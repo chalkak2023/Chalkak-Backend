@@ -5,12 +5,19 @@
 ## 목차
 
 - [예시 1](#예시-1)
-- [예시 2](#예시-2)
+- [.env](#.env)
 
 ## 예시 1
 
 예시 1 내용
 
-## 예시 2
+## .env
 
-예시 2 내용
+```
+DATABASE_HOST='localhost'
+DATABASE_PORT=3306
+DATABASE_USERNAME=
+DATABASE_PASSWORD=
+DATABASE_NAME='chalkak'
+DATABASE_SYNC=true
+```
