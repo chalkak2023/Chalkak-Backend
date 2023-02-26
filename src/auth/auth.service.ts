@@ -8,9 +8,14 @@ export class AuthService {
   constructor(@InjectRepository(User) private usersRepository: Repository<User>) {}
 
   async createSampleUser() {
-    return await this.usersRepository.insert({
-      email: 'test_email@gmail.com', 
-      password: 'qwer1234',
-    })
+    let arr = [];
+    for (let i = 1; i <= 5; i++) {
+      const temp = {
+        email: `test_emai_${i}@gmail.com`,
+        password: 'qwer1234',
+      };
+      arr.push(temp);
+    }
+    return await this.usersRepository.insert(arr);
   }
 }
