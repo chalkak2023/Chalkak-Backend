@@ -1,5 +1,5 @@
 import { Collection } from 'src/collections/entities/collection.entity';
-import { Photospot } from 'src/collections/entities/photospot.entity';
+import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Join } from 'src/meetups/entities/join.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';

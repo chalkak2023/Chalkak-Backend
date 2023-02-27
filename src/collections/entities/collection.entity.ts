@@ -1,6 +1,6 @@
 import { User } from 'src/auth/entities/user.entity';
 import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
-import { Photospot } from './photospot.entity';
+import { Photospot } from 'src/photospot/entities/photospot.entity';
 
 @Entity({ schema: 'chalkak', name: 'collection' })
 export class Collection {

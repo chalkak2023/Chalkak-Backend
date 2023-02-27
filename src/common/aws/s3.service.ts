@@ -19,16 +19,17 @@ export class S3Service {
     });
   }
 
-  async putObject(file: any) {
-    const { path, filename, mimetype } = file;
+  async putObject(image: any) {
+    const { path, filename, busBoyMimeType } = image;
+    const fileName = image.path.split('\\')[3];
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
-        Key: filename,
+        Key: fileName,
         Body: createReadStream(path),
-        ContentType: mimetype,
+        ContentType: busBoyMimeType,
       })
     );
-    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${filename}`;
+    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${fileName}`;
   }
 }
