@@ -1,8 +1,13 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Meetup } from './entities/meetup.entity';
 
 @Injectable()
 export class MeetupsService {
-  constructor() {}
+  constructor(
+    @InjectRepository(Meetup) private meetupRepository: Repository<Meetup>,
+  ) {}
 
   getMeetups(): string {
     return 'hi';
