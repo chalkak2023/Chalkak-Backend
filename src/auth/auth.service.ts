@@ -18,4 +18,46 @@ export class AuthService {
     }
     return await this.usersRepository.insert(arr);
   }
+
+  async signUp() {
+    return {
+      message: 'message',
+    };
+  }
+
+  async signIn() {
+    return {
+      message: 'message',
+    };
+  }
+
+  async signOut() {
+    return {
+      message: 'message',
+    };
+  }
+
+  async postEmailVerification() {
+    return {
+      message: 'message',
+    };
+  }
+
+  async putEmailVerification() {
+    return {
+      message: 'message',
+    };
+  }
+
+  async changePassword() {
+    return {
+      message: 'message',
+    };
+  }
+
+  async oauthSignIn() {
+    return {
+      message: 'message',
+    };
+  }
 }
