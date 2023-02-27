@@ -36,6 +36,7 @@
     "cookie-parser": "^1.4.6",
     "lodash": "^4.17.21",
     "mysql": "^2.18.1",
+    "nestjs-form-data": "^1.8.7",
     "nodemailer": "^6.9.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",

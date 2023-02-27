@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { CollectionsModule } from './collections/collections.module';
 import { MeetupsModule } from './meetups/meetups.module';
 import { AdminModule } from './admin/admin.module';
+import { PhotospotModule } from './photospot/photospot.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { AdminModule } from './admin/admin.module';
     CollectionsModule,
     MeetupsModule,
     AdminModule,
+    PhotospotModule,
   ],
   controllers: [AppController],
   providers: [AppService],
