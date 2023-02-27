@@ -2,6 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
+import {
+  PostEmailVerificationBodyDTO,
+  SignInBodyDTO,
+  SignUpBodyDTO,
+  PutEmailVerificationBodyDTO,
+  ChangePasswordBodyDTO,
+} from './dto/auth.dto';
 
 @Injectable()
 export class AuthService {
@@ -19,13 +26,15 @@ export class AuthService {
     return await this.usersRepository.insert(arr);
   }
 
-  async signUp() {
+  async signUp(body: SignUpBodyDTO) {
+    const { email, password } = body;
     return {
       message: 'message',
     };
   }
 
-  async signIn() {
+  async signIn(body: SignInBodyDTO) {
+    const { email, password } = body;
     return {
       message: 'message',
     };
@@ -37,19 +46,22 @@ export class AuthService {
     };
   }
 
-  async postEmailVerification() {
+  async postEmailVerification(body: PostEmailVerificationBodyDTO) {
+    const { email } = body;
     return {
       message: 'message',
     };
   }
 
-  async putEmailVerification() {
+  async putEmailVerification(body: PutEmailVerificationBodyDTO) {
+    const { email } = body;
     return {
       message: 'message',
     };
   }
 
-  async changePassword() {
+  async changePassword(body: ChangePasswordBodyDTO) {
+    const { password } = body;
     return {
       message: 'message',
     };
