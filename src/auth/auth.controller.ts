@@ -1,5 +1,12 @@
-import { Controller, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Patch, Post, Put } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import {
+  PostEmailVerificationBodyDTO,
+  SignInBodyDTO,
+  SignUpBodyDTO,
+  PutEmailVerificationBodyDTO,
+  ChangePasswordBodyDTO,
+} from './dto/auth.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -11,12 +18,12 @@ export class AuthController {
   }
 
   @Post('signup')
-  async signUp() {
+  async signUp(@Body() body: SignUpBodyDTO) {
     return await this.authService.signUp();
   }
 
   @Post('signin')
-  async signIn() {
+  async signIn(@Body() body: SignInBodyDTO) {
     return await this.authService.signUp();
   }
 
@@ -26,17 +33,17 @@ export class AuthController {
   }
 
   @Post('emailverification')
-  async postEmailVerification() {
+  async postEmailVerification(@Body() body: PostEmailVerificationBodyDTO) {
     return await this.authService.postEmailVerification();
   }
 
   @Put('emailverification')
-  async putEmailVerification() {
+  async putEmailVerification(@Body() body: PutEmailVerificationBodyDTO) {
     return await this.authService.putEmailVerification();
   }
 
   @Patch('password')
-  async changePassword() {
+  async changePassword(@Body() body: ChangePasswordBodyDTO) {
     return await this.authService.changePassword();
   }
 
