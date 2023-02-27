@@ -19,12 +19,12 @@ export class AuthController {
 
   @Post('signup')
   async signUp(@Body() body: SignUpBodyDTO) {
-    return await this.authService.signUp();
+    return await this.authService.signUp(body);
   }
 
   @Post('signin')
   async signIn(@Body() body: SignInBodyDTO) {
-    return await this.authService.signUp();
+    return await this.authService.signUp(body);
   }
 
   @Post('signout')
@@ -34,17 +34,17 @@ export class AuthController {
 
   @Post('emailverification')
   async postEmailVerification(@Body() body: PostEmailVerificationBodyDTO) {
-    return await this.authService.postEmailVerification();
+    return await this.authService.postEmailVerification(body);
   }
 
   @Put('emailverification')
   async putEmailVerification(@Body() body: PutEmailVerificationBodyDTO) {
-    return await this.authService.putEmailVerification();
+    return await this.authService.putEmailVerification(body);
   }
 
   @Patch('password')
   async changePassword(@Body() body: ChangePasswordBodyDTO) {
-    return await this.authService.changePassword();
+    return await this.authService.changePassword(body);
   }
 
   @Post('oauth/signin')
