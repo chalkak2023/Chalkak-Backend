@@ -15,7 +15,7 @@ async function bootstrap() {
       whitelist: true,
       forbidNonWhitelisted: true,
       transform: true,
-    }),
+    })
   );
   app.use(cookieParser());
   await app.listen(8080);
