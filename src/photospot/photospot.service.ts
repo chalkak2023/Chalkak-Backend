@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
-import { Photospot } from 'src/photospot/entities/photospot.entity';
+import { Photospot } from '../photospot/entities/photospot.entity';
 import { S3Service } from './../common/aws/s3.service';
 
 @Injectable()
