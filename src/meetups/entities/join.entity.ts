@@ -13,9 +13,11 @@ export class Join {
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne((type) => Meetup, (meetup) => meetup.joins)
+  @ManyToOne(() => Meetup, (meetup) => meetup.joins, {
+    onDelete: 'CASCADE',
+  })
   meetup: Meetup;
 
-  @ManyToOne((type) => User, (user) => user.joins)
+  @ManyToOne(() => User, (user) => user.joins)
   user: User;
 }

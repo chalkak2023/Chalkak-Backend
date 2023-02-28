@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { CreateMeetupDto } from '../dto/create-meetup.dto';
 import { MeetupsRepository } from '../meetups.repository';
@@ -7,12 +8,13 @@ class mockMeetupsRepository {
   getMeetups() {
     return [];
   }
-  createMeetup() {
-    return [];
-  }
+  createMeetup() {}
   getMeetup() {
-    return {};
+    return {
+      userId: 1
+    };
   }
+  delete() {}
 }
 
 describe('MeetupsService', () => {
@@ -83,6 +85,31 @@ describe('MeetupsService', () => {
       expect(spy).toHaveBeenCalled();
       expect(spy).toHaveBeenCalledWith(id);
       expect(result).toBeInstanceOf(Object);
+    });
+  });
+
+  describe('deleteMeetup Method', () => {
+    const meetupId = 1;
+    const exist_user = 1;
+    const not_exist_user = 2;
+    it('success', async () => {
+        const getMeetupSpy = jest.spyOn(repository, 'getMeetup');
+      const deleteSpy = jest.spyOn(repository, 'delete');
+      await service.deleteMeetup(meetupId, exist_user);
+      expect(getMeetupSpy).toHaveBeenCalled();
+      expect(getMeetupSpy).toHaveBeenCalledWith(meetupId);
+      expect(deleteSpy).toHaveBeenCalled();
+      expect(deleteSpy).toHaveBeenCalledWith(meetupId);
+    });
+    it('fail - NotFoundException', async () => {
+      const getMeetupSpy = jest.spyOn(repository, 'getMeetup');
+      try {
+        await service.deleteMeetup(meetupId, not_exist_user);
+      } catch (err) {
+        expect(getMeetupSpy).toHaveBeenCalled();
+        expect(getMeetupSpy).toHaveBeenCalledWith(meetupId);
+        expect(err).toBeInstanceOf(ForbiddenException);
+      }
     });
   });
 });

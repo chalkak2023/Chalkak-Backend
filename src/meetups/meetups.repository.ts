@@ -49,7 +49,7 @@ export class MeetupsRepository extends Repository<Meetup> {
     }
   }
 
-  async getMeetup(id: number): Promise<Meetup> {
+  async getMeetup(meetupId: number): Promise<Meetup> {
     const meetup = await this.createQueryBuilder('m')
       .select([
         'm.id',
@@ -65,11 +65,11 @@ export class MeetupsRepository extends Repository<Meetup> {
       ])
       .leftJoin('m.joins', 'j')
       .leftJoin('j.user', 'u')
-      .where('m.id = :id', { id })
+      .where('m.id = :id', { id: meetupId })
       .getOne();
 
     if (_.isNil(meetup)) {
-      throw new NotFoundException(`해당하는 모임이 존재하지 않음. ID: ${id}`);
+      throw new NotFoundException(`해당하는 모임이 존재하지 않음. meetupId: ${meetupId}`);
     }
     return meetup;
   }
