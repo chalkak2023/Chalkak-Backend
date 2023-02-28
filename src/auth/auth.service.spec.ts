@@ -38,6 +38,30 @@ describe('AuthService', () => {
     );
   })
 
+  beforeEach(() => {
+    // 데이터셋
+    users = [
+      {
+        id: 1,
+        email: 'test@gmail.com',
+        password: 'testpassword|10',
+        isBlock: false,
+        createdAt: new Date('2023-02-28T13:46:54.285Z'),
+        updatedAt: new Date('2023-02-28T13:49:32.285Z'),
+        deletedAt: null,
+      },
+      {
+        id: 2,
+        email: 'test@naver.com',
+        password: 'testpass|10',
+        isBlock: false,
+        createdAt: new Date('2023-02-28T13:50:22.225Z'),
+        updatedAt: new Date('2023-02-28T13:50:32.144Z'),
+        deletedAt: new Date('2023-02-28T13:53:03.387Z'),
+      },
+    ];
+  });
+
   beforeEach(async () => {
     jest.clearAllMocks()
     const module: TestingModule = await Test.createTestingModule({
