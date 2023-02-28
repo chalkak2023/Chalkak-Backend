@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, CACHE_MANAGER, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -17,6 +17,7 @@ import { ConfigService } from '@nestjs/config';
 export class AuthService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
+    @Inject(CACHE_MANAGER) protected readonly cacheManager: any,
     private jwtService: JwtService,
     private configService: ConfigService
   ) {}
@@ -71,6 +72,7 @@ export class AuthService {
         expiresIn: '7d',
       }
     );
+    this.cacheManager.set(user.id, refreshToken, { ttl: 1000 * 60 * 60 * 24 * 7 });
     // 임시
     response.cookie('accessToken', accessToken);
     response.cookie('refreshToken', refreshToken);
@@ -82,8 +84,9 @@ export class AuthService {
   }
 
   async signOut(user: any) {
+    await this.cacheManager.del(user.id)
     return {
-      message: 'message',
+      message: '로그아웃 되었습니다.',
     };
   }
 
