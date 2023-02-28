@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Req } from '@nestjs/common';
+import { Request } from 'express';
 import { CreateMeetupDto } from './dto/create-meetup.dto';
 import { Meetup } from './entities/meetup.entity';
 import { MeetupsService } from './meetups.service';
@@ -23,8 +24,20 @@ export class MeetupsController {
   }
 
   @Delete(':meetupId')
-  async deleteMeetup(@Param('meetupId') meetupId: number): Promise<void> {
-    const userId: number = 1;
-    return await this.meetupsService.deleteMeetup(meetupId, userId);
+  async deleteMeetup(@Param('meetupId') meetupId: number, @Req() req: Request): Promise<void> {
+    const { userId } = req.cookies;
+    if (userId === '' || isNaN(userId)) {
+      throw new BadRequestException('userId가 잘못되었습니다.');
+    }
+    return await this.meetupsService.deleteMeetup(meetupId, parseInt(userId));
+  }
+
+  @Post(':meetupId/join')
+  async addJoin(@Param('meetupId') meetupId: number, @Req() req: Request): Promise<void> {
+    const { userId } = req.cookies;
+    if (userId === '' || isNaN(userId)) {
+      throw new BadRequestException('userId가 잘못되었습니다.');
+    }
+    return await this.meetupsService.addJoin(meetupId, parseInt(userId));
   }
 }
