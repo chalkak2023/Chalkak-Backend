@@ -129,7 +129,7 @@ export class AuthService {
   async putEmailVerification(body: PutEmailVerificationBodyDTO) {
     const { email, verifyToken } = body;
     const cachedVerifyToken = await this.cacheManager.get(email + '_verifyToken');
-    console.log(verifyToken, cachedVerifyToken)
+    console.log(verifyToken, cachedVerifyToken);
     if (!cachedVerifyToken) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
@@ -147,8 +147,10 @@ export class AuthService {
 
   async changePassword(body: ChangePasswordBodyDTO, user: any) {
     const { password } = body;
+    const passwordHash = bcrypt.hashSync(password, 10)
+    await this.usersRepository.update(user.id, {password: passwordHash})
     return {
-      message: 'message',
+      message: '비밀번호가 변경되었습니다.',
     };
   }
 
