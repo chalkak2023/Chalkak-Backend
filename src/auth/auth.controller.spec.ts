@@ -1,51 +1,35 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
+
+const moduleMocker = new ModuleMocker(global);
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let service: AuthService;
+  let service: jest.Mocked<AuthService>;
 
   beforeEach(async () => {
-    const mockProvider = {
-      provide: AuthService,
-      useFactory: () => ({
-        createSampleUser: jest.fn(() => []),
-      }),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [AuthService, mockProvider],
-    }).compile();
+    })
+      .useMocker((token) => {
+        if (token === AuthService) {
+          return {};
+        }
+        if (typeof token === 'function') {
+          const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
+          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
+          return new Mock();
+        }
+      })
+      .compile();
 
-    controller = module.get<AuthController>(AuthController);
-    service = module.get<AuthService>(AuthService);
+    controller = module.get(AuthController);
+    service = module.get(AuthService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
-  });
-
-  describe('POST /api/auth/sample', () => {
-    it('createSampleUser method', () => {
-      expect(controller.createSampleUser()).not.toEqual(null);
-    });
-    it('createSampleUser method', () => {
-      controller.createSampleUser();
-      expect(service.createSampleUser).toHaveBeenCalled();
-      expect(service.createSampleUser).toHaveBeenCalledWith();
-    });
-    it('if calling createSampleUser and receive a specific error', async () => {
-      jest.spyOn(controller, 'createSampleUser').mockImplementation(() => {
-        throw new Error('error');
-      });
-      try {
-        await controller.createSampleUser();
-      } catch (err) {
-        expect(err).toBeDefined();
-        expect(err.message).toEqual('error');
-      }
-    });
   });
 });

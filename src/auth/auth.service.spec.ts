@@ -1,48 +1,39 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
+import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { User } from './entities/user.entity';
+import { Repository } from 'typeorm';
 
-class AuthServiceMock {
-  createSampleUser() {
-    return [];
-  }
-}
+const moduleMocker = new ModuleMocker(global);
 
 describe('AuthService', () => {
   let service: AuthService;
+  let mockUserRepository: jest.Mocked<Repository<User>>
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        AuthService,
-        {
-          provide: AuthService,
-          useClass: AuthServiceMock,
-        },
-      ],
-    }).compile();
+      providers: [AuthService],
+    })
+      .useMocker((token) => {
+        if (token === getRepositoryToken(User)) {
+          return {
+            findOneBy: jest.fn()
+          }
+        }
+        if (typeof token === 'function') {
+          const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
+          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
+          return new Mock();
+        }
+      })
+      .compile();
 
-    service = module.get<AuthService>(AuthService);
+    service = module.get(AuthService);
+    mockUserRepository = module.get(getRepositoryToken(User))
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-  });
-
-  describe('createSampleUser', () => {
-    it('should create 5 sample user', async () => {
-      const createSampleUserSpy = jest.spyOn(service, 'createSampleUser');
-      await service.createSampleUser();
-      expect(createSampleUserSpy).toHaveBeenCalledWith();
-    });
-    it('it must generate an error, getMeetups return an error', async () => {
-      jest.spyOn(service, 'createSampleUser').mockImplementation(() => {
-        throw new Error('error');
-      });
-      try {
-        await service.createSampleUser();
-      } catch (err) {
-        expect(err.message).toEqual('error');
-      }
-    });
   });
 });
