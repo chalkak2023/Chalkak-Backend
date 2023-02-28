@@ -83,8 +83,11 @@ export class AuthService {
     };
   }
 
-  async signOut(user: any) {
+  async signOut(user: any, response: any) {
     await this.cacheManager.del(user.id)
+    // 임시
+    response.clearCookie('accessToken');
+    response.clearCookie('refreshToken');
     return {
       message: '로그아웃 되었습니다.',
     };
