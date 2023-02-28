@@ -101,7 +101,7 @@ export class AuthService {
   }
 
   async putEmailVerification(body: PutEmailVerificationBodyDTO) {
-    const { email } = body;
+    const { email, verifyToken } = body;
     return {
       message: 'message',
     };
