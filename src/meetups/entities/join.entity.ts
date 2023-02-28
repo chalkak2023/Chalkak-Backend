@@ -5,17 +5,17 @@ import { Meetup } from './meetup.entity';
 @Entity({ schema: 'chalkak', name: 'join' })
 export class Join {
   @PrimaryColumn()
-  userId: number;
+  meetupId: number;
 
   @PrimaryColumn()
-  meetupId: number;
+  userId: number;
 
   @CreateDateColumn()
   createdAt: Date;
 
-  @ManyToOne((type) => User, (user) => user.joins)
-  user: User;
-
   @ManyToOne((type) => Meetup, (meetup) => meetup.joins)
   meetup: Meetup;
+
+  @ManyToOne((type) => User, (user) => user.joins)
+  user: User;
 }
