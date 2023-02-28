@@ -74,8 +74,8 @@ export class AuthService {
     );
     this.cacheManager.set(user.id, refreshToken, { ttl: 1000 * 60 * 60 * 24 * 7 });
     // 임시
-    response.cookie('accessToken', accessToken);
-    response.cookie('refreshToken', refreshToken);
+    response.cookie('accessToken', accessToken, { maxAge: 1000 * 60 * 60 });
+    response.cookie('refreshToken', refreshToken, { maxAge: 1000 * 60 * 60 * 24 * 7 });
     return {
       message: '로그인 되었습니다.',
       accessToken,
@@ -84,7 +84,7 @@ export class AuthService {
   }
 
   async signOut(user: any, response: any) {
-    await this.cacheManager.del(user.id)
+    await this.cacheManager.del(user.id);
     // 임시
     response.clearCookie('accessToken');
     response.clearCookie('refreshToken');
