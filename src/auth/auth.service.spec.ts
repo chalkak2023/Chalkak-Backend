@@ -29,9 +29,9 @@ describe('AuthService', () => {
     );
     (bcrypt.compareSync as jest.MockedFunction<typeof bcrypt.compareSync>).mockImplementation(
       (data: string | Buffer, encrypted: string) => {
-        const [plain, saltOrRounds] = encrypted.split('|')
+        const [plain, saltOrRounds] = encrypted.split('|');
         if (!saltOrRounds) {
-          return false
+          return false;
         }
         return data.toString() === plain;
       }
