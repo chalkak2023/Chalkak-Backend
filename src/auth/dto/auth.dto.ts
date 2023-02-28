@@ -1,4 +1,5 @@
 import { IntersectionType, PickType } from '@nestjs/mapped-types';
+import { Type } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
 export class SignUpBodyDTO {
@@ -11,7 +12,8 @@ export class SignUpBodyDTO {
 
 export class VerifyTokenDTO {
   @IsNotEmpty()
-  verifyToken: string | number;
+  @Type(() => Number)
+  verifyToken: number;
 }
 
 export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email', 'password']) {}

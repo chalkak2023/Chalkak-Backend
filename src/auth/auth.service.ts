@@ -20,6 +20,7 @@ import {
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
 
 @Injectable()
 export class AuthService {
@@ -27,7 +28,8 @@ export class AuthService {
     @InjectRepository(User) private usersRepository: Repository<User>,
     @Inject(CACHE_MANAGER) protected readonly cacheManager: any,
     private jwtService: JwtService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private mailerAuthService: MailerAuthService
   ) {}
 
   async createSampleUser() {
@@ -116,15 +118,30 @@ export class AuthService {
 
   async postEmailVerification(body: PostEmailVerificationBodyDTO) {
     const { email } = body;
+    const verifyToken = this.generateRandomNumber();
+    await this.mailerAuthService.sendMailAuthMail(email, verifyToken);
+    this.cacheManager.set(email + '_verifyToken', verifyToken, { ttl: 1000 * 60 * 5 });
     return {
-      message: 'message',
+      message: '이메일 인증번호가 요청되었습니다.',
     };
   }
 
   async putEmailVerification(body: PutEmailVerificationBodyDTO) {
     const { email, verifyToken } = body;
+    const cachedVerifyToken = await this.cacheManager.get(email + '_verifyToken');
+    console.log(verifyToken, cachedVerifyToken)
+    if (!cachedVerifyToken) {
+      throw new NotFoundException({
+        message: '인증번호를 요청하지 않았거나 만료되었습니다.',
+      });
+    }
+    if (verifyToken != cachedVerifyToken) {
+      throw new UnauthorizedException({
+        message: '인증번호가 일치하지 않습니다.',
+      });
+    }
     return {
-      message: 'message',
+      message: '이메일 인증번호가 확인되었습니다.',
     };
   }
 
@@ -139,5 +156,11 @@ export class AuthService {
     return {
       message: 'message',
     };
+  }
+
+  private generateRandomNumber(): number {
+    var minm = 100000;
+    var maxm = 999999;
+    return Math.floor(Math.random() * (maxm - minm + 1)) + minm;
   }
 }
