@@ -35,12 +35,19 @@ export class AuthService {
   }
 
   async signUp(body: SignUpBodyDTO) {
-    const { email, password } = body;
-    const passwordHash = bcrypt.hashSync(password, 10);
-    await this.usersRepository.insert({ email, password: passwordHash });
-    return {
-      message: '회원가입 되었습니다.',
-    };
+    try {
+
+      const { email, password } = body;
+      const passwordHash = bcrypt.hashSync(password, 10);
+      await this.usersRepository.insert({ email, password: passwordHash });
+      return {
+        message: '회원가입 되었습니다.',
+      };
+    } catch (e) {
+      throw new BadRequestException({
+        message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.'
+      })
+    }
   }
 
   async signIn(body: SignInBodyDTO, response: any) {
