@@ -8,6 +8,9 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
 import { CACHE_MANAGER } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
+jest.mock('bcrypt');
+
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -18,7 +21,25 @@ describe('AuthService', () => {
   let mockConfigService: jest.Mocked<ConfigService>;
   let mockMailerAuthService: jest.Mocked<MailerAuthService>;
 
+  beforeAll(() => {
+    (bcrypt.hashSync as jest.MockedFunction<typeof bcrypt.hashSync>).mockImplementation(
+      (data: string | Buffer, saltOrRounds: string | number) => {
+        return data.toString() + '|' + saltOrRounds;
+      }
+    );
+    (bcrypt.compareSync as jest.MockedFunction<typeof bcrypt.compareSync>).mockImplementation(
+      (data: string | Buffer, encrypted: string) => {
+        const [plain, saltOrRounds] = encrypted.split('|')
+        if (!saltOrRounds) {
+          return false
+        }
+        return data.toString() === plain;
+      }
+    );
+  })
+
   beforeEach(async () => {
+    jest.clearAllMocks()
     const module: TestingModule = await Test.createTestingModule({
       providers: [AuthService],
     })
