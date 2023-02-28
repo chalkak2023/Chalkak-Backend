@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Req } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Param, Post, Query, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { CreateMeetupDto } from './dto/create-meetup.dto';
 import { Meetup } from './entities/meetup.entity';
@@ -39,5 +39,14 @@ export class MeetupsController {
       throw new BadRequestException('userId가 잘못되었습니다.');
     }
     return await this.meetupsService.addJoin(meetupId, parseInt(userId));
+  }
+
+  @Delete(':meetupId/join')
+  async deleteJoin(@Param('meetupId') meetupId: number, @Req() req: Request): Promise<void> {
+    const { userId } = req.cookies;
+    if (userId === '' || isNaN(userId)) {
+      throw new BadRequestException('userId가 잘못되었습니다.');
+    }
+    return await this.meetupsService.deleteJoin(meetupId, parseInt(userId));
   }
 }

@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
 import { CreateMeetupDto } from './dto/create-meetup.dto';
 import { Meetup } from './entities/meetup.entity';
 import { MeetupsRepository } from './meetups.repository';
@@ -51,6 +51,20 @@ export class MeetupsService {
       throw new ForbiddenException('정원이 다 찼습니다.');
     }
     await this.joinRepository.insert({
+      meetupId, userId
+    });
+  }
+
+  async deleteJoin(meetupId: number, userId: number) {
+    const meetup = await this.getMeetup(meetupId);
+    const join = await this.getJoin(meetupId, userId);
+    if (_.isNil(join)) {
+      throw new BadRequestException(`모임에 참여중인 유저가 아닙니다.`);
+    }
+    if (meetup.userId === userId) {
+      throw new ForbiddenException('모임의 주최자는 참여 취소를 할 수 없습니다.');
+    }
+    await this.joinRepository.delete({
       meetupId, userId
     });
   }
