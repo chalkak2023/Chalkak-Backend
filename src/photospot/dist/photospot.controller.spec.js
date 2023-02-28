@@ -46,11 +46,11 @@ describe('PhotospotController', function () {
     var photoController;
     var spyService;
     beforeAll(function () { return __awaiter(void 0, void 0, void 0, function () {
-        var PhotospotProvider, app;
+        var PhotospotServiceProvider, app;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    PhotospotProvider = {
+                    PhotospotServiceProvider = {
                         provide: photospot_service_1.PhotospotService,
                         useFactory: function () { return ({
                             createPhotospot: jest.fn(function () { return []; })
@@ -64,7 +64,7 @@ describe('PhotospotController', function () {
                                 }),
                             ],
                             controllers: [photospot_controller_1.PhotospotController],
-                            providers: [photospot_service_1.PhotospotService, PhotospotProvider]
+                            providers: [photospot_service_1.PhotospotService, PhotospotServiceProvider]
                         }).compile()];
                 case 1:
                     app = _a.sent();
@@ -74,14 +74,16 @@ describe('PhotospotController', function () {
             }
         });
     }); });
-    it('calling createPhotospot method', function () {
+    it('calling Controller createPhotospot method', function () {
         var dto = new create_photospot_dto_1.CreatePhotospotDto();
         expect(photoController.createPhotospot(dto)).not.toEqual(null);
     });
-    it('calling createPhotospot method', function () {
+    it('calling Service createPhotospot method', function () {
         var dto = new create_photospot_dto_1.CreatePhotospotDto();
+        var userId = 1;
+        var collectionId = 1;
         photoController.createPhotospot(dto);
         expect(spyService.createPhotospot).toHaveBeenCalled();
-        expect(spyService.createPhotospot).toHaveBeenCalledWith(dto);
+        expect(spyService.createPhotospot).toHaveBeenCalledWith(dto, userId, collectionId);
     });
 });

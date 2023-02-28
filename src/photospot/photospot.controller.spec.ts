@@ -10,7 +10,7 @@ describe('PhotospotController', () => {
   let spyService: PhotospotService;
 
   beforeAll(async () => {
-    const PhotospotProvider = {
+    const PhotospotServiceProvider = {
       provide: PhotospotService,
       useFactory: () => ({
         createPhotospot: jest.fn(() => []),
@@ -24,22 +24,25 @@ describe('PhotospotController', () => {
         }),
       ],
       controllers: [PhotospotController],
-      providers: [PhotospotService, PhotospotProvider],
+      providers: [PhotospotService, PhotospotServiceProvider],
     }).compile();
 
     photoController = app.get<PhotospotController>(PhotospotController);
     spyService = app.get<PhotospotService>(PhotospotService);
   });
 
-  it('calling createPhotospot method', () => {
+  it('calling Controller createPhotospot method', () => {
     const dto = new CreatePhotospotDto();
     expect(photoController.createPhotospot(dto)).not.toEqual(null);
   });
 
-  it('calling createPhotospot method', () => {
+  it('calling Service createPhotospot method', () => {
     const dto = new CreatePhotospotDto();
+    const userId = 1;
+    const collectionId = 1
+
     photoController.createPhotospot(dto);
     expect(spyService.createPhotospot).toHaveBeenCalled();
-    expect(spyService.createPhotospot).toHaveBeenCalledWith(dto);
+    expect(spyService.createPhotospot).toHaveBeenCalledWith(dto, userId, collectionId);
   })
 });

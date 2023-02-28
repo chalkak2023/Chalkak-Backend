@@ -12,8 +12,9 @@ export class PhotospotService {
     private readonly s3Service: S3Service
   ) {}
 
-  async createPhotospot({ title, description, latitude, longitude, image }: CreatePhotospotDto): Promise<void> {
+  async createPhotospot(createPhtospotDto: CreatePhotospotDto, userId: number, collectionId: number): Promise<void> {
+    const { title, description, latitude, longitude, image }: CreatePhotospotDto = createPhtospotDto;
     const imagePath = await this.s3Service.putObject(image);
-    this.photospotRepository.insert({ title, description, latitude, longitude, imagePath, userId: 1, collectionId: 1 });
+    this.photospotRepository.insert({ title, description, latitude, longitude, imagePath, userId, collectionId });
   }
 }

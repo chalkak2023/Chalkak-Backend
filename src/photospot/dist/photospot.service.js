@@ -54,16 +54,17 @@ var PhotospotService = /** @class */ (function () {
         this.photospotRepository = photospotRepository;
         this.s3Service = s3Service;
     }
-    PhotospotService.prototype.createPhotospot = function (_a) {
-        var title = _a.title, description = _a.description, latitude = _a.latitude, longitude = _a.longitude, image = _a.image;
+    PhotospotService.prototype.createPhotospot = function (createPhtospotDto, userId, collectionId) {
         return __awaiter(this, void 0, Promise, function () {
-            var imagePath;
-            return __generator(this, function (_b) {
-                switch (_b.label) {
-                    case 0: return [4 /*yield*/, this.s3Service.putObject(image)];
+            var title, description, latitude, longitude, image, imagePath;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        title = createPhtospotDto.title, description = createPhtospotDto.description, latitude = createPhtospotDto.latitude, longitude = createPhtospotDto.longitude, image = createPhtospotDto.image;
+                        return [4 /*yield*/, this.s3Service.putObject(image)];
                     case 1:
-                        imagePath = _b.sent();
-                        this.photospotRepository.insert({ title: title, description: description, latitude: latitude, longitude: longitude, imagePath: imagePath, userId: 1, collectionId: 1 });
+                        imagePath = _a.sent();
+                        this.photospotRepository.insert({ title: title, description: description, latitude: latitude, longitude: longitude, imagePath: imagePath, userId: userId, collectionId: collectionId });
                         return [2 /*return*/];
                 }
             });

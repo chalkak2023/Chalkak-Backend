@@ -6,10 +6,10 @@ import { PhotospotService } from './photospot.service';
 @Controller('/collections/photospots')
 export class PhotospotController {
   constructor(private readonly photospotService: PhotospotService) {}
-  
+
   @Post()
   @FormDataRequest()
   createPhotospot(@Body() createPhtospotDto: CreatePhotospotDto): void {
-    this.photospotService.createPhotospot(createPhtospotDto)
+    this.photospotService.createPhotospot(createPhtospotDto, 1, 1);
   }
 }
