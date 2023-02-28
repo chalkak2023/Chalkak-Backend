@@ -36,15 +36,13 @@ export class AuthController {
   }
 
   @Post('emailverification')
-  @UseGuards(JwtGuard)
-  async postEmailVerification(@Body() body: PostEmailVerificationBodyDTO, @InjectUser() user: any) {
-    return await this.authService.postEmailVerification(body, user);
+  async postEmailVerification(@Body() body: PostEmailVerificationBodyDTO) {
+    return await this.authService.postEmailVerification(body);
   }
 
   @Put('emailverification')
-  @UseGuards(JwtGuard)
-  async putEmailVerification(@Body() body: PutEmailVerificationBodyDTO, @InjectUser() user: any) {
-    return await this.authService.putEmailVerification(body, user);
+  async putEmailVerification(@Body() body: PutEmailVerificationBodyDTO) {
+    return await this.authService.putEmailVerification(body);
   }
 
   @Patch('')

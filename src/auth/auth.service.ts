@@ -93,14 +93,14 @@ export class AuthService {
     };
   }
 
-  async postEmailVerification(body: PostEmailVerificationBodyDTO, user: any) {
+  async postEmailVerification(body: PostEmailVerificationBodyDTO) {
     const { email } = body;
     return {
       message: 'message',
     };
   }
 
-  async putEmailVerification(body: PutEmailVerificationBodyDTO, user: any) {
+  async putEmailVerification(body: PutEmailVerificationBodyDTO) {
     const { email } = body;
     return {
       message: 'message',
