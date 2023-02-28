@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.279.0",
+    "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/bull": "^0.6.3",
     "@nestjs/common": "^9.0.0",
     "@nestjs/config": "^2.3.1",
