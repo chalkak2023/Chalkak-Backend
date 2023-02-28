@@ -10,6 +10,9 @@ class mockMeetupsService {
   createMeetup() {
     return [];
   }
+  getMeetup() {
+    return {};
+  }
 }
 
 describe('MeetupsController', () => {
@@ -40,6 +43,7 @@ describe('MeetupsController', () => {
     it('getMeetups', async () => {
       const spy = jest.spyOn(service, 'getMeetups');
       const result = await controller.getMeetups();
+      expect(spy).toHaveBeenCalled();
       expect(spy).toHaveBeenCalledWith();
       expect(result).toBeInstanceOf(Array);
     });
@@ -59,6 +63,17 @@ describe('MeetupsController', () => {
       await controller.createMeetup(meetupDto);
       expect(spy).toHaveBeenCalled();
       expect(spy).toHaveBeenCalledWith(meetupDto);
+    });
+  });
+
+  describe('GET /api/meetup', () => {
+    const id = 1;
+    it('getMeetup', async () => {
+      const spy = jest.spyOn(service, 'getMeetup');
+      const result = await controller.getMeetup(id);
+      expect(spy).toHaveBeenCalled();
+      expect(spy).toHaveBeenCalledWith(id);
+      expect(result).toBeInstanceOf(Object);
     });
   });
 });
