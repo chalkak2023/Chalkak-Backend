@@ -31,8 +31,8 @@ export class AuthController {
 
   @Post('signout')
   @UseGuards(JwtGuard)
-  async signOut( @InjectUser() user: any) {
-    return await this.authService.signOut(user);
+  async signOut( @InjectUser() user: any, @Res({ passthrough: true }) response: any) {
+    return await this.authService.signOut(user, response);
   }
 
   @Post('emailverification')
