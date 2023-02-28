@@ -1,4 +1,4 @@
-import { Body, Controller, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   PostEmailVerificationBodyDTO,
@@ -7,6 +7,8 @@ import {
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
 } from './dto/auth.dto';
+import { JwtGuard } from 'src/common/auth/guard/jwt/jwt.guard';
+import { InjectUser } from 'src/common/auth/auth.decorator';
 
 @Controller('api/auth')
 export class AuthController {
@@ -23,28 +25,32 @@ export class AuthController {
   }
 
   @Post('signin')
-  async signIn(@Body() body: SignInBodyDTO) {
-    return await this.authService.signUp(body);
+  async signIn(@Body() body: SignInBodyDTO, @Res({ passthrough: true }) response: any) {
+    return await this.authService.signIn(body, response);
   }
 
   @Post('signout')
-  async signOut() {
-    return await this.authService.signOut();
+  @UseGuards(JwtGuard)
+  async signOut( @InjectUser() user: any) {
+    return await this.authService.signOut(user);
   }
 
   @Post('emailverification')
-  async postEmailVerification(@Body() body: PostEmailVerificationBodyDTO) {
-    return await this.authService.postEmailVerification(body);
+  @UseGuards(JwtGuard)
+  async postEmailVerification(@Body() body: PostEmailVerificationBodyDTO, @InjectUser() user: any) {
+    return await this.authService.postEmailVerification(body, user);
   }
 
   @Put('emailverification')
-  async putEmailVerification(@Body() body: PutEmailVerificationBodyDTO) {
-    return await this.authService.putEmailVerification(body);
+  @UseGuards(JwtGuard)
+  async putEmailVerification(@Body() body: PutEmailVerificationBodyDTO, @InjectUser() user: any) {
+    return await this.authService.putEmailVerification(body, user);
   }
 
-  @Patch('password')
-  async changePassword(@Body() body: ChangePasswordBodyDTO) {
-    return await this.authService.changePassword(body);
+  @Patch('')
+  @UseGuards(JwtGuard)
+  async changePassword(@Body() body: ChangePasswordBodyDTO, @InjectUser() user: any) {
+    return await this.authService.changePassword(body, user);
   }
 
   @Post('oauth/signin')
