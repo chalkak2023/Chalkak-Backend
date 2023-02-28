@@ -1,4 +1,12 @@
-import { BadRequestException, CACHE_MANAGER, Inject, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  CACHE_MANAGER,
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -36,7 +44,6 @@ export class AuthService {
 
   async signUp(body: SignUpBodyDTO) {
     try {
-
       const { email, password } = body;
       const passwordHash = bcrypt.hashSync(password, 10);
       await this.usersRepository.insert({ email, password: passwordHash });
@@ -45,49 +52,56 @@ export class AuthService {
       };
     } catch (e) {
       throw new BadRequestException({
-        message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.'
-      })
+        message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.',
+      });
     }
   }
 
   async signIn(body: SignInBodyDTO, response: any) {
-    const { email, password } = body;
-    const user = await this.usersRepository.findOneBy({ email });
-    if (!user) {
-      throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
-    }
-    if (!bcrypt.compareSync(password, user.password)) {
-      throw new UnauthorizedException({ message: '비밀번호가 일치하지 않습니다.' });
-    }
-    const accessToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        role: 'user',
-      },
-      {
-        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
-        expiresIn: '1h',
+    try {
+      const { email, password } = body;
+      const user = await this.usersRepository.findOneBy({ email });
+      if (!user) {
+        throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
       }
-    );
-    const refreshToken = this.jwtService.sign(
-      {
-        id: user.id,
-      },
-      {
-        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
-        expiresIn: '7d',
+      if (!bcrypt.compareSync(password, user.password)) {
+        throw new UnauthorizedException({ message: '비밀번호가 일치하지 않습니다.' });
       }
-    );
-    this.cacheManager.set(user.id, refreshToken, { ttl: 1000 * 60 * 60 * 24 * 7 });
-    // 임시
-    response.cookie('accessToken', accessToken, { maxAge: 1000 * 60 * 60 });
-    response.cookie('refreshToken', refreshToken, { maxAge: 1000 * 60 * 60 * 24 * 7 });
-    return {
-      message: '로그인 되었습니다.',
-      accessToken,
-      refreshToken,
-    };
+      const accessToken = this.jwtService.sign(
+        {
+          id: user.id,
+          email: user.email,
+          role: 'user',
+        },
+        {
+          secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
+          expiresIn: '1h',
+        }
+      );
+      const refreshToken = this.jwtService.sign(
+        {
+          id: user.id,
+        },
+        {
+          secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
+          expiresIn: '7d',
+        }
+      );
+      this.cacheManager.set(user.id, refreshToken, { ttl: 1000 * 60 * 60 * 24 * 7 });
+      // 임시
+      response.cookie('accessToken', accessToken, { maxAge: 1000 * 60 * 60 });
+      response.cookie('refreshToken', refreshToken, { maxAge: 1000 * 60 * 60 * 24 * 7 });
+      return {
+        message: '로그인 되었습니다.',
+        accessToken,
+        refreshToken,
+      };
+    } catch (e) {
+      console.error(e);
+      throw new InternalServerErrorException({
+        message: '로그인이 제대로 이뤄지지 않았습니다.',
+      });
+    }
   }
 
   async signOut(user: any, response: any) {
