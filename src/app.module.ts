@@ -8,12 +8,20 @@ import { AuthModule } from './auth/auth.module';
 import { CollectionsModule } from './collections/collections.module';
 import { MeetupsModule } from './meetups/meetups.module';
 import { AdminModule } from './admin/admin.module';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './auth/guard/jwt/jwt.strategy';
 import { PhotospotModule } from './photospot/photospot.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
+    JwtModule.register({
+      secret: 'test',
+      signOptions: {
+        expiresIn: '1h',
+      },
+    }),
     AuthModule,
     CollectionsModule,
     MeetupsModule,
@@ -21,6 +29,6 @@ import { PhotospotModule } from './photospot/photospot.module';
     PhotospotModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, JwtStrategy],
 })
 export class AppModule {}

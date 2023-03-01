@@ -1,5 +1,14 @@
-import { Controller, Post } from '@nestjs/common';
+import { Body, Controller, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import {
+  PostEmailVerificationBodyDTO,
+  SignInBodyDTO,
+  SignUpBodyDTO,
+  PutEmailVerificationBodyDTO,
+  ChangePasswordBodyDTO,
+} from './dto/auth.dto';
+import { InjectUser } from './auth.decorator';
+import { JwtGuard } from './guard/jwt/jwt.guard';
 
 @Controller('api/auth')
 export class AuthController {
@@ -8,5 +17,42 @@ export class AuthController {
   @Post('sample')
   async createSampleUser() {
     return await this.authService.createSampleUser();
+  }
+
+  @Post('signup')
+  async signUp(@Body() body: SignUpBodyDTO) {
+    return await this.authService.signUp(body);
+  }
+
+  @Post('signin')
+  async signIn(@Body() body: SignInBodyDTO, @Res({ passthrough: true }) response: any) {
+    return await this.authService.signIn(body, response);
+  }
+
+  @Post('signout')
+  @UseGuards(JwtGuard)
+  async signOut( @InjectUser() user: any, @Res({ passthrough: true }) response: any) {
+    return await this.authService.signOut(user, response);
+  }
+
+  @Post('emailverification')
+  async postEmailVerification(@Body() body: PostEmailVerificationBodyDTO) {
+    return await this.authService.postEmailVerification(body);
+  }
+
+  @Put('emailverification')
+  async putEmailVerification(@Body() body: PutEmailVerificationBodyDTO) {
+    return await this.authService.putEmailVerification(body);
+  }
+
+  @Patch('')
+  @UseGuards(JwtGuard)
+  async changePassword(@Body() body: ChangePasswordBodyDTO, @InjectUser() user: any) {
+    return await this.authService.changePassword(body, user);
+  }
+
+  @Post('oauth/signin')
+  async oauthSignIn() {
+    return await this.authService.oauthSignIn();
   }
 }
