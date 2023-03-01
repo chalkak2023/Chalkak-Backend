@@ -41,26 +41,24 @@ export class AuthService {
       };
       arr.push(temp);
     }
-    return await this.usersRepository.insert(arr).catch(err => {
+    return await this.usersRepository.insert(arr).catch((err) => {
       throw new BadRequestException({
-        message: "중복된 데이터가 이미 있습니다."
-      })
+        message: '중복된 데이터가 이미 있습니다.',
+      });
     });
   }
 
   async signUp(body: SignUpBodyDTO) {
-    try {
-      const { email, password } = body;
-      const passwordHash = bcrypt.hashSync(password, 10);
-      await this.usersRepository.insert({ email, password: passwordHash });
-      return {
-        message: '회원가입 되었습니다.',
-      };
-    } catch (e) {
+    const { email, password } = body;
+    const passwordHash = bcrypt.hashSync(password, 10);
+    await this.usersRepository.insert({ email, password: passwordHash }).catch((err) => {
       throw new BadRequestException({
         message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.',
       });
-    }
+    });
+    return {
+      message: '회원가입 되었습니다.',
+    };
   }
 
   async signIn(body: SignInBodyDTO, response: any) {
@@ -151,8 +149,8 @@ export class AuthService {
 
   async changePassword(body: ChangePasswordBodyDTO, user: any) {
     const { password } = body;
-    const passwordHash = bcrypt.hashSync(password, 10)
-    await this.usersRepository.update(user.id, {password: passwordHash})
+    const passwordHash = bcrypt.hashSync(password, 10);
+    await this.usersRepository.update(user.id, { password: passwordHash });
     return {
       message: '비밀번호가 변경되었습니다.',
     };
