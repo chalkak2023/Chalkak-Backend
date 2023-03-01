@@ -3,19 +3,14 @@ import { AuthService } from './auth.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindOptionsWhere, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
-import { BadRequestException, CACHE_MANAGER } from '@nestjs/common';
-import { SignUpBodyDTO } from './dto/auth.dto';
+import { BadRequestException, CACHE_MANAGER, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { SignInBodyDTO, SignUpBodyDTO } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { isArray } from 'class-validator';
-import { Response } from 'express';
 jest.mock('bcrypt');
-
-type TableUser = Omit<User, 'collections' | 'photospots' | 'meetups' | 'joins'>;
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -27,9 +22,11 @@ describe('AuthService', () => {
   let mockMailerAuthService: jest.Mocked<MailerAuthService>;
 
   // DB 모킹
-  let users: TableUser[] = [];
+  let users: User[] = [];
   // 캐시(레디스 등) 모킹
   let cache: Record<string, any> = {};
+  // config
+  let config = {};
 
   beforeAll(() => {
     (bcrypt.hashSync as jest.MockedFunction<typeof bcrypt.hashSync>).mockImplementation(
@@ -46,6 +43,11 @@ describe('AuthService', () => {
         return data.toString() === plain;
       }
     );
+
+    config = {
+      JWT_ACCESS_TOKEN_SECRET: 'accessToken',
+      JWT_REFRESH_TOKEN_SECRET: 'refreshToken',
+    };
   });
 
   beforeEach(() => {
@@ -84,6 +86,7 @@ describe('AuthService', () => {
         if (token === getRepositoryToken(User)) {
           return {
             insert: jest.fn(),
+            findOneBy: jest.fn(),
           };
         }
         if (token === CACHE_MANAGER) {
@@ -105,6 +108,8 @@ describe('AuthService', () => {
     mockJwtService = module.get(JwtService);
     mockConfigService = module.get(ConfigService);
     mockMailerAuthService = module.get(MailerAuthService);
+
+    mockConfigService.get.mockImplementation((key: keyof typeof config) => config[key]);
   });
 
   it('should be defined', () => {
@@ -141,6 +146,35 @@ describe('AuthService', () => {
           message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.',
         })
       );
+    });
+  });
+
+  describe('signIn Method', () => {
+    it('should be defined', () => {
+      expect(service.signIn).toBeDefined();
+      expect(typeof service.signIn).toBe('function');
+    });
+
+    it('should be return success message when success situation', async () => {
+      const body: SignInBodyDTO = {
+        email: 'test@gmail.com',
+        password: 'testpassword',
+      };
+      const response: any = {
+        cookie: jest.fn(() => response),
+      };
+      mockUserRepository.findOneBy.mockResolvedValue(users[0]);
+      mockJwtService.sign.mockImplementation((payload: any, options: any) => {
+        return `token${options.secret}`;
+      });
+      const accessToken = `token${mockConfigService.get('JWT_ACCESS_TOKEN_SECRET')}`;
+      const refreshToken = `token${mockConfigService.get('JWT_REFRESH_TOKEN_SECRET')}`;
+
+      expect(service.signIn(body, response)).resolves.toStrictEqual({
+        message: '로그인 되었습니다.',
+        accessToken,
+        refreshToken,
+      });
     });
   });
 });
