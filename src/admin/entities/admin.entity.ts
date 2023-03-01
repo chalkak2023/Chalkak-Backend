@@ -13,7 +13,7 @@ export class Admin {
   password: string;
 
   @Column('varchar')
-  name: string;
+  responsibility: string;
 
   @CreateDateColumn()
   createdAt: Date;
