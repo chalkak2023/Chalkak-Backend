@@ -64,7 +64,7 @@ export class AuthService {
   async signIn(body: SignInBodyDTO, response: any) {
     try {
       const { email, password } = body;
-      const user = await this.usersRepository.findOneBy({ email });
+      const user = await this.usersRepository.findOne({ where: { email }, select: { id: true, email: true, password: true } });
       if (!user) {
         throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
       }
