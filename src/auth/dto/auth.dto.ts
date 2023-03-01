@@ -26,6 +26,7 @@ export class SignUpBodyDTO {
 }
 
 export class VerifyTokenDTO {
+  @Type(() => Number)
   @IsInt({
     message: '이메일 인증토큰은 정수여야합니다.',
   })
