@@ -1,6 +1,7 @@
-import { Controller, Get, Req } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UsePipes, ValidationPipe } from '@nestjs/common';
 import { Request } from 'express';
 import { AdminService } from './admin.service';
+import { SignupAdminReqDto } from './dto/signup.admin.req.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -25,5 +26,11 @@ export class AdminController {
       p,
       lastPage: Math.ceil(total / perPage),
     };
+  }
+
+  @Post('auth/signup')
+  @UsePipes(ValidationPipe)
+  async signupAdmin(@Body() data: SignupAdminReqDto) {
+    return await this.adminService.signupAdmin(data);
   }
 }
