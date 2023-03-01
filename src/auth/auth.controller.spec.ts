@@ -1,51 +1,161 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
+import { PostEmailVerificationBodyDTO, SignInBodyDTO, SignUpBodyDTO, PutEmailVerificationBodyDTO, ChangePasswordBodyDTO } from './dto/auth.dto';
+
+const moduleMocker = new ModuleMocker(global);
 
 describe('AuthController', () => {
   let controller: AuthController;
-  let service: AuthService;
+  let service: jest.Mocked<AuthService>;
 
   beforeEach(async () => {
-    const mockProvider = {
-      provide: AuthService,
-      useFactory: () => ({
-        createSampleUser: jest.fn(() => []),
-      }),
-    };
-
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
-      providers: [AuthService, mockProvider],
-    }).compile();
+    })
+      .useMocker((token) => {
+        if (typeof token === 'function') {
+          const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
+          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
+          return new Mock();
+        }
+      })
+      .compile();
 
-    controller = module.get<AuthController>(AuthController);
-    service = module.get<AuthService>(AuthService);
+    controller = module.get(AuthController);
+    service = module.get(AuthService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 
-  describe('POST /api/auth/sample', () => {
-    it('createSampleUser method', () => {
-      expect(controller.createSampleUser()).not.toEqual(null);
+  describe('POST /api/auth/signup (signUp)', () => {
+    it('should be defined', () => {
+      expect(controller.signUp).toBeDefined();
+      expect(typeof controller.signUp).toBe('function');
     });
-    it('createSampleUser method', () => {
-      controller.createSampleUser();
-      expect(service.createSampleUser).toHaveBeenCalled();
-      expect(service.createSampleUser).toHaveBeenCalledWith();
+
+    it('should be return value returned by service same name method', async () => {
+      const body: SignUpBodyDTO = {
+        email: 'testman@gmail.com',
+        password: 'qwer1234',
+      };
+      const mockReturnValue = { message: '회원가입 되었습니다.' };
+      service.signUp.mockResolvedValue(mockReturnValue);
+
+      expect(controller.signUp(body)).resolves.toBe(mockReturnValue);
     });
-    it('if calling createSampleUser and receive a specific error', async () => {
-      jest.spyOn(controller, 'createSampleUser').mockImplementation(() => {
-        throw new Error('error');
-      });
-      try {
-        await controller.createSampleUser();
-      } catch (err) {
-        expect(err).toBeDefined();
-        expect(err.message).toEqual('error');
-      }
+  });
+
+  describe('POST /api/auth/signup (signUp)', () => {
+    it('should be defined', () => {
+      expect(controller.signUp).toBeDefined();
+      expect(typeof controller.signUp).toBe('function');
+    });
+
+    it('should be return value returned by service same name method', async () => {
+      const body: SignUpBodyDTO = {
+        email: 'testman@gmail.com',
+        password: 'qwer1234',
+      };
+      const mockReturnValue = { message: '회원가입 되었습니다.' };
+      service.signUp.mockResolvedValue(mockReturnValue);
+
+      expect(controller.signUp(body)).resolves.toBe(mockReturnValue);
+    });
+  });
+
+  describe('POST /api/auth/signIn (signIn)', () => {
+    it('should be defined', () => {
+      expect(controller.signIn).toBeDefined();
+      expect(typeof controller.signIn).toBe('function');
+    });
+
+    it('should be return value returned by service same name method', async () => {
+      const body: SignInBodyDTO = {
+        email: 'testman@gmail.com',
+        password: 'qwer1234',
+      };
+      const response = {};
+      const mockReturnValue = { message: '로그인 되었습니다.', accessToken: 'accessToken', refreshToken: 'refreshToken' };
+      service.signIn.mockResolvedValue(mockReturnValue);
+
+      expect(controller.signIn(body, response)).resolves.toBe(mockReturnValue);
+    });
+  });
+
+  describe('POST /api/auth/signout (signOut)', () => {
+    it('should be defined', () => {
+      expect(controller.signOut).toBeDefined();
+      expect(typeof controller.signOut).toBe('function');
+    });
+
+    it('should be return value returned by service same name method', async () => {
+      const user = {
+        id: 1,
+      };
+      const response = {};
+      const mockReturnValue = { message: '로그아웃 되었습니다.' };
+      service.signOut.mockResolvedValue(mockReturnValue);
+
+      expect(controller.signOut(user, response)).resolves.toBe(mockReturnValue);
+    });
+  });
+
+  describe('POST /api/auth/emailVerification (postEmailVerification)', () => {
+    it('should be defined', () => {
+      expect(controller.postEmailVerification).toBeDefined();
+      expect(typeof controller.postEmailVerification).toBe('function');
+    });
+
+    it('should be return value returned by service same name method', async () => {
+      const body: PostEmailVerificationBodyDTO = {
+        email: 'testman@gmail.com',
+      };
+      const mockReturnValue = { message: '이메일 인증번호가 요청되었습니다.' };
+      service.postEmailVerification.mockResolvedValue(mockReturnValue);
+
+      expect(controller.postEmailVerification(body)).resolves.toBe(mockReturnValue);
+    });
+  });
+
+  describe('PUT /api/auth/emailVerification (putEmailVerification)', () => {
+    it('should be defined', () => {
+      expect(controller.putEmailVerification).toBeDefined();
+      expect(typeof controller.putEmailVerification).toBe('function');
+    });
+
+    it('should be return value returned by service same name method', async () => {
+      const body: PutEmailVerificationBodyDTO = {
+        email: 'testman@gmail.com',
+        verifyToken: 123456,
+      };
+      const mockReturnValue = { message: '이메일 인증번호가 확인되었습니다.' };
+      service.putEmailVerification.mockResolvedValue(mockReturnValue);
+
+      expect(controller.putEmailVerification(body)).resolves.toBe(mockReturnValue);
+    });
+  });
+
+  describe('PATCH /api/auth (changePassword)', () => {
+    it('should be defined', () => {
+      expect(controller.changePassword).toBeDefined();
+      expect(typeof controller.changePassword).toBe('function');
+    });
+
+    it('should be return value returned by service same name method', async () => {
+      const body: ChangePasswordBodyDTO = {
+        password: 'changepassword1234',
+      };
+      const user = {
+        id: 1,
+      };
+      const mockReturnValue = { message: '비밀번호가 변경되었습니다.' };
+      service.changePassword.mockResolvedValue(mockReturnValue);
+
+      expect(controller.changePassword(body, user)).resolves.toBe(mockReturnValue);
     });
   });
 });
