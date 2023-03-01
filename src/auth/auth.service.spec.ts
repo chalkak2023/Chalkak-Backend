@@ -93,6 +93,9 @@ describe('AuthService', () => {
           return {
             get: jest.fn().mockImplementation((key: string) => cache[key]),
             set: jest.fn().mockImplementation((key: string, value: any, options: any) => (cache[key] = value)),
+            del: jest.fn().mockImplementation((key: string) => {
+              delete cache[key];
+            }),
           };
         }
         if (typeof token === 'function') {
