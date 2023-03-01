@@ -132,6 +132,8 @@ describe('AuthService', () => {
         password: 'testpassword',
       };
 
+      mockUserRepository.insert.mockResolvedValue({ generatedMaps: [], identifiers: [], raw: false });
+
       expect(service.signUp(body)).resolves.toStrictEqual({
         message: '회원가입 되었습니다.',
       });
