@@ -87,6 +87,7 @@ describe('AuthService', () => {
           return {
             insert: jest.fn(),
             findOneBy: jest.fn(),
+            update: jest.fn(),
           };
         }
         if (token === CACHE_MANAGER) {
@@ -218,7 +219,7 @@ describe('AuthService', () => {
       });
     });
   });
-  
+
   describe('putEmailVerification Method', () => {
     it('should be defined', () => {
       expect(service.putEmailVerification).toBeDefined();
@@ -228,15 +229,38 @@ describe('AuthService', () => {
     it('should be return success message when success situation', async () => {
       const body = {
         email: 'test@gmail.com',
-        verifyToken: 123456
+        verifyToken: 123456,
       };
 
       cache = {
-        'test@gmail.com_verifyToken': 123456
-      }
+        'test@gmail.com_verifyToken': 123456,
+      };
 
       expect(service.putEmailVerification(body)).resolves.toStrictEqual({
         message: '이메일 인증번호가 확인되었습니다.',
+      });
+    });
+  });
+
+  describe('changePassword Method', () => {
+    it('should be defined', () => {
+      expect(service.changePassword).toBeDefined();
+      expect(typeof service.changePassword).toBe('function');
+    });
+
+    it('should be return success message when success situation', async () => {
+      const body = {
+        password: 'changePW',
+      };
+      const user = {
+        id: 1,
+      };
+      cache = {
+        'test@gmail.com_verifyToken': 123456,
+      };
+
+      expect(service.changePassword(body, user)).resolves.toStrictEqual({
+        message: '비밀번호가 변경되었습니다.',
       });
     });
   });
