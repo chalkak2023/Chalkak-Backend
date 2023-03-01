@@ -1,12 +1,17 @@
 import { IntersectionType, PickType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsStrongPassword } from 'class-validator';
 
 export class SignUpBodyDTO {
   @IsEmail()
   email: string;
-  @IsNotEmpty()
-  @IsString()
+  @IsStrongPassword({
+    minLength: 8,
+    minLowercase: 0,
+    minNumbers: 0,
+    minSymbols: 0,
+    minUppercase: 0,
+  })
   password: string;
 }
 
