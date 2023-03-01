@@ -28,6 +28,7 @@
     "@nestjs/mapped-types": "^1.2.2",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
+    "bcrypt": "^5.1.0",
     "bull": "^4.10.4",
     "cache-manager": "^4.1.0",
     "cache-manager-redis-store": "^2.0.0",
