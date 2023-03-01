@@ -22,7 +22,7 @@ describe('AuthService', () => {
   let mockMailerAuthService: jest.Mocked<MailerAuthService>;
 
   // DB 모킹
-  let users: User[] = [];
+  let users: any[] = [];
   // 캐시(레디스 등) 모킹
   let cache: Record<string, any> = {};
   // config
