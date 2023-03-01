@@ -218,4 +218,26 @@ describe('AuthService', () => {
       });
     });
   });
+  
+  describe('putEmailVerification Method', () => {
+    it('should be defined', () => {
+      expect(service.putEmailVerification).toBeDefined();
+      expect(typeof service.putEmailVerification).toBe('function');
+    });
+
+    it('should be return success message when success situation', async () => {
+      const body = {
+        email: 'test@gmail.com',
+        verifyToken: 123456
+      };
+
+      cache = {
+        'test@gmail.com_verifyToken': 123456
+      }
+
+      expect(service.putEmailVerification(body)).resolves.toStrictEqual({
+        message: '이메일 인증번호가 확인되었습니다.',
+      });
+    });
+  });
 });
