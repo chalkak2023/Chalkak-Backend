@@ -62,9 +62,8 @@ export class AuthService {
   }
 
   async signIn(body: SignInBodyDTO, response: any) {
-    try {
       const { email, password } = body;
-      const user = await this.usersRepository.findOneBy({ email });
+      const user = await this.usersRepository.findOne({ where: { email }, select: { id: true, email: true, password: true } });
       if (!user) {
         throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
       }
@@ -100,12 +99,6 @@ export class AuthService {
         accessToken,
         refreshToken,
       };
-    } catch (e) {
-      console.error(e);
-      throw new InternalServerErrorException({
-        message: '로그인이 제대로 이뤄지지 않았습니다.',
-      });
-    }
   }
 
   async signOut(user: any, response: any) {

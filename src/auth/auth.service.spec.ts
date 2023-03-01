@@ -86,6 +86,7 @@ describe('AuthService', () => {
         if (token === getRepositoryToken(User)) {
           return {
             insert: jest.fn(),
+            findOne: jest.fn(),
             findOneBy: jest.fn(),
             update: jest.fn(),
           };
@@ -169,7 +170,7 @@ describe('AuthService', () => {
       const response: any = {
         cookie: jest.fn(() => response),
       };
-      mockUserRepository.findOneBy.mockResolvedValue(users[0]);
+      mockUserRepository.findOne.mockResolvedValue(users[0]);
       mockJwtService.sign.mockImplementation((payload: any, options: any) => {
         return `token${options.secret}`;
       });
