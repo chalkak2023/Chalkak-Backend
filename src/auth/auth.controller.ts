@@ -7,8 +7,8 @@ import {
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
 } from './dto/auth.dto';
-import { JwtGuard } from 'src/common/auth/guard/jwt/jwt.guard';
-import { InjectUser } from 'src/common/auth/auth.decorator';
+import { InjectUser } from './auth.decorator';
+import { JwtGuard } from './guard/jwt/jwt.guard';
 
 @Controller('api/auth')
 export class AuthController {

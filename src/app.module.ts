@@ -9,7 +9,7 @@ import { CollectionsModule } from './collections/collections.module';
 import { MeetupsModule } from './meetups/meetups.module';
 import { AdminModule } from './admin/admin.module';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './common/auth/guard/jwt/jwt.strategy';
+import { JwtStrategy } from './auth/guard/jwt/jwt.strategy';
 
 @Module({
   imports: [
