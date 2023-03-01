@@ -180,4 +180,25 @@ describe('AuthService', () => {
       });
     });
   });
+
+  describe('signOut Method', () => {
+    it('should be defined', () => {
+      expect(service.signOut).toBeDefined();
+      expect(typeof service.signOut).toBe('function');
+    });
+
+    it('should be return success message when success situation', async () => {
+      const user = {
+        id: 1,
+      };
+      const response: any = {
+        cookie: jest.fn(() => response),
+        clearCookie: jest.fn(() => response),
+      };
+
+      expect(service.signOut(user, response)).resolves.toStrictEqual({
+        message: '로그아웃 되었습니다.',
+      });
+    });
+  });
 });
