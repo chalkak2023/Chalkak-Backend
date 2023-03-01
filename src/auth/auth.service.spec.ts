@@ -110,4 +110,37 @@ describe('AuthService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  describe('signUp Method', () => {
+    it('should be defined', () => {
+      expect(service.signUp).toBeDefined();
+      expect(typeof service.signUp).toBe('function');
+    });
+
+    it('should be return success message when success situation', async () => {
+      const body: SignUpBodyDTO = {
+        email: 'testman@gmail.com',
+        password: 'testpassword',
+      };
+
+      expect(service.signUp(body)).resolves.toStrictEqual({
+        message: '회원가입 되었습니다.',
+      });
+      expect(mockUserRepository.insert).toHaveBeenCalledWith({ email: body.email, password: bcrypt.hashSync(body.password, 10) });
+    });
+
+    it('should be return fail message when error situation', async () => {
+      const body: SignUpBodyDTO = {
+        email: 'test@gmail.com',
+        password: 'testpassword',
+      };
+      mockUserRepository.insert.mockRejectedValue(new Error());
+
+      expect(service.signUp(body)).rejects.toThrowError(
+        new BadRequestException({
+          message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.',
+        })
+      );
+    });
+  });
 });
