@@ -1,3 +1,4 @@
+import { Param } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
 import * as sinon from 'sinon';
@@ -68,6 +69,18 @@ describe('PhotospotService', () => {
     expect(spyS3Service.putObject).toHaveBeenCalled();
     expect(spyS3Service.putObject).toHaveBeenCalledWith(dto.image);
   });
+
+  it('calling Service getAllPhotospot method', () => {
+    const collectionId = 1;
+
+    expect(photoService.getAllPhotospot(collectionId)).not.toEqual(null);
+  });
+
+  it('calling Service getPhotospot method', () => {
+    const param = {collectionId: 1, photospotId: 1}
+
+    expect(photoService.getPhotospot(param)).not.toEqual(null);
+  })
 
   afterAll(async () => {
     sandbox.restore();

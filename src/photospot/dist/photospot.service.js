@@ -48,10 +48,12 @@ exports.__esModule = true;
 exports.PhotospotService = void 0;
 var common_1 = require("@nestjs/common");
 var typeorm_1 = require("@nestjs/typeorm");
+var _ = require("lodash");
 var photospot_entity_1 = require("../photospot/entities/photospot.entity");
 var PhotospotService = /** @class */ (function () {
-    function PhotospotService(photospotRepository, s3Service) {
+    function PhotospotService(photospotRepository, dataSource, s3Service) {
         this.photospotRepository = photospotRepository;
+        this.dataSource = dataSource;
         this.s3Service = s3Service;
     }
     PhotospotService.prototype.createPhotospot = function (createPhtospotDto, userId, collectionId) {
@@ -65,6 +67,66 @@ var PhotospotService = /** @class */ (function () {
                     case 1:
                         imagePath = _a.sent();
                         this.photospotRepository.insert({ title: title, description: description, latitude: latitude, longitude: longitude, imagePath: imagePath, userId: userId, collectionId: collectionId });
+                        return [2 /*return*/];
+                }
+            });
+        });
+    };
+    PhotospotService.prototype.getAllPhotospot = function (collectionId) {
+        return __awaiter(this, void 0, Promise, function () {
+            var photospots;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, this.photospotRepository.find({ where: { collectionId: collectionId } })];
+                    case 1:
+                        photospots = _a.sent();
+                        if (!photospots.length) {
+                            // throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
+                            throw new common_1.NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
+                        }
+                        return [2 /*return*/, photospots];
+                }
+            });
+        });
+    };
+    PhotospotService.prototype.getPhotospot = function (_a) {
+        var collectionId = _a.collectionId, photospotId = _a.photospotId;
+        return __awaiter(this, void 0, Promise, function () {
+            var photospot;
+            return __generator(this, function (_b) {
+                switch (_b.label) {
+                    case 0: return [4 /*yield*/, this.photospotRepository.findOne({ where: { collectionId: collectionId, id: photospotId } })];
+                    case 1:
+                        photospot = _b.sent();
+                        if (_.isNil(photospot)) {
+                            throw new common_1.NotFoundException('해당 포토스팟을 찾을 수 없습니다.');
+                        }
+                        return [2 /*return*/, photospot];
+                }
+            });
+        });
+    };
+    PhotospotService.prototype.modifyPhotospot = function (modifyPhotospotDto, param) {
+        return __awaiter(this, void 0, Promise, function () {
+            var title, description, image, collectionId, photospotId, updateData, imagePath;
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0:
+                        title = modifyPhotospotDto.title, description = modifyPhotospotDto.description, image = modifyPhotospotDto.image;
+                        collectionId = param.collectionId, photospotId = param.photospotId;
+                        return [4 /*yield*/, this.getPhotospot({ collectionId: collectionId, photospotId: photospotId })];
+                    case 1:
+                        _a.sent();
+                        if (!_.isNil(image)) return [3 /*break*/, 2];
+                        updateData = { title: title, description: description };
+                        return [3 /*break*/, 4];
+                    case 2: return [4 /*yield*/, this.s3Service.putObject(image)];
+                    case 3:
+                        imagePath = _a.sent();
+                        updateData = { title: title, description: description, imagePath: imagePath };
+                        _a.label = 4;
+                    case 4:
+                        this.photospotRepository.update({ id: photospotId }, updateData);
                         return [2 /*return*/];
                 }
             });

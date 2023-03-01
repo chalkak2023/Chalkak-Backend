@@ -108,6 +108,14 @@ describe('PhotospotService', function () {
         expect(spyS3Service.putObject).toHaveBeenCalled();
         expect(spyS3Service.putObject).toHaveBeenCalledWith(dto.image);
     });
+    it('calling Service getAllPhotospot method', function () {
+        var collectionId = 1;
+        expect(photoService.getAllPhotospot(collectionId)).not.toEqual(null);
+    });
+    it('calling Service getPhotospot method', function () {
+        var param = { collectionId: 1, photospotId: 1 };
+        expect(photoService.getPhotospot(param)).not.toEqual(null);
+    });
     afterAll(function () { return __awaiter(void 0, void 0, void 0, function () {
         return __generator(this, function (_a) {
             sandbox.restore();

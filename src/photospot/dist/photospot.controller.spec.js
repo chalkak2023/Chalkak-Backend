@@ -53,7 +53,9 @@ describe('PhotospotController', function () {
                     PhotospotServiceProvider = {
                         provide: photospot_service_1.PhotospotService,
                         useFactory: function () { return ({
-                            createPhotospot: jest.fn(function () { return []; })
+                            createPhotospot: jest.fn(function () { }),
+                            getAllPhotospot: jest.fn(function () { return []; }),
+                            getPhotospot: jest.fn(function () { })
                         }); }
                     };
                     return [4 /*yield*/, testing_1.Test.createTestingModule({
@@ -76,14 +78,35 @@ describe('PhotospotController', function () {
     }); });
     it('calling Controller createPhotospot method', function () {
         var dto = new create_photospot_dto_1.CreatePhotospotDto();
-        expect(photoController.createPhotospot(dto)).not.toEqual(null);
+        var collectionId = 1;
+        expect(photoController.createPhotospot(dto, collectionId)).not.toEqual(null);
     });
     it('calling Service createPhotospot method', function () {
         var dto = new create_photospot_dto_1.CreatePhotospotDto();
         var userId = 1;
         var collectionId = 1;
-        photoController.createPhotospot(dto);
+        photoController.createPhotospot(dto, collectionId);
         expect(spyService.createPhotospot).toHaveBeenCalled();
         expect(spyService.createPhotospot).toHaveBeenCalledWith(dto, userId, collectionId);
+    });
+    it('calling Controller getAllPhotospot method', function () {
+        var collectionId = 1;
+        expect(photoController.getAllPhotospot(collectionId)).not.toEqual(null);
+    });
+    it('calling Service getAllPhotospot method', function () {
+        var collectionId = 1;
+        photoController.getAllPhotospot(collectionId);
+        expect(spyService.getAllPhotospot).toHaveBeenCalled();
+        expect(spyService.getAllPhotospot).toHaveBeenCalledWith(collectionId);
+    });
+    it('calling Controller getPhotospot method', function () {
+        var param = { collectionId: 1, photospotId: 1 };
+        expect(photoController.getPhotospot(param)).not.toEqual(null);
+    });
+    it('calling Service getPhotospot method', function () {
+        var param = { collectionId: 1, photospotId: 1 };
+        photoController.getPhotospot(param);
+        expect(spyService.getPhotospot).toHaveBeenCalled();
+        expect(spyService.getPhotospot).toHaveBeenCalledWith(param);
     });
 });
