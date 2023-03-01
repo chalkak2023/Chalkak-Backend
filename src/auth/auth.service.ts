@@ -41,7 +41,11 @@ export class AuthService {
       };
       arr.push(temp);
     }
-    return await this.usersRepository.insert(arr);
+    return await this.usersRepository.insert(arr).catch(err => {
+      throw new BadRequestException({
+        message: "중복된 데이터가 이미 있습니다."
+      })
+    });
   }
 
   async signUp(body: SignUpBodyDTO) {
