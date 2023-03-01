@@ -77,7 +77,7 @@ export class AuthService {
         },
         {
           secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
-          expiresIn: '1h',
+          expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN') || '1h',
         }
       );
       const refreshToken = this.jwtService.sign(
@@ -86,7 +86,7 @@ export class AuthService {
         },
         {
           secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
-          expiresIn: '7d',
+          expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN') || '7d',
         }
       );
       this.cacheManager.set(user.id, refreshToken, { ttl: 1000 * 60 * 60 * 24 * 7 });
