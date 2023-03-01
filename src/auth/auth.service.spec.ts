@@ -7,10 +7,15 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
-import { CACHE_MANAGER } from '@nestjs/common';
+import { BadRequestException, CACHE_MANAGER } from '@nestjs/common';
+import { SignUpBodyDTO } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { isArray } from 'class-validator';
+import { Response } from 'express';
 jest.mock('bcrypt');
 
+type TableUser = Omit<User, 'collections' | 'photospots' | 'meetups' | 'joins'>;
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -20,6 +25,11 @@ describe('AuthService', () => {
   let mockJwtService: jest.Mocked<JwtService>;
   let mockConfigService: jest.Mocked<ConfigService>;
   let mockMailerAuthService: jest.Mocked<MailerAuthService>;
+
+  // DB 모킹
+  let users: TableUser[] = [];
+  // 캐시(레디스 등) 모킹
+  let cache: Record<string, any> = {};
 
   beforeAll(() => {
     (bcrypt.hashSync as jest.MockedFunction<typeof bcrypt.hashSync>).mockImplementation(
@@ -36,7 +46,7 @@ describe('AuthService', () => {
         return data.toString() === plain;
       }
     );
-  })
+  });
 
   beforeEach(() => {
     // 데이터셋
@@ -60,23 +70,27 @@ describe('AuthService', () => {
         deletedAt: new Date('2023-02-28T13:53:03.387Z'),
       },
     ];
+    // 캐시 초기화
+    cache = {};
   });
 
   beforeEach(async () => {
-    jest.clearAllMocks()
+    jest.clearAllMocks();
+    cache = {};
     const module: TestingModule = await Test.createTestingModule({
       providers: [AuthService],
     })
       .useMocker((token) => {
         if (token === getRepositoryToken(User)) {
           return {
-            
+            insert: jest.fn(),
           };
         }
         if (token === CACHE_MANAGER) {
           return {
-
-          }
+            get: jest.fn().mockImplementation((key: string) => cache[key]),
+            set: jest.fn().mockImplementation((key: string, value: any, options: any) => (cache[key] = value)),
+          };
         }
         if (typeof token === 'function') {
           const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
