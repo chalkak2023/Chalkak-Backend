@@ -201,4 +201,21 @@ describe('AuthService', () => {
       });
     });
   });
+
+  describe('postEmailVerification Method', () => {
+    it('should be defined', () => {
+      expect(service.postEmailVerification).toBeDefined();
+      expect(typeof service.postEmailVerification).toBe('function');
+    });
+
+    it('should be return success message when success situation', async () => {
+      const body = {
+        email: 'test@gmail.com',
+      };
+
+      expect(service.postEmailVerification(body)).resolves.toStrictEqual({
+        message: '이메일 인증번호가 요청되었습니다.',
+      });
+    });
+  });
 });
