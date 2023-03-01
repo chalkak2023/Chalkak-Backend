@@ -46,6 +46,7 @@
     "@nestjs/cli": "^9.0.0",
     "@nestjs/schematics": "^9.0.0",
     "@nestjs/testing": "^9.0.0",
+    "@types/bcrypt": "^5.0.0",
     "@types/bull": "^4.10.0",
     "@types/cache-manager": "^4.0.1",
     "@types/cookie-parser": "^1.4.3",
