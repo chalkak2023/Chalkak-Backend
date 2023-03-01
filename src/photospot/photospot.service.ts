@@ -1,17 +1,17 @@
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
-import { BadRequestException, HttpException, Injectable, NotFoundException, Param } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, DataSource } from 'typeorm';
+import { Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { Photospot } from '../photospot/entities/photospot.entity';
 import { S3Service } from './../common/aws/s3.service';
+import { PhotospotParam } from './types/photospotParam.interface';
 
 @Injectable()
 export class PhotospotService {
   constructor(
     @InjectRepository(Photospot) private photospotRepository: Repository<Photospot>,
-    private dataSource: DataSource,
     private readonly s3Service: S3Service
   ) {}
 
@@ -33,7 +33,7 @@ export class PhotospotService {
     return photospots;
   }
 
-  async getPhotospot({ collectionId, photospotId }: { collectionId: number; photospotId: number }): Promise<Photospot | null> {
+  async getPhotospot({ collectionId, photospotId }: PhotospotParam): Promise<Photospot | null> {
     const photospot = await this.photospotRepository.findOne({ where: { collectionId, id: photospotId } });
 
     if (_.isNil(photospot)) {
@@ -43,24 +43,26 @@ export class PhotospotService {
     return photospot;
   }
 
-  async modifyPhotospot(
-    modifyPhotospotDto: ModifyPhotospotDto,
-    param: { collectionId: number; photospotId: number }
-  ): Promise<void> {
-      const { title, description, image }: ModifyPhotospotDto = modifyPhotospotDto;
-      const { collectionId, photospotId }: { collectionId: number; photospotId: number } = param;
-      let updateData;
+  async modifyPhotospot(modifyPhotospotDto: ModifyPhotospotDto, param: PhotospotParam): Promise<void> {
+    const { title, description, image }: ModifyPhotospotDto = modifyPhotospotDto;
+    const { collectionId, photospotId }: PhotospotParam = param;
+    let updateData;
 
-      await this.getPhotospot({ collectionId, photospotId });
+    await this.getPhotospot({ collectionId, photospotId });
 
-      if (_.isNil(image)) {
-        updateData = { title, description };
-      } else {
-        const imagePath = await this.s3Service.putObject(image);
-        updateData = { title, description, imagePath };
-      }
+    if (_.isNil(image)) {
+      updateData = { title, description };
+    } else {
+      const imagePath = await this.s3Service.putObject(image);
+      updateData = { title, description, imagePath };
+    }
 
-      this.photospotRepository.update({ id: photospotId }, updateData);
-   
+    this.photospotRepository.update({ id: photospotId }, updateData);
+  }
+
+  async deletePhotospot({ collectionId, photospotId }: PhotospotParam) {
+    await this.getPhotospot({ collectionId, photospotId });
+
+    this.photospotRepository.softDelete(photospotId);
   }
 }

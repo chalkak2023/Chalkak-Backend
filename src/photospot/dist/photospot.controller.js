@@ -72,14 +72,15 @@ var PhotospotController = /** @class */ (function () {
     PhotospotController.prototype.modifyPhotospot = function (modifyPhotospot, param) {
         return __awaiter(this, void 0, Promise, function () {
             return __generator(this, function (_a) {
-                switch (_a.label) {
-                    case 0: return [4 /*yield*/, this.photospotService.modifyPhotospot(modifyPhotospot, param)];
-                    case 1:
-                        _a.sent();
-                        return [2 /*return*/];
-                }
+                console.log(param);
+                return [2 /*return*/];
             });
         });
+    };
+    PhotospotController.prototype.deletePhotospot = function (param) {
+        return __awaiter(this, void 0, void 0, function () { return __generator(this, function (_a) {
+            return [2 /*return*/];
+        }); });
     };
     __decorate([
         common_1.Post('/:collectionId/photospots'),
@@ -100,6 +101,10 @@ var PhotospotController = /** @class */ (function () {
         __param(0, common_1.Body()),
         __param(1, common_1.Param())
     ], PhotospotController.prototype, "modifyPhotospot");
+    __decorate([
+        common_1.Delete('/:collectionId/photospots/:photospotId'),
+        __param(0, common_1.Param())
+    ], PhotospotController.prototype, "deletePhotospot");
     PhotospotController = __decorate([
         common_1.Controller('/api/collections')
     ], PhotospotController);
