@@ -40,6 +40,7 @@ export class PhotospotController {
   }
 
   @Delete('/:collectionId/photospots/:photospotId')
+  @UseGuards(JwtGuard)
   async deletePhotospot(@Param('photospotId') photospotId: number) {
     await this.photospotService.deletePhotospot(photospotId);
   }
