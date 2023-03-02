@@ -33,6 +33,7 @@ export class PhotospotController {
   }
 
   @Put('/:collectionId/photospots/:photospotId')
+  @UseGuards(JwtGuard)
   @FormDataRequest()
   async modifyPhotospot(@Body() modifyPhotospot: ModifyPhotospotDto, @Param('photospotId') photospotId: number): Promise<void> {
     await this.photospotService.modifyPhotospot(modifyPhotospot, photospotId);
