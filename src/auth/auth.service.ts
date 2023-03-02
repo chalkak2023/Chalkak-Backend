@@ -62,40 +62,40 @@ export class AuthService {
   }
 
   async signIn(body: SignInBodyDTO, response: any) {
-      const { email, password } = body;
-      const user = await this.usersRepository.findOne({ where: { email }, select: { id: true, email: true, password: true } });
-      if (!user) {
-        throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
+    const { email, password } = body;
+    const user = await this.usersRepository.findOne({ where: { email }, select: { id: true, email: true, password: true } });
+    if (!user) {
+      throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
+    }
+    if (!bcrypt.compareSync(password, user.password)) {
+      throw new UnauthorizedException({ message: '비밀번호가 일치하지 않습니다.' });
+    }
+    const accessToken = this.jwtService.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: 'user',
+      },
+      {
+        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
+        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN') || '1h',
       }
-      if (!bcrypt.compareSync(password, user.password)) {
-        throw new UnauthorizedException({ message: '비밀번호가 일치하지 않습니다.' });
+    );
+    const refreshToken = this.jwtService.sign(
+      {
+        random: Math.floor(Math.random() * 10000) + 1,
+      },
+      {
+        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
+        expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN') || '7d',
       }
-      const accessToken = this.jwtService.sign(
-        {
-          id: user.id,
-          email: user.email,
-          role: 'user',
-        },
-        {
-          secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
-          expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN') || '1h',
-        }
-      );
-      const refreshToken = this.jwtService.sign(
-        {
-          id: user.id,
-        },
-        {
-          secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
-          expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN') || '7d',
-        }
-      );
-      this.cacheManager.set(refreshToken, user.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
-      return {
-        message: '로그인 되었습니다.',
-        accessToken,
-        refreshToken,
-      };
+    );
+    this.cacheManager.set(refreshToken, user.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
+    return {
+      message: '로그인 되었습니다.',
+      accessToken,
+      refreshToken,
+    };
   }
 
   async signOut(user: any, response: any) {
