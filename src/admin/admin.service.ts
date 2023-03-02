@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MoreThanOrEqual, Repository } from 'typeorm';
@@ -28,26 +28,25 @@ export class AdminService {
     return hash;
   }
 
-  // TODO : 유효성 검사 추가
   public async signupAdmin(data: SignupAdminReqDto): Promise<SignupAdminResDto> {
-    try {
-      let signupResult = new SignupAdminResDto();
+    let duplicateAdmin = await this.adminRepository.findOne({ where: { account: data.account }, select: { account: true } });
+    console.log('duplicateAdmin:', duplicateAdmin);
 
-      let newAdmin = new Admin();
-      newAdmin.account = data.account;
-      newAdmin.password = await this.hashPassword(data.password);
-      newAdmin.responsibility = data.responsibility;
-
-      await this.adminRepository.insert(newAdmin);
-      signupResult.successStatus = true;
-      signupResult.message = '새로운 관리자 계정을 정상적으로 생성하였습니다.';
-
-      return signupResult;
-    } catch (error) {
-      throw new BadRequestException({
-        message: '관리자 계정 생성에 실패했습니다.',
-      });
+    if (duplicateAdmin) {
+      throw new ConflictException({ message: '이미 중복되는 아이디가 있습니다.' });
     }
+    let signupResult = new SignupAdminResDto();
+
+    let newAdmin = new Admin();
+    newAdmin.account = data.account;
+    newAdmin.password = await this.hashPassword(data.password);
+    newAdmin.responsibility = data.responsibility;
+
+    await this.adminRepository.insert(newAdmin);
+    signupResult.successStatus = true;
+    signupResult.message = '새로운 관리자 계정을 정상적으로 생성하였습니다.';
+
+    return signupResult;
   }
 
   public async signinAdmin(account: string, hashpassword: string): Promise<SigninAdminDto> {
