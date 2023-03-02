@@ -90,7 +90,7 @@ export class AuthService {
           expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN') || '7d',
         }
       );
-      this.cacheManager.set(user.id, refreshToken, { ttl: 1000 * 60 * 60 * 24 * 7 });
+      this.cacheManager.set(refreshToken, user.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
       return {
         message: '로그인 되었습니다.',
         accessToken,
