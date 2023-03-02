@@ -56,7 +56,7 @@ export class AuthController {
     return await this.authService.oauthSignIn();
   }
 
-  @Post('refresh')
+  @Get('refresh')
   async refreshAccessToken(@Token('accessToken') accessToken: string, @Token('refreshToken') refreshToken: string) {
     return await this.authService.refreshAccessToken(accessToken, refreshToken)
   }
