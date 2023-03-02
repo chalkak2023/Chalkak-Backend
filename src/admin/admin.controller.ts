@@ -15,6 +15,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AdminService } from 'src/admin/admin.service';
+import { DeleteAdminDto } from 'src/admin/dto/delete.admin.dto';
 import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 
@@ -67,5 +68,10 @@ export class AdminController {
     const jwtData = { accessToken, refreshToken };
     res.cookie('auth-cookie', jwtData, { httpOnly: true });
     return { message: 'Refresh 토큰이 정상적으로 발행되었습니다.' };
+  }
+
+  @Delete('auth/:id')
+  async deleteAdmin(@Param('id') id: number) {
+    return this.adminService.deleteAdmin(id);
   }
 }
