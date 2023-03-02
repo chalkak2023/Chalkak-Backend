@@ -9,11 +9,17 @@ export class Admin {
   @Column('varchar')
   account: string;
 
-  @Column('varchar')
+  @Column('varchar', { select: false })
   password: string;
 
   @Column('varchar')
   responsibility: string;
+
+  @Column({ nullable: true, name: 'refreshtoken' })
+  refreshToken: string;
+
+  @Column({ type: 'date', nullable: true, name: 'refreshtokenexp' })
+  refreshTokenExp: string;
 
   @CreateDateColumn()
   createdAt: Date;
