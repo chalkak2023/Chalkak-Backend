@@ -1,3 +1,4 @@
+import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { Test, TestingModule } from '@nestjs/testing';
@@ -80,6 +81,21 @@ describe('PhotospotController', () => {
 
       expect(service.getPhotospot).toHaveBeenCalledTimes(1);
       expect(service.getPhotospot).toHaveBeenCalledWith(collectionId);
+    });
+  });
+
+  describe('PUT modifyPhotospot', () => {
+    it('should be defined', () => {
+      expect(controller.modifyPhotospot).toBeDefined();
+    });
+
+    it('modifyPhotospot 성공', () => {
+      const dto = new ModifyPhotospotDto();
+      const photospotId = 1;
+      service.modifyPhotospot(dto, photospotId);
+
+      expect(service.modifyPhotospot).toHaveBeenCalledTimes(1);
+      expect(service.modifyPhotospot).toHaveBeenCalledWith(dto, photospotId);
     });
   });
 });
