@@ -74,4 +74,14 @@ export class AdminController {
   async deleteAdmin(@Param('id') id: number) {
     return this.adminService.deleteAdmin(id);
   }
+
+  @Post('auth/signout')
+  signoutAdmin(@Req() req: Request, @Res() res: Response): any {
+    res.cookie('jwt', '', {
+      maxAge: 0,
+    });
+    return res.send({
+      message: '정상적으로 로그아웃 되었습니다.',
+    });
+  }
 }
