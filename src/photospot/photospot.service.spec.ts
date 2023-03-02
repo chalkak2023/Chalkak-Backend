@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -49,6 +49,7 @@ describe('PhotospotService', () => {
 
   describe('Service createPhotospot', () => {
     it('should be defined', () => {
+      expect(service.getAllPhotospot).toBeDefined();
       expect(mockS3Service.putObject).toBeDefined();
       expect(mockPhotospotRepository.insert).toBeDefined();
     });
@@ -60,21 +61,53 @@ describe('PhotospotService', () => {
       const { title, description, latitude, longitude, image } = dto;
       const imagePath = 'AWS path';
 
-      mockS3Service.putObject.mockResolvedValue(imagePath)
+      mockS3Service.putObject.mockResolvedValue(imagePath);
       await service.createPhotospot(dto, userId, collectionId);
       expect(mockS3Service.putObject).toHaveBeenCalledTimes(1);
       expect(mockS3Service.putObject).toHaveBeenCalledWith(image);
       expect(mockPhotospotRepository.insert).toHaveBeenCalledTimes(1);
-      expect(mockPhotospotRepository.insert).toHaveBeenCalledWith({ title, description, latitude, longitude, imagePath, userId, collectionId });
+      expect(mockPhotospotRepository.insert).toHaveBeenCalledWith({
+        title,
+        description,
+        latitude,
+        longitude,
+        imagePath,
+        userId,
+        collectionId,
+      });
     });
 
     it('createPhotospot 실패', async () => {
       const dto = new CreatePhotospotDto();
       const userId = 1;
       const collectionId = 1;
-      
+
       mockPhotospotRepository.insert.mockRejectedValue(new Error());
-      expect(service.createPhotospot(dto, userId, collectionId)).rejects.toThrowError(new BadRequestException('요청이 올바르지 않습니다.'))
-    })
+      expect(service.createPhotospot(dto, userId, collectionId)).rejects.toThrowError(
+        new BadRequestException('요청이 올바르지 않습니다.')
+      );
+    });
+  });
+
+  describe('Service getAllPhotospot', () => {
+    it('should db defined', () => {
+      expect(service.getAllPhotospot).toBeDefined();
+    });
+    it('getAllPhotospot 성공', async () => {
+      const collectionId = 1;
+      const photospots = [new Photospot()];
+
+      mockPhotospotRepository.find.mockResolvedValue(photospots);
+      expect(service.getAllPhotospot(collectionId)).resolves.toStrictEqual(photospots);
+    });
+
+    it('getAllPhotospot 해당 값 못 찾을 경우', async () => {
+      const collectionId = 1;
+
+      mockPhotospotRepository.find.mockResolvedValue([]);
+      expect(service.getAllPhotospot(collectionId)).rejects.toThrowError(
+        new NotFoundException('해당 콜렉션을 찾을 수 없습니다.')
+      );
+    });
   });
 });
