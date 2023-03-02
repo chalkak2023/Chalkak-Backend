@@ -21,12 +21,13 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
+import { Cache } from 'cache-manager';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: any,
+    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
     private jwtService: JwtService,
     private configService: ConfigService,
     private mailerAuthService: MailerAuthService
