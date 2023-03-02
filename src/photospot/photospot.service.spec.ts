@@ -110,4 +110,26 @@ describe('PhotospotService', () => {
       );
     });
   });
+
+  describe('Service getPhotospot', () => {
+    it('should db defined', () => {
+      expect(service.getPhotospot).toBeDefined();
+    });
+    it('getPhotospot 성공', async () => {
+      const photospotId = 1;
+      const photospot = new Photospot();
+
+      mockPhotospotRepository.findOne.mockResolvedValue(photospot);
+      expect(service.getPhotospot(photospotId)).resolves.toStrictEqual(photospot);
+    });
+
+    it('getPhotospot 해당 값 못 찾을 경우', async () => {
+      const photospotId = 1;
+
+      mockPhotospotRepository.findOne.mockResolvedValue(null);
+      expect(service.getPhotospot(photospotId)).rejects.toThrowError(
+        new NotFoundException('해당 포토스팟을 찾을 수 없습니다.')
+      );
+    });
+  });
 });
