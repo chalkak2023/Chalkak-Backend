@@ -72,26 +72,8 @@ export class AuthService {
     if (!bcrypt.compareSync(password, user.password)) {
       throw new UnauthorizedException({ message: '비밀번호가 일치하지 않습니다.' });
     }
-    const accessToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        role: 'user',
-      },
-      {
-        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
-        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN') || '1h',
-      }
-    );
-    const refreshToken = this.jwtService.sign(
-      {
-        random: Math.floor(Math.random() * 10000) + 1,
-      },
-      {
-        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
-        expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN') || '7d',
-      }
-    );
+    const accessToken = this.generateUserAccessToken(user);
+    const refreshToken = this.generateUserRefreshToken();
     this.cacheManager.set(refreshToken, user.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
     return {
       message: '로그인 되었습니다.',
@@ -164,7 +146,7 @@ export class AuthService {
       where: {
         id: userId,
       },
-      select: ['id', 'email']
+      select: ['id', 'email'],
     });
     if (_.isNil(user)) {
       throw new NotFoundException({
@@ -173,17 +155,7 @@ export class AuthService {
     }
 
     // TODO: 액세스 토큰을 생성하는 코드 필요.
-    const newAccessToken = this.jwtService.sign(
-      {
-        id: user.id,
-        email: user.email,
-        role: 'user',
-      },
-      {
-        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
-        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN') || '1h',
-      }
-    );
+    const newAccessToken = this.generateUserAccessToken(user)
 
     return {
       accessToken: newAccessToken,
@@ -195,5 +167,31 @@ export class AuthService {
     var minm = 100000;
     var maxm = 999999;
     return Math.floor(Math.random() * (maxm - minm + 1)) + minm;
+  }
+
+  private generateUserAccessToken(user: { id: number; email: string }) {
+    return this.jwtService.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: 'user',
+      },
+      {
+        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
+        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN') || '1h',
+      }
+    );
+  }
+
+  private generateUserRefreshToken() {
+    return this.jwtService.sign(
+      {
+        random: Math.floor(Math.random() * 10000) + 1,
+      },
+      {
+        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
+        expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN') || '7d',
+      }
+    );
   }
 }
