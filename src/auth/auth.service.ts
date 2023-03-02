@@ -22,6 +22,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
 import { Cache } from 'cache-manager';
+import _ from 'lodash';
 
 @Injectable()
 export class AuthService {
@@ -151,8 +152,38 @@ export class AuthService {
   }
 
   async refreshAccessToken(accessToken: string, refreshToken: string) {
+    // TODO: 기존 액세스 토큰이 만료되었는지 확인
+
+    const userId = await this.cacheManager.get<number>(refreshToken);
+    if (_.isNil(userId)) {
+      throw new UnauthorizedException({
+        message: '사용 만료되었습니다.',
+      });
+    }
+    const user = await this.usersRepository.findOne({
+      where: {
+        id: userId,
+      },
+      select: ['id', 'email']
+    });
+    if (_.isNil(user)) {
+      throw new NotFoundException({
+        message: '탈퇴한 유저입니다.',
+      });
+    }
+
     // TODO: 액세스 토큰을 생성하는 코드 필요.
-    const newAccessToken = 'newAccessToken';
+    const newAccessToken = this.jwtService.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: 'user',
+      },
+      {
+        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
+        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN') || '1h',
+      }
+    );
 
     return {
       accessToken: newAccessToken,
