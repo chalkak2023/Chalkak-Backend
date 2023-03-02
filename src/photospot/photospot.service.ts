@@ -19,7 +19,7 @@ export class PhotospotService {
       const { title, description, latitude, longitude, image }: CreatePhotospotDto = createPhtospotDto;
 
       const imagePath = await this.s3Service.putObject(image);
-      this.photospotRepository.insert({ title, description, latitude, longitude, imagePath, userId, collectionId });
+      await this.photospotRepository.insert({ title, description, latitude, longitude, imagePath, userId, collectionId });
     } catch (error) {
       console.log(error);
       throw new BadRequestException('요청이 올바르지 않습니다.');

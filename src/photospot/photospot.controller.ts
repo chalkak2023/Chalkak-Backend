@@ -1,18 +1,25 @@
-import { Controller, Post, Get, Put, Delete, Body, Param, Query, UsePipes } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Body, Param, Query, UsePipes, UseGuards } from '@nestjs/common';
 import { FormDataRequest } from 'nestjs-form-data/dist/decorators/form-data';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 import { PhotospotService } from './photospot.service';
 import { Photospot } from './entities/photospot.entity';
+import { InjectUser } from '../auth/auth.decorator';
+import { JwtGuard } from '../auth/guard/jwt/jwt.guard';
 
 @Controller('/api/collections')
 export class PhotospotController {
   constructor(private readonly photospotService: PhotospotService) {}
 
   @Post('/:collectionId/photospots')
+  @UseGuards(JwtGuard)
   @FormDataRequest()
-  createPhotospot(@Body() createPhtospotDto: CreatePhotospotDto, @Param('collectionId') collectionId: number): void {
-    this.photospotService.createPhotospot(createPhtospotDto, 1, collectionId);
+  async createPhotospot(
+    @Body() createPhtospotDto: CreatePhotospotDto,
+    @Param('collectionId') collectionId: number,
+    @InjectUser('id') userId: number
+  ): Promise<void> {
+    await this.photospotService.createPhotospot(createPhtospotDto, userId, collectionId);
   }
 
   @Get('/:collectionId')
@@ -26,12 +33,14 @@ export class PhotospotController {
   }
 
   @Put('/:collectionId/photospots/:photospotId')
+  @UseGuards(JwtGuard)
   @FormDataRequest()
   async modifyPhotospot(@Body() modifyPhotospot: ModifyPhotospotDto, @Param('photospotId') photospotId: number): Promise<void> {
     await this.photospotService.modifyPhotospot(modifyPhotospot, photospotId);
   }
 
   @Delete('/:collectionId/photospots/:photospotId')
+  @UseGuards(JwtGuard)
   async deletePhotospot(@Param('photospotId') photospotId: number) {
     await this.photospotService.deletePhotospot(photospotId);
   }
