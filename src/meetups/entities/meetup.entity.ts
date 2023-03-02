@@ -31,9 +31,11 @@ export class Meetup {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @ManyToOne((type) => User, (user) => user.meetups)
+  @ManyToOne(() => User, (user) => user.meetups)
   user: User;
 
-  @OneToMany((type) => Join, (join) => join.meetup)
+  @OneToMany(() => Join, (join) => join.meetup, {
+    cascade: true,
+  })
   joins: Join[];
 }
