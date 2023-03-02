@@ -57,16 +57,29 @@ describe('PhotospotController', () => {
 
   describe('GET getAllPhotospot', () => {
     it('should be defined', () => {
-      expect(controller.createPhotospot).toBeDefined();
+      expect(controller.getAllPhotospot).toBeDefined();
     });
 
     it('getAllPhotospot 성공', () => {
       const collectionId = 1;
-      const photospots = new Photospot();
       service.getAllPhotospot(collectionId);
 
       expect(service.getAllPhotospot).toHaveBeenCalledTimes(1);
       expect(service.getAllPhotospot).toHaveBeenCalledWith(collectionId);
+    });
+  });
+
+  describe('GET getPhotospot', () => {
+    it('should be defined', () => {
+      expect(controller.getPhotospot).toBeDefined();
+    });
+
+    it('getPhotospot 성공', () => {
+      const collectionId = 1;
+      service.getPhotospot(collectionId);
+
+      expect(service.getPhotospot).toHaveBeenCalledTimes(1);
+      expect(service.getPhotospot).toHaveBeenCalledWith(collectionId);
     });
   });
 });
