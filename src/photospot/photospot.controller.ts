@@ -14,12 +14,12 @@ export class PhotospotController {
   @Post('/:collectionId/photospots')
   @UseGuards(JwtGuard)
   @FormDataRequest()
-  createPhotospot(
+  async createPhotospot(
     @Body() createPhtospotDto: CreatePhotospotDto,
     @Param('collectionId') collectionId: number,
     @InjectUser('id') userId: number
-  ): void {
-    this.photospotService.createPhotospot(createPhtospotDto, userId, collectionId);
+  ): Promise<void> {
+    await this.photospotService.createPhotospot(createPhtospotDto, userId, collectionId);
   }
 
   @Get('/:collectionId')
