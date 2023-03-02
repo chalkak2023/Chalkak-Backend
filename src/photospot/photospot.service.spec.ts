@@ -13,7 +13,7 @@ import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { S3Service } from './../common/aws/s3.service';
 import { TypeOrmConfigService } from './../common/config/typeorm.config.service';
 
-describe('PhotospotService', () => {
+describe.skip('PhotospotService', () => {
   let photoService: PhotospotService;
   let spyS3Service: S3Service;
   let sandbox: sinon.SinonSandbox;

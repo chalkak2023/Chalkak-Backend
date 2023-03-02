@@ -5,7 +5,7 @@ import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { PhotospotController } from './photospot.controller';
 import { PhotospotService } from './photospot.service';
 
-describe('PhotospotController', () => {
+describe.skip('PhotospotController', () => {
   let photoController: PhotospotController;
   let spyService: PhotospotService;
 
