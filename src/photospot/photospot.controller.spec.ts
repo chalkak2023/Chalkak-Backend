@@ -61,9 +61,9 @@ describe('PhotospotController', () => {
       expect(controller.getAllPhotospot).toBeDefined();
     });
 
-    it('getAllPhotospot 성공', () => {
+    it('getAllPhotospot 성공', async () => {
       const collectionId = 1;
-      service.getAllPhotospot(collectionId);
+      await service.getAllPhotospot(collectionId);
 
       expect(service.getAllPhotospot).toHaveBeenCalledTimes(1);
       expect(service.getAllPhotospot).toHaveBeenCalledWith(collectionId);
@@ -75,9 +75,9 @@ describe('PhotospotController', () => {
       expect(controller.getPhotospot).toBeDefined();
     });
 
-    it('getPhotospot 성공', () => {
+    it('getPhotospot 성공', async () => {
       const collectionId = 1;
-      service.getPhotospot(collectionId);
+      await service.getPhotospot(collectionId);
 
       expect(service.getPhotospot).toHaveBeenCalledTimes(1);
       expect(service.getPhotospot).toHaveBeenCalledWith(collectionId);
@@ -89,10 +89,10 @@ describe('PhotospotController', () => {
       expect(controller.modifyPhotospot).toBeDefined();
     });
 
-    it('modifyPhotospot 성공', () => {
+    it('modifyPhotospot 성공', async () => {
       const dto = new ModifyPhotospotDto();
       const photospotId = 1;
-      service.modifyPhotospot(dto, photospotId);
+      await service.modifyPhotospot(dto, photospotId);
 
       expect(service.modifyPhotospot).toHaveBeenCalledTimes(1);
       expect(service.modifyPhotospot).toHaveBeenCalledWith(dto, photospotId);
@@ -104,9 +104,9 @@ describe('PhotospotController', () => {
       expect(controller.deletePhotospot).toBeDefined();
     });
 
-    it('deletePhotospot 성공', () => {
+    it('deletePhotospot 성공', async () => {
       const photospotId = 1;
-      service.deletePhotospot(photospotId);
+      await service.deletePhotospot(photospotId);
 
       expect(service.deletePhotospot).toHaveBeenCalledTimes(1);
       expect(service.deletePhotospot).toHaveBeenCalledWith(photospotId);
