@@ -1,4 +1,4 @@
-import { Body, Controller, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   PostEmailVerificationBodyDTO,
@@ -9,6 +9,7 @@ import {
 } from './dto/auth.dto';
 import { InjectUser, Token } from './auth.decorator';
 import { JwtGuard } from './guard/jwt/jwt.guard';
+import { JwtRefreshGuard } from './guard/jwt-refresh/jwt-refresh.guard';
 
 @Controller('api/auth')
 export class AuthController {
@@ -57,7 +58,8 @@ export class AuthController {
   }
 
   @Get('refresh')
+  @UseGuards(JwtRefreshGuard)
   async refreshAccessToken(@Token('accessToken') accessToken: string, @Token('refreshToken') refreshToken: string) {
-    return await this.authService.refreshAccessToken(accessToken, refreshToken)
+    return await this.authService.refreshAccessToken(accessToken, refreshToken);
   }
 }
