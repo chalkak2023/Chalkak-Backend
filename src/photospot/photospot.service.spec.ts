@@ -1,3 +1,5 @@
+import { FileSystemStoredFile } from 'nestjs-form-data/dist/classes/storage';
+import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -127,9 +129,51 @@ describe('PhotospotService', () => {
       const photospotId = 1;
 
       mockPhotospotRepository.findOne.mockResolvedValue(null);
-      expect(service.getPhotospot(photospotId)).rejects.toThrowError(
-        new NotFoundException('해당 포토스팟을 찾을 수 없습니다.')
+      expect(service.getPhotospot(photospotId)).rejects.toThrowError(new NotFoundException('해당 포토스팟을 찾을 수 없습니다.'));
+    });
+  });
+
+  describe('Service modifyPhotospot', () => {
+    it('should db defined', () => {
+      expect(service.modifyPhotospot).toBeDefined();
+    });
+    it('modifyPhotospot image가 있을 때 성공', async () => {
+      const dto = { title: '테스트', description: '테스트 설명', image: {} as FileSystemStoredFile };
+      const photospotId = 1;
+      const photospot = new Photospot();
+      const imagePath = 'AWS path';
+
+      mockPhotospotRepository.findOne.mockResolvedValue(photospot);
+      mockS3Service.putObject.mockResolvedValue(imagePath);
+
+      await service.modifyPhotospot(dto, photospotId);
+      expect(mockS3Service.putObject).toHaveBeenCalledTimes(1);
+      expect(mockS3Service.putObject).toHaveBeenCalledWith(dto.image);
+      expect(mockPhotospotRepository.update).toHaveBeenCalledTimes(1);
+      expect(mockPhotospotRepository.update).toHaveBeenCalledWith(
+        { id: photospotId },
+        { title: dto.title, description: dto.description, imagePath }
       );
     });
+
+    it('modifyPhotospot image가 없을 때 성공', async () => {
+      const dto = new ModifyPhotospotDto();
+      const photospotId = 1;
+      const photospot = new Photospot();
+
+      mockPhotospotRepository.findOne.mockResolvedValue(photospot);
+      await service.modifyPhotospot(dto, photospotId);
+      expect(mockS3Service.putObject).toHaveBeenCalledTimes(0);
+      expect(mockPhotospotRepository.update).toHaveBeenCalledTimes(1);
+      expect(mockPhotospotRepository.update).toHaveBeenCalledWith({ id: photospotId }, dto);
+    });
+
+    it('modifyPhotospot 해당 값 없을 때 실패', async () => {
+      const dto = { title: '테스트', description: '테스트 설명', image: {} as FileSystemStoredFile };
+      const photospotId = 1;
+
+      mockPhotospotRepository.findOne.mockResolvedValue(null);
+      expect(service.modifyPhotospot(dto, photospotId)).rejects.toThrowError(new NotFoundException('해당 포토스팟을 찾을 수 없습니다.'));
+    })
   });
 });
