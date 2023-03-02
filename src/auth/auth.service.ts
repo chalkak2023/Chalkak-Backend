@@ -149,6 +149,16 @@ export class AuthService {
     };
   }
 
+  async refreshAccessToken(accessToken: string, refreshToken: string) {
+    // TODO: 액세스 토큰을 생성하는 코드 필요.
+    const newAccessToken = 'newAccessToken';
+
+    return {
+      accessToken: newAccessToken,
+      message: '액세스 토큰을 재발급받았습니다.',
+    };
+  }
+
   private generateRandomNumber(): number {
     var minm = 100000;
     var maxm = 999999;
