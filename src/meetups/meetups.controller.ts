@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/c
 import { InjectUser } from 'src/auth/auth.decorator';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
 import { JwtGuard } from 'src/auth/guard/jwt/jwt.guard';
-import { CreateMeetupDto } from './dto/create-meetup.dto';
+import { CreateMeetupDTO } from './dto/create-meetup.dto';
 import { Meetup } from './entities/meetup.entity';
 import { MeetupsService } from './meetups.service';
 
@@ -17,7 +17,7 @@ export class MeetupsController {
 
   @Post()
   @UseGuards(JwtGuard)
-  async createMeetup(@Body() meetupDTO: CreateMeetupDto, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
+  async createMeetup(@Body() meetupDTO: CreateMeetupDTO, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
     meetupDTO.userId = userDTO.id;
     return await this.meetupsService.createMeetup(meetupDTO);
   }

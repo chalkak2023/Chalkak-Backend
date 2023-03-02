@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateMeetupDto } from '../dto/create-meetup.dto';
+import { CreateMeetupDTO } from '../dto/create-meetup.dto';
 import { MeetupsController } from '../meetups.controller';
 import { MeetupsService } from '../meetups.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
@@ -10,7 +10,7 @@ const moduleMocker = new ModuleMocker(global);
 
 describe('MeetupsController', () => {
   let controller: MeetupsController;
-  let service: jest.Mocked<MeetupsService>;
+  let mockService: jest.Mocked<MeetupsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -24,7 +24,7 @@ describe('MeetupsController', () => {
     }).compile();
 
     controller = module.get(MeetupsController);
-    service = module.get(MeetupsService);
+    mockService = module.get(MeetupsService);
   });
 
   it('should be defined', () => {
@@ -34,18 +34,18 @@ describe('MeetupsController', () => {
   describe('GET /api/meetups', () => {
     it('getMeetups', async () => {
       const mockReturnValue = [new Meetup()];
-      service.getMeetups.mockResolvedValue(mockReturnValue);
+      mockService.getMeetups.mockResolvedValue(mockReturnValue);
       const result = await controller.getMeetups();
 
       expect(result).toBe(mockReturnValue);
-      expect(service.getMeetups).toHaveBeenCalled();
-      expect(service.getMeetups).toHaveBeenCalledWith();
+      expect(mockService.getMeetups).toHaveBeenCalled();
+      expect(mockService.getMeetups).toHaveBeenCalledWith();
       expect(result).toBeInstanceOf(Array);
     });
   });
 
   describe('POST /api/meetups', () => {
-    const meetupDTO: CreateMeetupDto = {
+    const meetupDTO: CreateMeetupDTO = {
       userId: 1,
       title: 'test title',
       content: 'test content',
@@ -61,11 +61,11 @@ describe('MeetupsController', () => {
       exp: 0
     }
     it('createMeetup', async () => {
-      service.createMeetup.mockResolvedValue();
+      mockService.createMeetup.mockResolvedValue();
       await controller.createMeetup(meetupDTO, userDTO);
 
-      expect(service.createMeetup).toHaveBeenCalled();
-      expect(service.createMeetup).toHaveBeenCalledWith(meetupDTO);
+      expect(mockService.createMeetup).toHaveBeenCalled();
+      expect(mockService.createMeetup).toHaveBeenCalledWith(meetupDTO);
     });
   });
 
@@ -73,12 +73,12 @@ describe('MeetupsController', () => {
     it('getMeetup', async () => {
       const mockReturnValue = new Meetup();
       const meetupId = 1;
-      service.getMeetup.mockResolvedValue(mockReturnValue);
+      mockService.getMeetup.mockResolvedValue(mockReturnValue);
       const result = await controller.getMeetup(meetupId);
 
       expect(result).toBe(mockReturnValue);
-      expect(service.getMeetup).toHaveBeenCalled();
-      expect(service.getMeetup).toHaveBeenCalledWith(meetupId);
+      expect(mockService.getMeetup).toHaveBeenCalled();
+      expect(mockService.getMeetup).toHaveBeenCalledWith(meetupId);
       expect(result).toBeInstanceOf(Object);
     });
   });
@@ -93,11 +93,11 @@ describe('MeetupsController', () => {
       exp: 0
     }
     it('deleteMeetup', async () => {
-      service.deleteMeetup.mockResolvedValue();
+      mockService.deleteMeetup.mockResolvedValue();
       await controller.deleteMeetup(meetupId, userDTO);
 
-      expect(service.deleteMeetup).toHaveBeenCalled();
-      expect(service.deleteMeetup).toHaveBeenCalledWith(meetupId, userDTO.id);
+      expect(mockService.deleteMeetup).toHaveBeenCalled();
+      expect(mockService.deleteMeetup).toHaveBeenCalledWith(meetupId, userDTO.id);
     });
   });
 
@@ -111,11 +111,11 @@ describe('MeetupsController', () => {
       exp: 0
     }
     it('addJoin', async () => {
-      service.addJoin.mockResolvedValue();
+      mockService.addJoin.mockResolvedValue();
       await controller.addJoin(meetupId, userDTO);
 
-      expect(service.addJoin).toHaveBeenCalled();
-      expect(service.addJoin).toHaveBeenCalledWith(meetupId, userDTO.id);
+      expect(mockService.addJoin).toHaveBeenCalled();
+      expect(mockService.addJoin).toHaveBeenCalledWith(meetupId, userDTO.id);
     });
   });
 
@@ -129,11 +129,11 @@ describe('MeetupsController', () => {
       exp: 0
     }
     it('deleteJoin', async () => {
-      service.deleteJoin.mockResolvedValue();
+      mockService.deleteJoin.mockResolvedValue();
       await controller.deleteJoin(meetupId, userDTO);
 
-      expect(service.deleteJoin).toHaveBeenCalled();
-      expect(service.deleteJoin).toHaveBeenCalledWith(meetupId, userDTO.id);
+      expect(mockService.deleteJoin).toHaveBeenCalled();
+      expect(mockService.deleteJoin).toHaveBeenCalledWith(meetupId, userDTO.id);
     });
   });
 });

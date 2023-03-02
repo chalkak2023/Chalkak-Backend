@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { DataSource, Repository } from 'typeorm';
-import { CreateMeetupDto } from './dto/create-meetup.dto';
+import { CreateMeetupDTO } from './dto/create-meetup.dto';
 import { Join } from './entities/join.entity';
 import { Meetup } from './entities/meetup.entity';
 
@@ -31,7 +31,7 @@ export class MeetupsRepository extends Repository<Meetup> {
       .getMany();
   }
 
-  async createMeetup(meetupDto: CreateMeetupDto) {
+  async createMeetup(meetupDto: CreateMeetupDTO) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();

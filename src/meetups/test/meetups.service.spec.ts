@@ -1,71 +1,43 @@
-import { ConflictException, ForbiddenException } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
-import { CreateMeetupDto } from '../dto/create-meetup.dto';
+import { Repository } from 'typeorm';
+import { CreateMeetupDTO } from '../dto/create-meetup.dto';
 import { Join } from '../entities/join.entity';
 import { MeetupsRepository } from '../meetups.repository';
 import { MeetupsService } from '../meetups.service';
+import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
+import { Meetup } from '../entities/meetup.entity';
 
-class mockMeetupsRepository {
-  getMeetups() {
-    return [];
-  }
-  createMeetup() {}
-  getMeetup() {
-    return {
-      userId: 1,
-      headcount: 2,
-      joins: [
-        {}
-      ]
-    };
-  }
-  delete() {}
-}
-class mockJoinRepository {
-  findOne() {
-    return {
-      meetupId: 1,
-      userId: 1
-    };
-  }
-}
-class mockDataSource {
-
-}
+const moduleMocker = new ModuleMocker(global);
 
 describe('MeetupsService', () => {
   let service: MeetupsService;
-  let meetupRepository: MeetupsRepository;
-  let joinRepository: Repository<Join>;
-  let dataSource: DataSource;
+  let mockMeetupRepository: jest.Mocked<MeetupsRepository>;
+  let mockJoinRepository: jest.Mocked<Repository<Join>>;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        MeetupsService,
-        MeetupsRepository,
-        DataSource,
-        {
-          provide: MeetupsRepository,
-          useClass: mockMeetupsRepository,
-        },
-        {
-          provide: getRepositoryToken(Join),
-          useClass: mockJoinRepository,
-        },
-        {
-          provide: DataSource,
-          useClass: mockDataSource,
-        },
-      ],
+      providers: [MeetupsService],
+    }).useMocker((token) => {
+      if (token === getRepositoryToken(Join)) {
+        return {
+          findOne: jest.fn(),
+          insert: jest.fn(),
+          delete: jest.fn(),
+        };
+      }
+      if (typeof token === 'function') {
+        const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
+        const Mock = moduleMocker.generateFromMetadata(mockMetadata);
+        return new Mock();
+      }
     }).compile();
 
-    service = module.get<MeetupsService>(MeetupsService);
-    meetupRepository = module.get<MeetupsRepository>(MeetupsRepository);
-    joinRepository = module.get<Repository<Join>>(getRepositoryToken(Join));
-    dataSource = module.get<DataSource>(DataSource);
+    service = module.get(MeetupsService);
+    mockMeetupRepository = module.get(MeetupsRepository);
+    mockJoinRepository = module.get(getRepositoryToken(Join));
   });
 
   it('should be defined', () => {
@@ -74,73 +46,75 @@ describe('MeetupsService', () => {
 
   describe('getMeetups Method', () => {
     it('success', async () => {
-      const spy = jest.spyOn(meetupRepository, 'getMeetups');
+      const mockReturnValue = [new Meetup()];
+      mockMeetupRepository.getMeetups.mockResolvedValue(mockReturnValue);
       const result = await service.getMeetups();
-      expect(spy).toHaveBeenCalled();
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockMeetupRepository.getMeetups).toHaveBeenCalled();
+      expect(mockMeetupRepository.getMeetups).toHaveBeenCalledWith();
       expect(result).toBeInstanceOf(Array);
     });
-    // it('should return error', async () => {
-    //   jest.spyOn(repository, 'getMeetups').mockImplementation(() => {
-    //     throw new Error('error');
-    //   });
-    //   try {
-    //     await service.getMeetups();
-    //   } catch (err) {
-    //     expect(err.message).toEqual('error');
-    //   }
-    // });
   });
 
   describe('createMeetup Method', () => {
-    const meetupDto: CreateMeetupDto = {
-      userId: 0,
+    const meetupDTO: CreateMeetupDTO = {
+      userId: 1,
       title: 'test title',
       content: 'test content',
       place: 'test place',
       schedule: '2023-02-28 17:20',
-      headcount: 0,
+      headcount: 2,
     };
     it('success', async () => {
-      const spy = jest.spyOn(meetupRepository, 'createMeetup');
-      await service.createMeetup(meetupDto);
-      expect(spy).toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledWith(meetupDto);
+      mockMeetupRepository.createMeetup.mockResolvedValue();
+      await service.createMeetup(meetupDTO);
+
+      expect(mockMeetupRepository.createMeetup).toHaveBeenCalled();
+      expect(mockMeetupRepository.createMeetup).toHaveBeenCalledWith(meetupDTO);
     });
   });
 
   describe('getMeetup Method', () => {
-    const id = 1;
+    const meetupId = 1;
     it('success', async () => {
-      const spy = jest.spyOn(meetupRepository, 'getMeetup');
-      const result = await service.getMeetup(id);
-      expect(spy).toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledWith(id);
+      const mockReturnValue = new Meetup();
+      mockMeetupRepository.getMeetup.mockResolvedValue(mockReturnValue);
+      const result = await service.getMeetup(meetupId);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
       expect(result).toBeInstanceOf(Object);
     });
   });
 
   describe('deleteMeetup Method', () => {
     const meetupId = 1;
-    const existUser = 1;
-    const notExistUser = 2;
-    it('success', async () => {
-        const getMeetupSpy = jest.spyOn(meetupRepository, 'getMeetup');
-      const deleteSpy = jest.spyOn(meetupRepository, 'delete');
-      await service.deleteMeetup(meetupId, existUser);
-      expect(getMeetupSpy).toHaveBeenCalled();
-      expect(getMeetupSpy).toHaveBeenCalledWith(meetupId);
-      expect(deleteSpy).toHaveBeenCalled();
-      expect(deleteSpy).toHaveBeenCalledWith(meetupId);
-    });
-    it('fail - Not the one who created the meetup', async () => {
-      const getMeetupSpy = jest.spyOn(meetupRepository, 'getMeetup');
+    const userId = 1;
+    it('Fail - not creator', async () => {
+      const mockReturnValue = new Meetup();
+      mockReturnValue.userId = 2;
+      mockMeetupRepository.getMeetup.mockResolvedValue(mockReturnValue);
       try {
-        await service.deleteMeetup(meetupId, notExistUser);
+        await service.deleteMeetup(meetupId, userId);
       } catch (err) {
-        expect(getMeetupSpy).toHaveBeenCalled();
-        expect(getMeetupSpy).toHaveBeenCalledWith(meetupId);
+        expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
+        expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
         expect(err).toBeInstanceOf(ForbiddenException);
       }
+    });
+    it('Success', async () => {
+      const mockReturnValue = new Meetup();
+      mockReturnValue.userId = 1;
+      mockMeetupRepository.getMeetup.mockResolvedValue(mockReturnValue);
+      mockMeetupRepository.delete.mockResolvedValue({raw: false});
+      await service.deleteMeetup(meetupId, userId);
+
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
+      expect(mockMeetupRepository.delete).toHaveBeenCalled();
+      expect(mockMeetupRepository.delete).toHaveBeenCalledWith(meetupId);
     });
   });
 
@@ -148,52 +122,129 @@ describe('MeetupsService', () => {
     const meetupId = 1;
     const userId = 1;
     it('success', async () => {
-      const spy = jest.spyOn(joinRepository, 'findOne');
+      const mockReturnValue = new Join();
+      mockJoinRepository.findOne.mockResolvedValue(mockReturnValue);
       const result = await service.getJoin(meetupId, userId);
-      expect(spy).toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledWith({
-        where: { meetupId, userId },
-      });
+
+      expect(mockJoinRepository.findOne).toHaveBeenCalled();
+      expect(mockJoinRepository.findOne).toHaveBeenCalledWith(
+        { where: { meetupId, userId } }
+      );
       expect(result).toBeInstanceOf(Object);
     });
   });
 
   describe('addJoin Method', () => {
     const meetupId = 1;
-    const alreadyJoinUser = 1;
-    const userId = 2;
-    it('fail - already join', async () => {
-      const getMeetupSpy = jest.spyOn(meetupRepository, 'getMeetup');
-      const findOneSpy = jest.spyOn(joinRepository, 'findOne');
+    const userId = 1;
+    it('Fail - already join', async () => {
+      const mockFindOneReturnValue = new Join();
+      mockJoinRepository.findOne.mockResolvedValue(mockFindOneReturnValue);
       try {
-        await service.addJoin(meetupId, alreadyJoinUser);
+        await service.addJoin(meetupId, userId);
       } catch (err) {
-        expect(getMeetupSpy).toHaveBeenCalled();
-        expect(getMeetupSpy).toHaveBeenCalledWith(meetupId);
-        expect(findOneSpy).toHaveBeenCalled();
-        expect(findOneSpy).toHaveBeenCalledWith({
-          where: { meetupId, userId: alreadyJoinUser },
-        });
+        expect(mockJoinRepository.findOne).toHaveBeenCalled();
+        expect(mockJoinRepository.findOne).toHaveBeenCalledWith(
+          { where: { meetupId, userId } }
+        );
         expect(err).toBeInstanceOf(ConflictException);
       }
     });
-    it('fail - headcount full', async () => {
-      // TODO: mockMeetupsRepository의 getMeetup 메서드에 대해
-      // headcount를 변경할 방법 필요
+    it('Fail - headcount full', async () => {
+      const mockFindOneReturnValue = null;
+      mockJoinRepository.findOne.mockResolvedValue(mockFindOneReturnValue);
+      const mockGetMeetupReturnValue = new Meetup();
+      mockGetMeetupReturnValue.headcount = 1;
+      mockGetMeetupReturnValue.joins = [new Join()];
+      mockMeetupRepository.getMeetup.mockResolvedValue(mockGetMeetupReturnValue);
+      try {
+        await service.addJoin(meetupId, userId);
+      } catch (err) {
+        expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
+        expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
+        expect(mockJoinRepository.findOne).toHaveBeenCalled();
+        expect(mockJoinRepository.findOne).toHaveBeenCalledWith(
+          { where: { meetupId, userId } }
+        );
+        expect(err).toBeInstanceOf(ForbiddenException);
+      }
     });
-    it('success', async () => {
-      // TODO: mockJoinRepository findOne 메서드에 대해
-      // null로 변경할 방법 필요
+    it('Success', async () => {
+      const mockFindOneReturnValue = null;
+      mockJoinRepository.findOne.mockResolvedValue(mockFindOneReturnValue);
+      const mockGetMeetupReturnValue = new Meetup();
+      mockGetMeetupReturnValue.headcount = 2;
+      mockGetMeetupReturnValue.joins = [new Join()];
+      mockMeetupRepository.getMeetup.mockResolvedValue(mockGetMeetupReturnValue);
+      mockJoinRepository.insert.mockResolvedValue({ generatedMaps: [], identifiers: [], raw: false });
+      await service.addJoin(meetupId, userId);
 
-      // const getMeetupSpy = jest.spyOn(meetupRepository, 'getMeetup');
-      // const findOneSpy = jest.spyOn(joinRepository, 'findOne');
-      // await service.addJoin(meetupId, userId);
-      // expect(getMeetupSpy).toHaveBeenCalled();
-      // expect(getMeetupSpy).toHaveBeenCalledWith(meetupId);
-      // expect(findOneSpy).toHaveBeenCalled();
-      // expect(findOneSpy).toHaveBeenCalledWith({
-      //   where: { meetupId, userId },
-      // });
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
+      expect(mockJoinRepository.findOne).toHaveBeenCalled();
+      expect(mockJoinRepository.findOne).toHaveBeenCalledWith(
+        { where: { meetupId, userId } }
+      );
+      expect(mockJoinRepository.insert).toHaveBeenCalled();
+      expect(mockJoinRepository.insert).toHaveBeenCalledWith(
+        { meetupId, userId }
+      );
+    });
+  });
+
+  describe('deleteJoin Method', () => {
+    const meetupId = 1;
+    const userId = 1;
+    it('Fail - Not participant', async () => {
+      const mockFindOneReturnValue = null;
+      mockJoinRepository.findOne.mockResolvedValue(mockFindOneReturnValue);
+      try {
+        await service.deleteJoin(meetupId, userId);
+      } catch (err) {
+        expect(mockJoinRepository.findOne).toHaveBeenCalled();
+        expect(mockJoinRepository.findOne).toHaveBeenCalledWith(
+          { where: { meetupId, userId } }
+        );
+        expect(err).toBeInstanceOf(BadRequestException);
+      }
+    });
+    it('Fail - He is the host', async () => {
+      const mockFindOneReturnValue = new Join();
+      mockJoinRepository.findOne.mockResolvedValue(mockFindOneReturnValue);
+      const mockGetMeetupReturnValue = new Meetup();
+      mockGetMeetupReturnValue.userId = userId;
+      mockMeetupRepository.getMeetup.mockResolvedValue(mockGetMeetupReturnValue);
+      try {
+        await service.deleteJoin(meetupId, userId);
+      } catch (err) {
+        expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
+        expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
+        expect(mockJoinRepository.findOne).toHaveBeenCalled();
+        expect(mockJoinRepository.findOne).toHaveBeenCalledWith(
+          { where: { meetupId, userId } }
+        );
+        expect(err).toBeInstanceOf(ForbiddenException);
+      }
+    });
+    it('Success', async () => {
+      const mockFindOneReturnValue = new Join();
+      mockJoinRepository.findOne.mockResolvedValue(mockFindOneReturnValue);
+      const mockGetMeetupReturnValue = new Meetup();
+      mockGetMeetupReturnValue.userId = userId + 1;
+      mockMeetupRepository.getMeetup.mockResolvedValue(mockGetMeetupReturnValue);
+      mockJoinRepository.delete.mockResolvedValue({ raw: false });
+      await service.deleteJoin(meetupId, userId);
+
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
+      expect(mockJoinRepository.findOne).toHaveBeenCalled();
+      expect(mockJoinRepository.findOne).toHaveBeenCalledWith(
+        { where: { meetupId, userId } }
+      );
+      expect(mockJoinRepository.delete).toHaveBeenCalled();
+      expect(mockJoinRepository.delete).toHaveBeenCalledWith(
+        { meetupId, userId }
+      );
     });
   });
 });
