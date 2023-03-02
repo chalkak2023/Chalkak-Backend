@@ -12,20 +12,22 @@ export class MeetupsRepository extends Repository<Meetup> {
   }
 
   async getMeetups(): Promise<Meetup[]> {
-    return await this.createQueryBuilder('meetup')
-      .leftJoin('meetup.joins', 'join')
+    return await this.createQueryBuilder('m')
       .select([
-        'meetup.id',
-        'meetup.userId',
-        'meetup.title',
-        'meetup.content',
-        'meetup.place',
-        'meetup.schedule',
-        'meetup.headcount',
-        'meetup.createdAt',
-        'join',
+        'm.id',
+        'm.userId',
+        'u.email',
+        'm.title',
+        'm.content',
+        'm.place',
+        'm.schedule',
+        'm.headcount',
+        'm.createdAt',
+        'j',
       ])
-      .orderBy('meetup.id', 'DESC')
+      .leftJoin('m.joins', 'j')
+      .leftJoin('m.user', 'u')
+      .orderBy('m.id', 'DESC')
       .getMany();
   }
 
@@ -54,6 +56,7 @@ export class MeetupsRepository extends Repository<Meetup> {
       .select([
         'm.id',
         'm.userId',
+        'mu.email',
         'm.title',
         'm.content',
         'm.place',
@@ -64,6 +67,7 @@ export class MeetupsRepository extends Repository<Meetup> {
         'u.email',
       ])
       .leftJoin('m.joins', 'j')
+      .leftJoin('m.user', 'mu')
       .leftJoin('j.user', 'u')
       .where('m.id = :id', { id: meetupId })
       .getOne();
