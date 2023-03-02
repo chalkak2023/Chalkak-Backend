@@ -31,4 +31,10 @@ MAILER_PORT=465
 MAILER_USER=chalkak.test@gmail.com
 MAILER_PASS=계정비밀번호
 MAILER_SECURE=false
+
+AWS_BUCKET_REGION="ap-northeast-2"
+AWS_BUCKET_NAME="nest-board-app"
+AWS_ACCESS_KEY_ID="본인 키"
+AWS_SECRET_ACCESS_KEY="본인 시크릿 키"
+
 ```

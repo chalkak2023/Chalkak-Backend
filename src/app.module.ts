@@ -10,6 +10,7 @@ import { MeetupsModule } from './meetups/meetups.module';
 import { AdminModule } from './admin/admin.module';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtStrategy } from './auth/guard/jwt/jwt.strategy';
+import { PhotospotModule } from './photospot/photospot.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { JwtStrategy } from './auth/guard/jwt/jwt.strategy';
     CollectionsModule,
     MeetupsModule,
     AdminModule,
+    PhotospotModule,
   ],
   controllers: [AppController],
   providers: [AppService, JwtStrategy],
