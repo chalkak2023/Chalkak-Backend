@@ -1,14 +1,13 @@
+import { BadRequestException } from '@nestjs/common';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
-import { ConfigModule } from '@nestjs/config';
-import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { FileSystemStoredFile } from 'nestjs-form-data/dist/classes/storage';
-import { NestjsFormDataModule } from 'nestjs-form-data';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PhotospotService } from './photospot.service';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { S3Service } from './../common/aws/s3.service';
 import { TypeOrmConfigService } from './../common/config/typeorm.config.service';
+import { CreatePhotospotDto } from './dto/create-photospot.dto';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -19,14 +18,8 @@ describe('PhotospotService', () => {
   const REPOSITORY_TOKEN = getRepositoryToken(Photospot);
 
   beforeEach(async () => {
-    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
-      imports: [
-        ConfigModule.forRoot({ isGlobal: true }),
-        TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
-        TypeOrmModule.forFeature([Photospot]),
-      ],
-      providers: [PhotospotService, S3Service],
+      providers: [PhotospotService],
     })
       .useMocker((token) => {
         if (token === REPOSITORY_TOKEN) {
@@ -37,7 +30,7 @@ describe('PhotospotService', () => {
             update: jest.fn(),
           };
         }
-        if (token === 'function') {
+        if (typeof token === 'function') {
           const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
           const Mock = moduleMocker.generateFromMetadata(mockMetadata);
           return new Mock();
@@ -52,5 +45,36 @@ describe('PhotospotService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
+  });
+
+  describe('Service createPhotospot', () => {
+    it('should be defined', () => {
+      expect(mockS3Service.putObject).toBeDefined();
+      expect(mockPhotospotRepository.insert).toBeDefined();
+    });
+
+    it('createPhotospot 성공', async () => {
+      const dto = new CreatePhotospotDto();
+      const userId = 1;
+      const collectionId = 1;
+      const { title, description, latitude, longitude, image } = dto;
+      const imagePath = 'AWS path';
+
+      mockS3Service.putObject.mockResolvedValue(imagePath)
+      await service.createPhotospot(dto, userId, collectionId);
+      expect(mockS3Service.putObject).toHaveBeenCalledTimes(1);
+      expect(mockS3Service.putObject).toHaveBeenCalledWith(image);
+      expect(mockPhotospotRepository.insert).toHaveBeenCalledTimes(1);
+      expect(mockPhotospotRepository.insert).toHaveBeenCalledWith({ title, description, latitude, longitude, imagePath, userId, collectionId });
+    });
+
+    it('createPhotospot 실패', async () => {
+      const dto = new CreatePhotospotDto();
+      const userId = 1;
+      const collectionId = 1;
+      
+      mockPhotospotRepository.insert.mockRejectedValue(new Error());
+      expect(service.createPhotospot(dto, userId, collectionId)).rejects.toThrowError(new BadRequestException('요청이 올바르지 않습니다.'))
+    })
   });
 });
