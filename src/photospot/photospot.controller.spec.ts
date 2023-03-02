@@ -98,4 +98,18 @@ describe('PhotospotController', () => {
       expect(service.modifyPhotospot).toHaveBeenCalledWith(dto, photospotId);
     });
   });
+
+  describe('DELETE deletePhotospot', () => {
+    it('should be defined', () => {
+      expect(controller.deletePhotospot).toBeDefined();
+    });
+
+    it('deletePhotospot 성공', () => {
+      const photospotId = 1;
+      service.deletePhotospot(photospotId);
+
+      expect(service.deletePhotospot).toHaveBeenCalledTimes(1);
+      expect(service.deletePhotospot).toHaveBeenCalledWith(photospotId);
+    });
+  });
 });
