@@ -1,9 +1,10 @@
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { Test, TestingModule } from '@nestjs/testing';
+import { FileSystemStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
+import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { PhotospotController } from './photospot.controller';
 import { PhotospotService } from './photospot.service';
-import { FileSystemStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -51,6 +52,21 @@ describe('PhotospotController', () => {
       service.createPhotospot(dto, userId, collectionId);
       expect(service.createPhotospot).toHaveBeenCalledTimes(1);
       expect(service.createPhotospot).toHaveBeenCalledWith(dto, userId, collectionId);
+    });
+  });
+
+  describe('GET getAllPhotospot', () => {
+    it('should be defined', () => {
+      expect(controller.createPhotospot).toBeDefined();
+    });
+
+    it('getAllPhotospot 성공', () => {
+      const collectionId = 1;
+      const photospots = new Photospot();
+      service.getAllPhotospot(collectionId);
+
+      expect(service.getAllPhotospot).toHaveBeenCalledTimes(1);
+      expect(service.getAllPhotospot).toHaveBeenCalledWith(collectionId);
     });
   });
 });
