@@ -30,6 +30,7 @@ describe('PhotospotService', () => {
             findOne: jest.fn(),
             find: jest.fn(),
             update: jest.fn(),
+            softDelete: jest.fn(),
           };
         }
         if (typeof token === 'function') {
@@ -175,5 +176,29 @@ describe('PhotospotService', () => {
       mockPhotospotRepository.findOne.mockResolvedValue(null);
       expect(service.modifyPhotospot(dto, photospotId)).rejects.toThrowError(new NotFoundException('해당 포토스팟을 찾을 수 없습니다.'));
     })
+  });
+
+  
+  describe('Service deletePhotospot', () => {
+    it('should db defined', () => {
+      expect(service.deletePhotospot).toBeDefined();
+    });
+    it('deletePhotospot 성공', async () => {
+      const photospotId = 1;
+      const photospot = new Photospot();
+ 
+      mockPhotospotRepository.findOne.mockResolvedValue(photospot);
+
+      await service.deletePhotospot(photospotId);
+      expect(mockPhotospotRepository.softDelete).toHaveBeenCalledTimes(1);
+      expect(mockPhotospotRepository.softDelete).toHaveBeenCalledWith(photospotId);
+    });
+
+    it('deletePhotospot 해당 값 못 찾을 경우', async () => {
+      const photospotId = 1;
+
+      mockPhotospotRepository.findOne.mockResolvedValue(null);
+      expect(service.deletePhotospot(photospotId)).rejects.toThrowError(new NotFoundException('해당 포토스팟을 찾을 수 없습니다.'));
+    });
   });
 });
