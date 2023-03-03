@@ -162,7 +162,6 @@ export class AuthService {
       });
     }
 
-    // TODO: 액세스 토큰을 생성하는 코드 필요.
     const newAccessToken = this.generateUserAccessToken(user)
 
     return {
