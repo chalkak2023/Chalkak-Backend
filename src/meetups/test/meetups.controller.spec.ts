@@ -32,14 +32,26 @@ describe('MeetupsController', () => {
   });
 
   describe('GET /api/meetups', () => {
+    const page = 1;
+    const pageUnderOne = 0;
     it('getMeetups', async () => {
       const mockReturnValue = [new Meetup()];
       mockService.getMeetups.mockResolvedValue(mockReturnValue);
-      const result = await controller.getMeetups();
+      const result = await controller.getMeetups(page);
 
       expect(result).toBe(mockReturnValue);
       expect(mockService.getMeetups).toHaveBeenCalled();
-      expect(mockService.getMeetups).toHaveBeenCalledWith();
+      expect(mockService.getMeetups).toHaveBeenCalledWith(page);
+      expect(result).toBeInstanceOf(Array);
+    });
+    it('getMeetups - If page is less than 1', async () => {
+      const mockReturnValue = [new Meetup()];
+      mockService.getMeetups.mockResolvedValue(mockReturnValue);
+      const result = await controller.getMeetups(pageUnderOne);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockService.getMeetups).toHaveBeenCalled();
+      expect(mockService.getMeetups).toHaveBeenCalledWith(page);
       expect(result).toBeInstanceOf(Array);
     });
   });

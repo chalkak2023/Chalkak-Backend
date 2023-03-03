@@ -45,14 +45,15 @@ describe('MeetupsService', () => {
   });
 
   describe('getMeetups Method', () => {
+    const page = 1;
     it('success', async () => {
       const mockReturnValue = [new Meetup()];
       mockMeetupRepository.getMeetups.mockResolvedValue(mockReturnValue);
-      const result = await service.getMeetups();
+      const result = await service.getMeetups(page);
 
       expect(result).toBe(mockReturnValue);
       expect(mockMeetupRepository.getMeetups).toHaveBeenCalled();
-      expect(mockMeetupRepository.getMeetups).toHaveBeenCalledWith();
+      expect(mockMeetupRepository.getMeetups).toHaveBeenCalledWith(page);
       expect(result).toBeInstanceOf(Array);
     });
   });
