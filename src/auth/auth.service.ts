@@ -134,8 +134,17 @@ export class AuthService {
   }
 
   async refreshAccessToken(accessToken: string, refreshToken: string) {
-    // TODO: 기존 액세스 토큰이 만료되었는지 확인
-
+    await this.jwtService
+      .verifyAsync(accessToken, {
+        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
+      })
+      .catch((err: Error) => {
+        if (err.name === 'JsonWebTokenError') {
+          throw new BadRequestException({
+            message: '정상 발급된 액세스 토큰이 아닙니다.',
+          });
+        }
+      });
     const userId = await this.cacheManager.get<number>(refreshToken);
     if (_.isNil(userId)) {
       throw new UnauthorizedException({
