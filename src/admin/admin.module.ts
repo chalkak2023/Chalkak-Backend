@@ -11,16 +11,7 @@ import { JwtAdminStrategy } from 'src/admin/strategies/jwt.admin.strategy';
 import { RefreshTokenAdminStrategy } from 'src/admin/strategies/refresh.token.admin.strategy';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Admin, Faq]),
-    JwtModule.register({
-      secret: 'temporary',
-      signOptions: {
-        expiresIn: 30,
-      },
-    }),
-    PassportModule,
-  ],
+  imports: [TypeOrmModule.forFeature([Admin, Faq]), JwtModule],
   providers: [AdminService, LocalAdminStrategy, JwtAdminStrategy, RefreshTokenAdminStrategy],
   controllers: [AdminController],
   exports: [AdminService],
