@@ -15,9 +15,9 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AdminService } from 'src/admin/admin.service';
-import { DeleteAdminDto } from 'src/admin/dto/delete.admin.dto';
 import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
+import { AdminToken } from './auth.admin.decorator';
 
 @Controller('admin')
 export class AdminController {
@@ -42,7 +42,6 @@ export class AdminController {
   }
 
   @Post('auth/signup')
-  @UsePipes(ValidationPipe)
   async signupAdmin(@Body() data: SignupAdminReqDto) {
     return await this.adminService.signupAdmin(data);
   }
@@ -51,9 +50,9 @@ export class AdminController {
   @UseGuards(AuthGuard('local'))
   @HttpCode(200)
   async signinAdmin(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const user = req.user as SigninAdminDto;
-    const accessToken = await this.adminService.issueAccessToken(user);
-    const refreshToken = await this.adminService.issueRefreshToken(user.id);
+    const admin = req.user as SigninAdminDto;
+    const accessToken = await this.adminService.issueAccessToken(admin);
+    const refreshToken = await this.adminService.issueRefreshToken(admin.id);
     const jwtData = { accessToken, refreshToken };
     res.cookie('auth-cookie', jwtData, { httpOnly: true });
     return { data: jwtData, message: '로그인에 성공하였습니다.' };
@@ -61,13 +60,16 @@ export class AdminController {
 
   @Get('auth/signin')
   @UseGuards(AuthGuard('refresh'))
-  async reissueTokens(@Req() req: any, @Res({ passthrough: true }) res: Response) {
-    const user = req.user as SigninAdminDto;
-    const accessToken = await this.adminService.issueAccessToken(user);
-    const refreshToken = await this.adminService.issueRefreshToken(user.id);
-    const jwtData = { accessToken, refreshToken };
+  async reissueTokens(
+    @Req() req: any,
+    @Res({ passthrough: true }) res: Response,
+    @AdminToken('refreshToken') refreshToken: string
+  ) {
+    const admin = req.user as SigninAdminDto;
+    const accessToken = await this.adminService.issueAccessToken(admin);
+    const jwtData = { accessToken, refreshToken }; // 기존 refreshToken으로 가져옴
     res.cookie('auth-cookie', jwtData, { httpOnly: true });
-    return { message: 'Refresh 토큰이 정상적으로 발행되었습니다.' };
+    return { message: 'Access 토큰이 정상적으로 재발급 되었습니다.' };
   }
 
   @Delete('auth/:id')
@@ -77,11 +79,7 @@ export class AdminController {
 
   @Post('auth/signout')
   signoutAdmin(@Req() req: Request, @Res() res: Response): any {
-    res.cookie('jwt', '', {
-      maxAge: 0,
-    });
-    return res.send({
-      message: '정상적으로 로그아웃 되었습니다.',
-    });
+    res.cookie('jwt', '', { maxAge: 0 });
+    return res.send({ message: '정상적으로 로그아웃 되었습니다.' });
   }
 }
