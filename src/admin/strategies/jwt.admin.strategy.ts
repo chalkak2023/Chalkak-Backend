@@ -16,7 +16,7 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt') {
           if (!data) {
             return new BadRequestException();
           }
-          return data.token;
+          return data.accessToken;
         },
       ]),
     });

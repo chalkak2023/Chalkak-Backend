@@ -30,13 +30,11 @@ export class AdminService {
 
   public async signupAdmin(data: SignupAdminReqDto): Promise<SignupAdminResDto> {
     let duplicateAdmin = await this.adminRepository.findOne({ where: { account: data.account }, select: { account: true } });
-    console.log('duplicateAdmin:', duplicateAdmin);
-
     if (duplicateAdmin) {
       throw new ConflictException({ message: '이미 중복되는 아이디가 있습니다.' });
     }
-    let signupResult = new SignupAdminResDto();
 
+    let signupResult = new SignupAdminResDto();
     let newAdmin = new Admin();
     newAdmin.account = data.account;
     newAdmin.password = await this.hashPassword(data.password);
@@ -93,7 +91,7 @@ export class AdminService {
     }
   }
 
-  public async verifyfreshToken(account: string, refreshToken: string): Promise<SigninAdminDto> {
+  public async verifyRefreshToken(account: string, refreshToken: string): Promise<SigninAdminDto> {
     const currentDate = moment().day(7).format('YYYY/MM/DD');
     let admin = await this.adminRepository.findOne({
       where: { account, refreshToken, refreshTokenExp: MoreThanOrEqual(currentDate) },

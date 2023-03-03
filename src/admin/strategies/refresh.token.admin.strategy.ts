@@ -18,12 +18,12 @@ export class RefreshTokenAdminStrategy extends PassportStrategy(Strategy, 'refre
           if (_.isNil(data)) {
             throw new BadRequestException();
           }
-          return data.token;
+          return data.accessToken;
         },
       ]),
     });
   }
-  async verifyAdminToken(req: Request, payload: any) {
+  async validate(req: Request, payload: any) {
     if (!payload) {
       throw new BadRequestException({
         message: 'Access 토큰이 유효하지 않습니다.',
@@ -35,7 +35,7 @@ export class RefreshTokenAdminStrategy extends PassportStrategy(Strategy, 'refre
         message: 'Refresh 토큰이 유효하지 않습니다.',
       });
     }
-    let admin = await this.adminService.verifyfreshToken(payload.account, authCookieData.refreshToken);
+    let admin = await this.adminService.verifyRefreshToken(payload.account, authCookieData.refreshToken);
     if (!admin) {
       throw new BadRequestException({
         message: '토큰이 만료되었습니다.',
