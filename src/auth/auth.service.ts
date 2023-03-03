@@ -21,12 +21,14 @@ import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
+import { Cache } from 'cache-manager';
+import _ from 'lodash';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: any,
+    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
     private jwtService: JwtService,
     private configService: ConfigService,
     private mailerAuthService: MailerAuthService
@@ -62,40 +64,22 @@ export class AuthService {
   }
 
   async signIn(body: SignInBodyDTO, response: any) {
-      const { email, password } = body;
-      const user = await this.usersRepository.findOne({ where: { email }, select: { id: true, email: true, password: true } });
-      if (!user) {
-        throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
-      }
-      if (!bcrypt.compareSync(password, user.password)) {
-        throw new UnauthorizedException({ message: '비밀번호가 일치하지 않습니다.' });
-      }
-      const accessToken = this.jwtService.sign(
-        {
-          id: user.id,
-          email: user.email,
-          role: 'user',
-        },
-        {
-          secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
-          expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN') || '1h',
-        }
-      );
-      const refreshToken = this.jwtService.sign(
-        {
-          id: user.id,
-        },
-        {
-          secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
-          expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN') || '7d',
-        }
-      );
-      this.cacheManager.set(user.id, refreshToken, { ttl: 1000 * 60 * 60 * 24 * 7 });
-      return {
-        message: '로그인 되었습니다.',
-        accessToken,
-        refreshToken,
-      };
+    const { email, password } = body;
+    const user = await this.usersRepository.findOne({ where: { email }, select: { id: true, email: true, password: true } });
+    if (!user) {
+      throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
+    }
+    if (!bcrypt.compareSync(password, user.password)) {
+      throw new UnauthorizedException({ message: '비밀번호가 일치하지 않습니다.' });
+    }
+    const accessToken = this.generateUserAccessToken(user);
+    const refreshToken = this.generateUserRefreshToken();
+    this.cacheManager.set(refreshToken, user.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
+    return {
+      message: '로그인 되었습니다.',
+      accessToken,
+      refreshToken,
+    };
   }
 
   async signOut(user: any, response: any) {
@@ -118,7 +102,6 @@ export class AuthService {
   async putEmailVerification(body: PutEmailVerificationBodyDTO) {
     const { email, verifyToken } = body;
     const cachedVerifyToken = await this.cacheManager.get(email + '_verifyToken');
-    console.log(verifyToken, cachedVerifyToken);
     if (!cachedVerifyToken) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
@@ -149,9 +132,73 @@ export class AuthService {
     };
   }
 
+  async refreshAccessToken(accessToken: string, refreshToken: string) {
+    await this.jwtService
+      .verifyAsync(accessToken, {
+        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
+      })
+      .catch((err: Error) => {
+        if (err.name === 'JsonWebTokenError') {
+          throw new BadRequestException({
+            message: '정상 발급된 액세스 토큰이 아닙니다.',
+          });
+        }
+      });
+    const userId = await this.cacheManager.get<number>(refreshToken);
+    if (_.isNil(userId)) {
+      throw new UnauthorizedException({
+        message: '사용 만료되었습니다.',
+      });
+    }
+    const user = await this.usersRepository.findOne({
+      where: {
+        id: userId,
+      },
+      select: ['id', 'email'],
+    });
+    if (_.isNil(user)) {
+      throw new NotFoundException({
+        message: '탈퇴한 유저입니다.',
+      });
+    }
+
+    const newAccessToken = this.generateUserAccessToken(user)
+
+    return {
+      accessToken: newAccessToken,
+      message: '액세스 토큰을 재발급받았습니다.',
+    };
+  }
+
   private generateRandomNumber(): number {
     var minm = 100000;
     var maxm = 999999;
     return Math.floor(Math.random() * (maxm - minm + 1)) + minm;
+  }
+
+  private generateUserAccessToken(user: { id: number; email: string }) {
+    return this.jwtService.sign(
+      {
+        id: user.id,
+        email: user.email,
+        role: 'user',
+      },
+      {
+        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
+        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN') || '1h',
+      }
+    );
+  }
+
+  private generateUserRefreshToken() {
+    return this.jwtService.sign(
+      {
+        random: Math.floor(Math.random() * 10000) + 1,
+      },
+      {
+        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
+        expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN') || '7d',
+      }
+    );
   }
 }
