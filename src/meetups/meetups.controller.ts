@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Delete, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { InjectUser } from 'src/auth/auth.decorator';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
 import { JwtGuard } from 'src/auth/guard/jwt/jwt.guard';
@@ -11,8 +11,9 @@ export class MeetupsController {
   constructor(private readonly meetupsService: MeetupsService) {}
 
   @Get()
-  async getMeetups(): Promise<Meetup[]> {
-    return await this.meetupsService.getMeetups();
+  async getMeetups(@Query('p', new DefaultValuePipe(1), ParseIntPipe) page: number): Promise<Meetup[]> {
+    if (page < 1) { page = 1; }
+    return await this.meetupsService.getMeetups(page);
   }
 
   @Post()
