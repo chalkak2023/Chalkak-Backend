@@ -7,7 +7,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
-import { BadRequestException, CACHE_MANAGER, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, CACHE_MANAGER, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { SignInBodyDTO, SignUpBodyDTO } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 jest.mock('bcrypt');
@@ -265,6 +265,58 @@ describe('AuthService', () => {
       expect(service.changePassword(body, user)).resolves.toStrictEqual({
         message: '비밀번호가 변경되었습니다.',
       });
+    });
+  });
+
+  describe('refreshAccessToken Method', () => {
+    it('should be defined', () => {
+      expect(service.refreshAccessToken).toBeDefined();
+      expect(typeof service.refreshAccessToken).toBe('function');
+    });
+
+    it('should be return success message when success situation', async () => {
+      const accessToken = 'accessToken';
+      const newAccessToken = 'newAccessToken';
+      const refreshToken = 'refreshToken';
+      cache = {
+        refreshToken: 1,
+      };
+      mockUserRepository.findOne.mockResolvedValue({
+        id: 1,
+        email: 'test@gmail.com',
+      } as User);
+      mockJwtService.sign.mockReturnValueOnce(newAccessToken);
+
+      expect(service.refreshAccessToken(accessToken, refreshToken)).resolves.toStrictEqual({
+        accessToken: newAccessToken,
+        message: '액세스 토큰을 재발급받았습니다.',
+      });
+    });
+
+    it.only('should throw exception when refresh cache is not found', async () => {
+      const accessToken = 'accessToken';
+      const refreshToken = 'refreshToken';
+      cache = {};
+
+      expect(service.refreshAccessToken(accessToken, refreshToken)).rejects.toThrowError(
+        new UnauthorizedException({
+          message: '사용 만료되었습니다.',
+        })
+      );
+    });
+
+    it('should throw exception when user is not found', async () => {
+      const accessToken = 'accessToken';
+      const refreshToken = 'refreshToken';
+      cache = {
+        refreshToken: 1,
+      };
+
+      expect(service.refreshAccessToken(accessToken, refreshToken)).rejects.toThrowError(
+        new NotFoundException({
+          message: '탈퇴한 유저입니다.',
+        })
+      );
     });
   });
 });
