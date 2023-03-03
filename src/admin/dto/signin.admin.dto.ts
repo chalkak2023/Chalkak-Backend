@@ -1,5 +1,11 @@
+import { IsNotEmpty } from 'class-validator';
+
 export class SigninAdminDto {
   id: number;
+
+  @IsNotEmpty()
   account: string;
-  responsibility: string;
+
+  @IsNotEmpty()
+  password: string;
 }
