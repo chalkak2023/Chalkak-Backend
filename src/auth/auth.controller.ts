@@ -1,4 +1,4 @@
-import { Body, Controller, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   PostEmailVerificationBodyDTO,
@@ -7,8 +7,9 @@ import {
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
 } from './dto/auth.dto';
-import { InjectUser } from './auth.decorator';
+import { InjectUser, Token } from './auth.decorator';
 import { JwtGuard } from './guard/jwt/jwt.guard';
+import { JwtRefreshGuard } from './guard/jwt-refresh/jwt-refresh.guard';
 
 @Controller('api/auth')
 export class AuthController {
@@ -31,7 +32,7 @@ export class AuthController {
 
   @Post('signout')
   @UseGuards(JwtGuard)
-  async signOut( @InjectUser() user: any, @Res({ passthrough: true }) response: any) {
+  async signOut(@InjectUser() user: any, @Res({ passthrough: true }) response: any) {
     return await this.authService.signOut(user, response);
   }
 
@@ -54,5 +55,11 @@ export class AuthController {
   @Post('oauth/signin')
   async oauthSignIn() {
     return await this.authService.oauthSignIn();
+  }
+
+  @Get('refresh')
+  @UseGuards(JwtRefreshGuard)
+  async refreshAccessToken(@Token('accessToken') accessToken: string, @Token('refreshToken') refreshToken: string) {
+    return await this.authService.refreshAccessToken(accessToken, refreshToken);
   }
 }

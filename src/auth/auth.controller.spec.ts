@@ -158,4 +158,25 @@ describe('AuthController', () => {
       expect(controller.changePassword(body, user)).resolves.toBe(mockReturnValue);
     });
   });
+
+  describe('GET /api/auth/refresh (refreshAccessToken)', () => {
+    it('should be defined', () => {
+      expect(controller.refreshAccessToken).toBeDefined();
+      expect(typeof controller.refreshAccessToken).toBe('function');
+    });
+
+    it('should be return value returned by service same name method', async () => {
+      const accessToken = 'accessToken';
+      const newAccessToken = 'AccessToken';
+      const refreshToken = 'refreshToken';
+
+      const mockReturnValue = {
+        accessToken: newAccessToken,
+        message: '액세스 토큰을 재발급받았습니다.',
+      };
+      service.refreshAccessToken.mockResolvedValue(mockReturnValue);
+
+      expect(controller.refreshAccessToken(accessToken, refreshToken)).resolves.toBe(mockReturnValue);
+    });
+  });
 });
