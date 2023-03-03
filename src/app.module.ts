@@ -9,7 +9,6 @@ import { CollectionsModule } from './collections/collections.module';
 import { MeetupsModule } from './meetups/meetups.module';
 import { AdminModule } from './admin/admin.module';
 import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from './auth/guard/jwt/jwt.strategy';
 import { PhotospotModule } from './photospot/photospot.module';
 
 @Module({
@@ -29,6 +28,6 @@ import { PhotospotModule } from './photospot/photospot.module';
     PhotospotModule,
   ],
   controllers: [AppController],
-  providers: [AppService, JwtStrategy],
+  providers: [AppService],
 })
 export class AppModule {}
