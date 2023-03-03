@@ -1,17 +1,4 @@
-import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  HttpCode,
-  Param,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AdminService } from 'src/admin/admin.service';
@@ -23,6 +10,7 @@ import { AdminToken } from './auth.admin.decorator';
 export class AdminController {
   constructor(private adminService: AdminService) {}
 
+  // 관리자 관리
   @Get('auth')
   async getAdminsList(@Req() req: Request) {
     const result = await this.adminService.getAdminsList('admin');
@@ -67,7 +55,7 @@ export class AdminController {
   ) {
     const admin = req.user as SigninAdminDto;
     const accessToken = await this.adminService.issueAccessToken(admin);
-    const jwtData = { accessToken, refreshToken }; // 기존 refreshToken으로 가져옴
+    const jwtData = { accessToken, refreshToken };
     res.cookie('auth-cookie', jwtData, { httpOnly: true });
     return { message: 'Access 토큰이 정상적으로 재발급 되었습니다.' };
   }
@@ -81,5 +69,11 @@ export class AdminController {
   signoutAdmin(@Req() req: Request, @Res() res: Response): any {
     res.cookie('jwt', '', { maxAge: 0 });
     return res.send({ message: '정상적으로 로그아웃 되었습니다.' });
+  }
+
+  // 유저 관리
+  @Get('users')
+  async getAdminUsersList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<any> {
+    return await this.adminService.getAdminUsersList(keyword, p);
   }
 }
