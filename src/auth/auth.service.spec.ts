@@ -7,7 +7,13 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
-import { BadRequestException, CACHE_MANAGER, InternalServerErrorException, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  CACHE_MANAGER,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { SignInBodyDTO, SignUpBodyDTO } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 jest.mock('bcrypt');
@@ -286,6 +292,7 @@ describe('AuthService', () => {
         email: 'test@gmail.com',
       } as User);
       mockJwtService.sign.mockReturnValueOnce(newAccessToken);
+      mockJwtService.verifyAsync.mockResolvedValue({})
 
       expect(service.refreshAccessToken(accessToken, refreshToken)).resolves.toStrictEqual({
         accessToken: newAccessToken,
@@ -293,10 +300,28 @@ describe('AuthService', () => {
       });
     });
 
-    it.only('should throw exception when refresh cache is not found', async () => {
+    it.skip('should throw exception when access token is not jwt token and is not signed by chalkak service', async () => {
       const accessToken = 'accessToken';
       const refreshToken = 'refreshToken';
       cache = {};
+
+      mockJwtService.verifyAsync.mockRejectedValue({
+        name: 'JsonWebTokenError',
+        message: '에러 남',
+      });
+
+      expect(service.refreshAccessToken(accessToken, refreshToken)).rejects.toThrowError(
+        new UnauthorizedException({
+          message: '사용 만료되었습니다.',
+        })
+      );
+    });
+
+    it('should throw exception when refresh cache is not found', async () => {
+      const accessToken = 'accessToken';
+      const refreshToken = 'refreshToken';
+      cache = {};
+      mockJwtService.verifyAsync.mockResolvedValue({});
 
       expect(service.refreshAccessToken(accessToken, refreshToken)).rejects.toThrowError(
         new UnauthorizedException({
@@ -311,6 +336,7 @@ describe('AuthService', () => {
       cache = {
         refreshToken: 1,
       };
+      mockJwtService.verifyAsync.mockResolvedValue({});
 
       expect(service.refreshAccessToken(accessToken, refreshToken)).rejects.toThrowError(
         new NotFoundException({
