@@ -102,7 +102,6 @@ export class AuthService {
   async putEmailVerification(body: PutEmailVerificationBodyDTO) {
     const { email, verifyToken } = body;
     const cachedVerifyToken = await this.cacheManager.get(email + '_verifyToken');
-    console.log(verifyToken, cachedVerifyToken);
     if (!cachedVerifyToken) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
