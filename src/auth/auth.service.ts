@@ -39,6 +39,7 @@ export class AuthService {
     for (let i = 1; i <= 5; i++) {
       const temp = {
         email: `test_emai_${i}@gmail.com`,
+        username: `test${i}`,
         password: bcrypt.hashSync('qwer1234', 10),
       };
       arr.push(temp);
@@ -51,9 +52,10 @@ export class AuthService {
   }
 
   async signUp(body: SignUpBodyDTO) {
-    const { email, password } = body;
+    const { username: _username, email, password } = body;
+    const username = _username || `${email.split('@')[0]}#${Math.floor(Math.random() * 10000) + 1}`
     const passwordHash = bcrypt.hashSync(password, 10);
-    await this.usersRepository.insert({ email, password: passwordHash }).catch((err) => {
+    await this.usersRepository.insert({ username, email, password: passwordHash }).catch((err) => {
       throw new BadRequestException({
         message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.',
       });
