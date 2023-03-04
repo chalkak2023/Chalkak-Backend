@@ -232,4 +232,13 @@ export class AdminService {
       lastPage: Math.ceil(total / take),
     };
   }
+
+  async deleteAdminMeetup(id: number) {
+    try {
+      await this.adminMeetupsRepository.findOne({ where: { id } });
+      return this.adminMeetupsRepository.delete(id);
+    } catch (error) {
+      throw new BadRequestException();
+    }
+  }
 }

@@ -120,4 +120,9 @@ export class AdminController {
   async getAdminMeetupsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Meetup[]> {
     return await this.adminService.getAdminMeetupsList(keyword, p);
   }
+
+  @Delete('meetups/:id')
+  async deleteAdminMeetup(@Param('id') id: number) {
+    return await this.adminService.deleteAdminMeetup(id);
+  }
 }
