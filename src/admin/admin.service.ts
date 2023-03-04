@@ -12,6 +12,7 @@ import { SignupAdminResDto } from 'src/admin/dto/signup.admin.res.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 import { User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
+import { Photospot } from 'src/photospot/entities/photospot.entity';
 
 @Injectable()
 export class AdminService {
@@ -19,6 +20,7 @@ export class AdminService {
     @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(User) private adminUsersRepository: Repository<User>,
     @InjectRepository(Collection) private adminCollectionsRepository: Repository<Collection>,
+    @InjectRepository(Photospot) private adminPhotospotsRepository: Repository<Photospot>,
     private jwtService: JwtService
   ) {}
 
@@ -183,5 +185,14 @@ export class AdminService {
     } catch (error) {
       throw new BadRequestException();
     }
+  }
+
+  // 포토스팟 관리
+  async getAdminAllPhotospot(id: number): Promise<Photospot[]> {
+    const photospots = await this.adminPhotospotsRepository.find({ where: { id } });
+    if (!photospots.length) {
+      throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
+    }
+    return photospots;
   }
 }

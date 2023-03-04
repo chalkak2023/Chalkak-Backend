@@ -8,6 +8,7 @@ import { AdminToken } from 'src/admin/auth.admin.decorator';
 import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
 import { User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
+import { Photospot } from 'src/photospot/entities/photospot.entity';
 
 @Controller('admin')
 export class AdminController {
@@ -95,5 +96,11 @@ export class AdminController {
   @Delete('collections/:id')
   async deleteAdminCollection(@Param('id') id: number) {
     return await this.adminService.deleteAdminCollection(id);
+  }
+
+  // 포토스팟 관리
+  @Get('photospots/:id')
+  async getAdminAllPhotospot(@Param('id') id: number): Promise<Photospot[]> {
+    return this.adminService.getAdminAllPhotospot(id);
   }
 }
