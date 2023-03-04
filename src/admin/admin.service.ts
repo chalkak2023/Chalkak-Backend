@@ -195,4 +195,12 @@ export class AdminService {
     }
     return photospots;
   }
+
+  async getAdminPhotospot(photospotId: number): Promise<Photospot | null> {
+    const photospot = await this.adminPhotospotsRepository.findOne({ where: { id: photospotId } });
+    if (_.isNil(photospot)) {
+      throw new NotFoundException('해당 포토스팟을 찾을 수 없습니다.');
+    }
+    return photospot;
+  }
 }
