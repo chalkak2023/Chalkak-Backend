@@ -29,8 +29,7 @@ export class PhotospotService {
   async getAllPhotospot(collectionId: number): Promise<Photospot[]> {
     const photospots = await this.photospotRepository.find({ where: { collectionId } });
 
-    console.log(_.isEmpty(photospots))
-    if (!photospots.length) {
+    if (_.isEmpty(photospots)) {
       throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
     }
 
