@@ -14,7 +14,7 @@ import { User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
-import { Faq } from './entities/faq.entity';
+import { Faq } from 'src/admin/entities/faq.entity';
 
 @Injectable()
 export class AdminService {
@@ -264,5 +264,13 @@ export class AdminService {
       page,
       lastPage: Math.ceil(total / take),
     };
+  }
+
+  async getAdminFaq(id: number): Promise<Faq> {
+    const faq = await this.adminFaqRepository.findOne({ where: { id } });
+    if (_.isNil(faq)) {
+      throw new NotFoundException('해당 게시물을 찾을 수 없습니다.');
+    }
+    return faq;
   }
 }

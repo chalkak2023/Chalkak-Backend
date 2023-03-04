@@ -132,4 +132,9 @@ export class AdminController {
   async getAdminFaqList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Faq[]> {
     return await this.adminService.getAdminFaqList(keyword, p);
   }
+
+  @Get('faq/:id')
+  async getAdminFaq(@Param('id') id: number): Promise<Faq> {
+    return this.adminService.getAdminFaq(id);
+  }
 }
