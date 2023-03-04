@@ -12,6 +12,7 @@ import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
 import { Faq } from 'src/admin/entities/faq.entity';
 import { CreateAdminFaqDto } from './dto/create.admin.faq.dto';
+import { UpdateAdminFaqDto } from './dto/update.admin.faq.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -142,5 +143,10 @@ export class AdminController {
   @Post('faq')
   async createAdminFaq(@Body() data: CreateAdminFaqDto) {
     return await this.adminService.createAdminFaq(data);
+  }
+
+  @Put('faq/:id')
+  async updateAdminFaq(@Param('id') id: number, @Body() updateAdminFaqtDto: UpdateAdminFaqDto): Promise<void> {
+    await this.adminService.updateAdminFaq(updateAdminFaqtDto, id);
   }
 }
