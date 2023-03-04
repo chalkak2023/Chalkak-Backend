@@ -1,37 +1,30 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateMeetupDto } from '../dto/create-meetup.dto';
+import { CreateMeetupDTO } from '../dto/create-meetup.dto';
 import { MeetupsController } from '../meetups.controller';
 import { MeetupsService } from '../meetups.service';
+import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
+import { Meetup } from '../entities/meetup.entity';
+import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
 
-class mockMeetupsService {
-  getMeetups() {
-    return [];
-  }
-  createMeetup() {}
-  getMeetup() {
-    return {};
-  }
-  deleteMeetup() {}
-}
+const moduleMocker = new ModuleMocker(global);
 
 describe('MeetupsController', () => {
   let controller: MeetupsController;
-  let service: MeetupsService;
+  let mockService: jest.Mocked<MeetupsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MeetupsController],
-      providers: [
-        MeetupsService,
-        {
-          provide: MeetupsService,
-          useClass: mockMeetupsService,
-        },
-      ],
+    }).useMocker((token) => {
+      if (typeof token === 'function') {
+        const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
+        const Mock = moduleMocker.generateFromMetadata(mockMetadata);
+        return new Mock();
+      }
     }).compile();
 
-    controller = module.get<MeetupsController>(MeetupsController);
-    service = module.get<MeetupsService>(MeetupsService);
+    controller = module.get(MeetupsController);
+    mockService = module.get(MeetupsService);
   });
 
   it('should be defined', () => {
@@ -39,56 +32,120 @@ describe('MeetupsController', () => {
   });
 
   describe('GET /api/meetups', () => {
+    const page = 1;
+    const pageUnderOne = 0;
     it('getMeetups', async () => {
-      const spy = jest.spyOn(service, 'getMeetups');
-      const result = await controller.getMeetups();
-      expect(spy).toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledWith();
+      const mockReturnValue = [new Meetup()];
+      mockService.getMeetups.mockResolvedValue(mockReturnValue);
+      const result = await controller.getMeetups(page);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockService.getMeetups).toHaveBeenCalled();
+      expect(mockService.getMeetups).toHaveBeenCalledWith(page);
+      expect(result).toBeInstanceOf(Array);
+    });
+    it('getMeetups - If page is less than 1', async () => {
+      const mockReturnValue = [new Meetup()];
+      mockService.getMeetups.mockResolvedValue(mockReturnValue);
+      const result = await controller.getMeetups(pageUnderOne);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockService.getMeetups).toHaveBeenCalled();
+      expect(mockService.getMeetups).toHaveBeenCalledWith(page);
       expect(result).toBeInstanceOf(Array);
     });
   });
 
   describe('POST /api/meetups', () => {
-    const meetupDto: CreateMeetupDto = {
-      userId: 0,
+    const meetupDTO: CreateMeetupDTO = {
+      userId: 1,
       title: 'test title',
       content: 'test content',
       place: 'test place',
       schedule: '2023-02-28 17:20',
       headcount: 0,
     };
+    const userDTO: decodedAccessTokenDTO = {
+      id: 1,
+      email: 'test@gmail.com',
+      role: 'user',
+      iat: 0,
+      exp: 0
+    }
     it('createMeetup', async () => {
-      const spy = jest.spyOn(service, 'createMeetup');
-      await controller.createMeetup(meetupDto);
-      expect(spy).toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledWith(meetupDto);
+      mockService.createMeetup.mockResolvedValue();
+      await controller.createMeetup(meetupDTO, userDTO);
+
+      expect(mockService.createMeetup).toHaveBeenCalled();
+      expect(mockService.createMeetup).toHaveBeenCalledWith(meetupDTO);
     });
   });
 
   describe('GET /api/meetups/:meetupId', () => {
-    const id = 1;
     it('getMeetup', async () => {
-      const spy = jest.spyOn(service, 'getMeetup');
-      const result = await controller.getMeetup(id);
-      expect(spy).toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledWith(id);
+      const mockReturnValue = new Meetup();
+      const meetupId = 1;
+      mockService.getMeetup.mockResolvedValue(mockReturnValue);
+      const result = await controller.getMeetup(meetupId);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockService.getMeetup).toHaveBeenCalled();
+      expect(mockService.getMeetup).toHaveBeenCalledWith(meetupId);
       expect(result).toBeInstanceOf(Object);
     });
   });
 
   describe('DELETE /api/meetups/:meetupId', () => {
     const meetupId = 1;
-    const req = {
-      userId: 1,
+    const userDTO: decodedAccessTokenDTO = {
+      id: 1,
+      email: 'test@gmail.com',
+      role: 'user',
+      iat: 0,
+      exp: 0
     }
     it('deleteMeetup', async () => {
-      // TODO: addJoin 메서드의 두 번째 인자로 req가 들어가야 하는데
-      // type문제를 해결하지 못해 일단 주석처리
+      mockService.deleteMeetup.mockResolvedValue();
+      await controller.deleteMeetup(meetupId, userDTO);
 
-      // const spy = jest.spyOn(service, 'deleteMeetup');
-      // await controller.deleteMeetup(meetupId, req);
-      // expect(spy).toHaveBeenCalled();
-      // expect(spy).toHaveBeenCalledWith(meetupId, userId);
+      expect(mockService.deleteMeetup).toHaveBeenCalled();
+      expect(mockService.deleteMeetup).toHaveBeenCalledWith(meetupId, userDTO.id);
+    });
+  });
+
+  describe('POST /api/meetups/:meetupId/join', () => {
+    const meetupId = 1;
+    const userDTO: decodedAccessTokenDTO = {
+      id: 1,
+      email: 'test@gmail.com',
+      role: 'user',
+      iat: 0,
+      exp: 0
+    }
+    it('addJoin', async () => {
+      mockService.addJoin.mockResolvedValue();
+      await controller.addJoin(meetupId, userDTO);
+
+      expect(mockService.addJoin).toHaveBeenCalled();
+      expect(mockService.addJoin).toHaveBeenCalledWith(meetupId, userDTO.id);
+    });
+  });
+
+  describe('DELETE /api/meetups/:meetupId/join', () => {
+    const meetupId = 1;
+    const userDTO: decodedAccessTokenDTO = {
+      id: 1,
+      email: 'test@gmail.com',
+      role: 'user',
+      iat: 0,
+      exp: 0
+    }
+    it('deleteJoin', async () => {
+      mockService.deleteJoin.mockResolvedValue();
+      await controller.deleteJoin(meetupId, userDTO);
+
+      expect(mockService.deleteJoin).toHaveBeenCalled();
+      expect(mockService.deleteJoin).toHaveBeenCalledWith(meetupId, userDTO.id);
     });
   });
 });

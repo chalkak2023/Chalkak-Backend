@@ -1,24 +1,20 @@
-import { FileSystemStoredFile } from 'nestjs-form-data/dist/classes/storage';
-import { NestjsFormDataModule } from 'nestjs-form-data';
-import { Test, TestingModule } from '@nestjs/testing';
+import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
+import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
+import { Test, TestingModule } from '@nestjs/testing';
+import { FileSystemStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
+import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { PhotospotController } from './photospot.controller';
 import { PhotospotService } from './photospot.service';
 
-describe.skip('PhotospotController', () => {
-  let photoController: PhotospotController;
-  let spyService: PhotospotService;
+const moduleMocker = new ModuleMocker(global);
 
-  beforeAll(async () => {
-    const PhotospotServiceProvider = {
-      provide: PhotospotService,
-      useFactory: () => ({
-        createPhotospot: jest.fn(() => {}),
-        getAllPhotospot: jest.fn(() => []),
-        getPhotospot: jest.fn(() => {}),
-      }),
-    };
-    const app: TestingModule = await Test.createTestingModule({
+describe('PhotospotController', () => {
+  let controller: PhotospotController;
+  let service: jest.Mocked<PhotospotService>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
       imports: [
         NestjsFormDataModule.config({
           storage: FileSystemStoredFile,
@@ -26,53 +22,94 @@ describe.skip('PhotospotController', () => {
         }),
       ],
       controllers: [PhotospotController],
-      providers: [PhotospotService, PhotospotServiceProvider],
-    }).compile();
+    })
+      .useMocker((token) => {
+        if (typeof token === 'function') {
+          const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
+          const Mock = moduleMocker.generateFromMetadata(mockMetadata);
+          return new Mock();
+        }
+      })
+      .compile();
 
-    photoController = app.get<PhotospotController>(PhotospotController);
-    spyService = app.get<PhotospotService>(PhotospotService);
+    controller = module.get(PhotospotController);
+    service = module.get(PhotospotService);
   });
 
-  it('calling Controller createPhotospot method', () => {
-    const dto = new CreatePhotospotDto();
-    const collectionId = 1;
-    expect(photoController.createPhotospot(dto, collectionId)).not.toEqual(null);
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
   });
 
-  it('calling Service createPhotospot method', () => {
-    const dto = new CreatePhotospotDto();
-    const userId = 1;
-    const collectionId = 1;
+  describe('POST createPhotospot', () => {
+    it('should be defined', () => {
+      expect(controller.createPhotospot).toBeDefined();
+    });
 
-    photoController.createPhotospot(dto, collectionId);
-    expect(spyService.createPhotospot).toHaveBeenCalled();
-    expect(spyService.createPhotospot).toHaveBeenCalledWith(dto, userId, collectionId);
+    it('createPhotospot 성공', () => {
+      const dto = new CreatePhotospotDto();
+      const userId = 1;
+      const collectionId = 1;
+
+      service.createPhotospot(dto, userId, collectionId);
+      expect(service.createPhotospot).toHaveBeenCalledTimes(1);
+      expect(service.createPhotospot).toHaveBeenCalledWith(dto, userId, collectionId);
+    });
   });
 
-  it('calling Controller getAllPhotospot method', () => {
-    const collectionId = 1;
-    expect(photoController.getAllPhotospot(collectionId)).not.toEqual(null);
+  describe('GET getAllPhotospot', () => {
+    it('should be defined', () => {
+      expect(controller.getAllPhotospot).toBeDefined();
+    });
+
+    it('getAllPhotospot 성공', async () => {
+      const collectionId = 1;
+      await service.getAllPhotospot(collectionId);
+
+      expect(service.getAllPhotospot).toHaveBeenCalledTimes(1);
+      expect(service.getAllPhotospot).toHaveBeenCalledWith(collectionId);
+    });
   });
 
-  it('calling Service getAllPhotospot method', () => {
-    const collectionId = 1;
+  describe('GET getPhotospot', () => {
+    it('should be defined', () => {
+      expect(controller.getPhotospot).toBeDefined();
+    });
 
-    photoController.getAllPhotospot(collectionId);
-    expect(spyService.getAllPhotospot).toHaveBeenCalled();
-    expect(spyService.getAllPhotospot).toHaveBeenCalledWith(collectionId);
+    it('getPhotospot 성공', async () => {
+      const collectionId = 1;
+      await service.getPhotospot(collectionId);
+
+      expect(service.getPhotospot).toHaveBeenCalledTimes(1);
+      expect(service.getPhotospot).toHaveBeenCalledWith(collectionId);
+    });
   });
 
-  it('calling Controller getPhotospot method', () => {
-    const param = { collectionId: 1, photospotId: 1 };
+  describe('PUT modifyPhotospot', () => {
+    it('should be defined', () => {
+      expect(controller.modifyPhotospot).toBeDefined();
+    });
 
-    expect(photoController.getPhotospot(param)).not.toEqual(null);
+    it('modifyPhotospot 성공', async () => {
+      const dto = new ModifyPhotospotDto();
+      const photospotId = 1;
+      await service.modifyPhotospot(dto, photospotId);
+
+      expect(service.modifyPhotospot).toHaveBeenCalledTimes(1);
+      expect(service.modifyPhotospot).toHaveBeenCalledWith(dto, photospotId);
+    });
   });
 
-  it('calling Service getPhotospot method', () => {
-    const param = { collectionId: 1, photospotId: 1 };
+  describe('DELETE deletePhotospot', () => {
+    it('should be defined', () => {
+      expect(controller.deletePhotospot).toBeDefined();
+    });
 
-    photoController.getPhotospot(param);
-    expect(spyService.getPhotospot).toHaveBeenCalled();
-    expect(spyService.getPhotospot).toHaveBeenCalledWith(param);
-  })
+    it('deletePhotospot 성공', async () => {
+      const photospotId = 1;
+      await service.deletePhotospot(photospotId);
+
+      expect(service.deletePhotospot).toHaveBeenCalledTimes(1);
+      expect(service.deletePhotospot).toHaveBeenCalledWith(photospotId);
+    });
+  });
 });
