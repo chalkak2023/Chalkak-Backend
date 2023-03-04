@@ -67,7 +67,11 @@ export class PhotospotService {
   }
 
   async deletePhotospot(photospotId: number, userId: number) {
-    await this.getPhotospot(photospotId);
+    const photospot = await this.getPhotospot(photospotId);
+
+    if (photospot.userId !== userId) {
+      throw new NotAcceptableException('해당 포토스팟에 접근 할 수 없습니다');
+    }
 
     this.photospotRepository.softDelete(photospotId);
   }
