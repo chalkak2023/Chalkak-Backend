@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AdminService } from 'src/admin/admin.service';
@@ -11,6 +11,7 @@ import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
 import { Faq } from 'src/admin/entities/faq.entity';
+import { CreateAdminFaqDto } from './dto/create.admin.faq.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -136,5 +137,10 @@ export class AdminController {
   @Get('faq/:id')
   async getAdminFaq(@Param('id') id: number): Promise<Faq> {
     return this.adminService.getAdminFaq(id);
+  }
+
+  @Post('faq')
+  async createAdminFaq(@Body() data: CreateAdminFaqDto) {
+    return await this.adminService.createAdminFaq(data);
   }
 }

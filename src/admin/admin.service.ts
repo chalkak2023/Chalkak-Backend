@@ -15,6 +15,7 @@ import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
 import { Faq } from 'src/admin/entities/faq.entity';
+import { CreateAdminFaqDto } from './dto/create.admin.faq.dto';
 
 @Injectable()
 export class AdminService {
@@ -272,5 +273,9 @@ export class AdminService {
       throw new NotFoundException('해당 게시물을 찾을 수 없습니다.');
     }
     return faq;
+  }
+
+  async createAdminFaq(createAdminFaqDto: CreateAdminFaqDto): Promise<void> {
+    await this.adminFaqRepository.save(createAdminFaqDto);
   }
 }
