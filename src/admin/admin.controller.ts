@@ -6,6 +6,8 @@ import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 import { AdminToken } from 'src/admin/auth.admin.decorator';
 import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
+import { User } from 'src/auth/entities/user.entity';
+import { Collection } from 'src/collections/entities/collection.entity';
 
 @Controller('admin')
 export class AdminController {
@@ -74,24 +76,24 @@ export class AdminController {
 
   // 유저 관리
   @Get('users')
-  async getAdminUsersList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<any> {
+  async getAdminUsersList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<User[]> {
     return await this.adminService.getAdminUsersList(keyword, p);
   }
 
   @Put('users/:id')
   async blockAdminUser(@Param('id') id: string, @Body() blockUser: BlockAdminUserDto) {
     const { isBlock } = blockUser;
-    await this.adminService.blockAdminUser(id, { isBlock: !isBlock });
+    return await this.adminService.blockAdminUser(id, { isBlock: !isBlock });
   }
 
   // 콜렉션 관리
   @Get('collections')
-  async getAdminCollectionsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<any> {
+  async getAdminCollectionsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Collection[]> {
     return await this.adminService.getAdminCollectionsList(keyword, p);
   }
 
   @Delete('collections/:id')
   async deleteAdminCollection(@Param('id') id: number) {
-    return this.adminService.deleteAdminCollection(id);
+    return await this.adminService.deleteAdminCollection(id);
   }
 }
