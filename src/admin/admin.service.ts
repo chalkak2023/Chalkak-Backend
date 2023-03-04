@@ -203,4 +203,9 @@ export class AdminService {
     }
     return photospot;
   }
+
+  async deleteAdminPhotospot(photospotId: number) {
+    await this.getAdminPhotospot(photospotId);
+    this.adminPhotospotsRepository.softDelete(photospotId);
+  }
 }

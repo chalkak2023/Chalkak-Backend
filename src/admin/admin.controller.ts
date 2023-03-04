@@ -108,4 +108,9 @@ export class AdminController {
   async getAdminPhotospot(@Param('photospotId') photospotId: number): Promise<Photospot | null> {
     return this.adminService.getAdminPhotospot(photospotId);
   }
+
+  @Delete('photospots/:id/:photospotId')
+  async deleteAdminPhotospot(@Param('photospotId') photospotId: number) {
+    await this.adminService.deleteAdminPhotospot(photospotId);
+  }
 }
