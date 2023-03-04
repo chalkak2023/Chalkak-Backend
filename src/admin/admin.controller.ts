@@ -1,18 +1,19 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AdminService } from 'src/admin/admin.service';
-import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
-import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
-import { AdminToken } from 'src/admin/auth.admin.decorator';
-import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
+import { Admin } from 'src/admin/entities/admin.entity';
 import { User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
 import { Faq } from 'src/admin/entities/faq.entity';
-import { CreateAdminFaqDto } from './dto/create.admin.faq.dto';
-import { UpdateAdminFaqDto } from './dto/update.admin.faq.dto';
+import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
+import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
+import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
+import { CreateAdminFaqDto } from 'src/admin/dto/create.admin.faq.dto';
+import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
+import { AdminToken } from 'src/admin/auth.admin.decorator';
 
 @Controller('admin')
 export class AdminController {
@@ -20,21 +21,8 @@ export class AdminController {
 
   // 관리자 관리
   @Get('auth')
-  async getAdminsList(@Req() req: Request) {
-    const result = await this.adminService.getAdminsList('admin');
-    if (req.query.keyword) {
-      result.where('admin.account LIKE :keyword OR admin.responsibility LIKE :keyword', { keyword: `%${req.query.keyword}` });
-    }
-    const p: number = parseInt(req.query.p as any) || 1;
-    const perPage = 6;
-    const total = await result.getCount();
-    result.offset((p - 1) * perPage).limit(perPage);
-    return {
-      data: await result.getMany(),
-      total,
-      p,
-      lastPage: Math.ceil(total / perPage),
-    };
+  async getAdminsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Admin[]> {
+    return await this.adminService.getAdminsList(keyword, p);
   }
 
   @Post('auth/signup')
@@ -65,7 +53,7 @@ export class AdminController {
     const accessToken = await this.adminService.issueAccessToken(admin);
     const jwtData = { accessToken, refreshToken };
     res.cookie('auth-cookie', jwtData, { httpOnly: true });
-    return { message: 'Access 토큰이 정상적으로 재발급 되었습니다.' };
+    return { message: 'Access 토큰을 정상적으로 재발급하였습니다.' };
   }
 
   @Delete('auth/:id')
@@ -76,7 +64,7 @@ export class AdminController {
   @Post('auth/signout')
   signoutAdmin(@Req() req: Request, @Res() res: Response): any {
     res.cookie('jwt', '', { maxAge: 0 });
-    return res.send({ message: '정상적으로 로그아웃 되었습니다.' });
+    return res.send({ message: '정상적으로 로그아웃하였습니다.' });
   }
 
   // 유저 관리
@@ -104,8 +92,8 @@ export class AdminController {
 
   // 포토스팟 관리
   @Get('photospots/:id')
-  async getAdminAllPhotospot(@Param('id') id: number): Promise<Photospot[]> {
-    return this.adminService.getAdminAllPhotospot(id);
+  async getAdminPhotospotList(@Param('id') id: number): Promise<Photospot[]> {
+    return this.adminService.getAdminPhotospotList(id);
   }
 
   @Get('photospots/:id/:photospotId')
@@ -146,7 +134,7 @@ export class AdminController {
   }
 
   @Put('faq/:id')
-  async updateAdminFaq(@Param('id') id: number, @Body() updateAdminFaqtDto: UpdateAdminFaqDto): Promise<void> {
+  async updateAdminFaq(@Param('id') id: number, @Body() updateAdminFaqtDto: UpdateAdminFaqDto) {
     await this.adminService.updateAdminFaq(updateAdminFaqtDto, id);
   }
 
