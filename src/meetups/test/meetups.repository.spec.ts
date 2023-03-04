@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CreateMeetupDto } from '../dto/create-meetup.dto';
+import { CreateMeetupDTO } from '../dto/create-meetup.dto';
 import { MeetupsRepository } from '../meetups.repository';
 
 class mockMeetupsRepository {
