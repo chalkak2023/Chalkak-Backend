@@ -10,15 +10,19 @@ import { Admin } from 'src/admin/entities/admin.entity';
 import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 import { SignupAdminResDto } from 'src/admin/dto/signup.admin.res.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
+import { User } from 'src/auth/entities/user.entity';
+import { Collection } from 'src/collections/entities/collection.entity';
 
 @Injectable()
 export class AdminService {
   constructor(
-    @InjectRepository(Admin)
-    private adminRepository: Repository<Admin>,
+    @InjectRepository(Admin) private adminRepository: Repository<Admin>,
+    @InjectRepository(User) private adminUsersRepository: Repository<User>,
+    @InjectRepository(Collection) private adminCollectionsRepository: Repository<Collection>,
     private jwtService: JwtService
   ) {}
 
+  // 관리자 관리
   async getAdminsList(alias: string) {
     return this.adminRepository.createQueryBuilder(alias);
   }
@@ -116,6 +120,68 @@ export class AdminService {
     const admin = await this.adminRepository.findOne({ where: { id }, select: { account: true } });
     if (admin?.account === 'master') {
       throw new UnauthorizedException('마스터 관리자 계정은 삭제할 수 없습니다.');
+    }
+  }
+
+  // 유저 관리
+  async getAdminUsersList(keyword: string, p: number = 1): Promise<any> {
+    const usersList = this.adminUsersRepository.createQueryBuilder('user');
+    if (keyword) {
+      usersList.where('user.email LIKE :keyword', { keyword: `%${keyword}%` });
+    }
+
+    const take = 6;
+    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const total = await usersList.getCount();
+    usersList.skip((page - 1) * take).take(take);
+
+    return {
+      data: await usersList.getMany(),
+      total,
+      page,
+      lastPage: Math.ceil(total / take),
+    };
+  }
+
+  blockAdminUser(id: string, blockUser: any): Promise<any> {
+    return this.adminUsersRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        isBlock: blockUser.isBlock,
+      })
+      .where('id = :id', { id })
+      .execute();
+  }
+
+  // 콜렉션 관리
+  async getAdminCollectionsList(keyword: string, p: number = 1): Promise<any> {
+    const collectionsList = this.adminCollectionsRepository.createQueryBuilder('collection');
+    if (keyword) {
+      collectionsList.where('collection.title LIKE :keyword OR collection.description LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    }
+
+    const take = 6;
+    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const total = await collectionsList.getCount();
+    collectionsList.skip((page - 1) * take).take(take);
+
+    return {
+      data: await collectionsList.getMany(),
+      total,
+      page,
+      lastPage: Math.ceil(total / take),
+    };
+  }
+
+  async deleteAdminCollection(id: number) {
+    try {
+      await this.adminCollectionsRepository.findOne({ where: { id } });
+      return this.adminCollectionsRepository.softDelete(id);
+    } catch (error) {
+      throw new BadRequestException();
     }
   }
 }
