@@ -1,6 +1,6 @@
 import { IntersectionType, PickType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
-import { IsEmail, IsInt, IsNotEmpty, IsNumber, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsInt, IsNumber, IsString, IsStrongPassword } from 'class-validator';
 
 export class SignUpBodyDTO {
   @IsEmail(
@@ -40,3 +40,20 @@ export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['emai
 export class PutEmailVerificationBodyDTO extends IntersectionType(PickType(SignUpBodyDTO, ['email']), VerifyTokenDTO) {}
 
 export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password']) {}
+
+export class decodedAccessTokenDTO {
+  @IsNumber()
+  readonly id: number;
+
+  @IsString()
+  readonly email: string;
+
+  @IsString()
+  readonly role: string;
+
+  @IsNumber()
+  readonly iat: number;
+
+  @IsNumber()
+  readonly exp: number;
+}

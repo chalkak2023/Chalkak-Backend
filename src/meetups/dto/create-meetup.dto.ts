@@ -1,6 +1,7 @@
+import { Type } from "class-transformer";
 import { IsNumber, IsOptional, IsString } from "class-validator";
 
-export class CreateMeetupDto {
+export class CreateMeetupDTO {
   @IsOptional()
   @IsNumber()
   userId: number;
@@ -17,6 +18,7 @@ export class CreateMeetupDto {
   @IsString()
   readonly schedule: string;
 
+  @Type(() => Number)
   @IsNumber()
   readonly headcount: number;
 }
