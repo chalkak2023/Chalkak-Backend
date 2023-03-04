@@ -13,7 +13,7 @@ import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
 import { CreateAdminFaqDto } from 'src/admin/dto/create.admin.faq.dto';
 import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
-import { AdminToken } from 'src/admin/auth.admin.decorator';
+import { AdminToken } from './decorators/auth.admin.decorator';
 
 @Controller('admin')
 export class AdminController {
