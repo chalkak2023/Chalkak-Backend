@@ -89,4 +89,9 @@ export class AdminController {
   async getAdminCollectionsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<any> {
     return await this.adminService.getAdminCollectionsList(keyword, p);
   }
+
+  @Delete('collections/:id')
+  async deleteAdminCollection(@Param('id') id: number) {
+    return this.adminService.deleteAdminCollection(id);
+  }
 }

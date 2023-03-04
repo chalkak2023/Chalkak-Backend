@@ -175,4 +175,13 @@ export class AdminService {
       lastPage: Math.ceil(total / take),
     };
   }
+
+  async deleteAdminCollection(id: number) {
+    try {
+      await this.adminCollectionsRepository.findOne({ where: { id } });
+      return this.adminCollectionsRepository.softDelete(id);
+    } catch (error) {
+      throw new BadRequestException();
+    }
+  }
 }
