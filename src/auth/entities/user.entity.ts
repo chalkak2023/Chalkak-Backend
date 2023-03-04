@@ -15,6 +15,12 @@ export class User {
   @Column('varchar', { select: false })
   password: string;
 
+  @Column('varchar', { unique: true })
+  username: string;
+
+  @Column('varchar')
+  provider: string | null;
+
   @Column('bool', { default: false })
   isBlock: boolean;
 
