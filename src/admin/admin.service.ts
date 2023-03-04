@@ -287,4 +287,12 @@ export class AdminService {
     }
     return this.adminFaqRepository.update({ id }, updateAdminFaqtDto);
   }
+
+  async deleteAdminFaq(id: number) {
+    await this.getAdminFaq(id);
+    if (_.isNil(id)) {
+      throw new NotFoundException('해당 게시물을 찾을 수 없습니다.');
+    }
+    return this.adminFaqRepository.softDelete(id);
+  }
 }

@@ -149,4 +149,9 @@ export class AdminController {
   async updateAdminFaq(@Param('id') id: number, @Body() updateAdminFaqtDto: UpdateAdminFaqDto): Promise<void> {
     await this.adminService.updateAdminFaq(updateAdminFaqtDto, id);
   }
+
+  @Delete('faq/:id')
+  async deleteAdminFaq(@Param('id') id: number) {
+    return await this.adminService.deleteAdminFaq(id);
+  }
 }
