@@ -11,12 +11,14 @@ import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 import { SignupAdminResDto } from 'src/admin/dto/signup.admin.res.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 import { User } from 'src/auth/entities/user.entity';
+import { Collection } from 'src/collections/entities/collection.entity';
 
 @Injectable()
 export class AdminService {
   constructor(
     @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(User) private adminUsersRepository: Repository<User>,
+    @InjectRepository(Collection) private adminCollectionsRepository: Repository<Collection>,
     private jwtService: JwtService
   ) {}
 
@@ -150,5 +152,27 @@ export class AdminService {
       })
       .where('id = :id', { id })
       .execute();
+  }
+
+  // 콜렉션 관리
+  async getAdminCollectionsList(keyword: string, p: number = 1): Promise<any> {
+    const collectionsList = this.adminCollectionsRepository.createQueryBuilder('collection');
+    if (keyword) {
+      collectionsList.where('collection.title LIKE :keyword OR collection.description LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    }
+
+    const take = 6;
+    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const total = await collectionsList.getCount();
+    collectionsList.skip((page - 1) * take).take(take);
+
+    return {
+      data: await collectionsList.getMany(),
+      total,
+      page,
+      lastPage: Math.ceil(total / take),
+    };
   }
 }

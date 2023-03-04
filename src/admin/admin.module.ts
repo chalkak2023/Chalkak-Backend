@@ -10,9 +10,10 @@ import { LocalAdminStrategy } from 'src/admin/strategies/local.admin.strategy';
 import { JwtAdminStrategy } from 'src/admin/strategies/jwt.admin.strategy';
 import { RefreshTokenAdminStrategy } from 'src/admin/strategies/refresh.token.admin.strategy';
 import { User } from 'src/auth/entities/user.entity';
+import { Collection } from 'src/collections/entities/collection.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Admin, Faq, User]), JwtModule],
+  imports: [TypeOrmModule.forFeature([Admin, Faq, User, Collection]), JwtModule],
   providers: [AdminService, LocalAdminStrategy, JwtAdminStrategy, RefreshTokenAdminStrategy],
   controllers: [AdminController],
   exports: [AdminService],

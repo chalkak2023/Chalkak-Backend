@@ -83,4 +83,10 @@ export class AdminController {
     const { isBlock } = blockUser;
     await this.adminService.blockAdminUser(id, { isBlock: !isBlock });
   }
+
+  // 콜렉션 관리
+  @Get('collections')
+  async getAdminCollectionsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<any> {
+    return await this.adminService.getAdminCollectionsList(keyword, p);
+  }
 }
