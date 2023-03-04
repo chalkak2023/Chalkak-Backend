@@ -10,6 +10,7 @@ import { User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
+import { Faq } from 'src/admin/entities/faq.entity';
 
 @Controller('admin')
 export class AdminController {
@@ -124,5 +125,11 @@ export class AdminController {
   @Delete('meetups/:id')
   async deleteAdminMeetup(@Param('id') id: number) {
     return await this.adminService.deleteAdminMeetup(id);
+  }
+
+  // 자주찾는질문 관리
+  @Get('faq')
+  async getAdminFaqList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Faq[]> {
+    return await this.adminService.getAdminFaqList(keyword, p);
   }
 }

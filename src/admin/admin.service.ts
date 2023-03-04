@@ -14,6 +14,7 @@ import { User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
+import { Faq } from './entities/faq.entity';
 
 @Injectable()
 export class AdminService {
@@ -23,6 +24,7 @@ export class AdminService {
     @InjectRepository(Collection) private adminCollectionsRepository: Repository<Collection>,
     @InjectRepository(Photospot) private adminPhotospotsRepository: Repository<Photospot>,
     @InjectRepository(Meetup) private adminMeetupsRepository: Repository<Meetup>,
+    @InjectRepository(Faq) private adminFaqRepository: Repository<Faq>,
     private jwtService: JwtService
   ) {}
 
@@ -240,5 +242,27 @@ export class AdminService {
     } catch (error) {
       throw new BadRequestException();
     }
+  }
+
+  // 자주찾는질문 관리
+  async getAdminFaqList(keyword: string, p: number = 1): Promise<any> {
+    const faqList = this.adminFaqRepository.createQueryBuilder('faq');
+    if (keyword) {
+      faqList.where('faq.title LIKE :keyword OR faq.content LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    }
+
+    const take = 6;
+    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const total = await faqList.getCount();
+    faqList.skip((page - 1) * take).take(take);
+
+    return {
+      data: await faqList.getMany(),
+      total,
+      page,
+      lastPage: Math.ceil(total / take),
+    };
   }
 }
