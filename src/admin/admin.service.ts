@@ -12,6 +12,8 @@ import { SignupAdminResDto } from 'src/admin/dto/signup.admin.res.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 import { User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
+import { Photospot } from 'src/photospot/entities/photospot.entity';
+import { Meetup } from 'src/meetups/entities/meetup.entity';
 
 @Injectable()
 export class AdminService {
@@ -19,6 +21,8 @@ export class AdminService {
     @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(User) private adminUsersRepository: Repository<User>,
     @InjectRepository(Collection) private adminCollectionsRepository: Repository<Collection>,
+    @InjectRepository(Photospot) private adminPhotospotsRepository: Repository<Photospot>,
+    @InjectRepository(Meetup) private adminMeetupsRepository: Repository<Meetup>,
     private jwtService: JwtService
   ) {}
 
@@ -180,6 +184,59 @@ export class AdminService {
     try {
       await this.adminCollectionsRepository.findOne({ where: { id } });
       return this.adminCollectionsRepository.softDelete(id);
+    } catch (error) {
+      throw new BadRequestException();
+    }
+  }
+
+  // 포토스팟 관리
+  async getAdminAllPhotospot(id: number): Promise<Photospot[]> {
+    const photospots = await this.adminPhotospotsRepository.find({ where: { id } });
+    if (!photospots.length) {
+      throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
+    }
+    return photospots;
+  }
+
+  async getAdminPhotospot(photospotId: number): Promise<Photospot> {
+    const photospot = await this.adminPhotospotsRepository.findOne({ where: { id: photospotId } });
+    if (_.isNil(photospot)) {
+      throw new NotFoundException('해당 포토스팟을 찾을 수 없습니다.');
+    }
+    return photospot;
+  }
+
+  async deleteAdminPhotospot(photospotId: number) {
+    await this.getAdminPhotospot(photospotId);
+    this.adminPhotospotsRepository.softDelete(photospotId);
+  }
+
+  // 모임 관리
+  async getAdminMeetupsList(keyword: string, p: number = 1): Promise<any> {
+    const meetupsList = this.adminMeetupsRepository.createQueryBuilder('meetup');
+    if (keyword) {
+      meetupsList.where('meetup.title LIKE :keyword OR meetup.content LIKE :keyword OR meetup.place LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    }
+
+    const take = 6;
+    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const total = await meetupsList.getCount();
+    meetupsList.skip((page - 1) * take).take(take);
+
+    return {
+      data: await meetupsList.getMany(),
+      total,
+      page,
+      lastPage: Math.ceil(total / take),
+    };
+  }
+
+  async deleteAdminMeetup(id: number) {
+    try {
+      await this.adminMeetupsRepository.findOne({ where: { id } });
+      return this.adminMeetupsRepository.delete(id);
     } catch (error) {
       throw new BadRequestException();
     }

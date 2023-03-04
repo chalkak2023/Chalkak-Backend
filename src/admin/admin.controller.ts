@@ -8,6 +8,8 @@ import { AdminToken } from 'src/admin/auth.admin.decorator';
 import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
 import { User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
+import { Photospot } from 'src/photospot/entities/photospot.entity';
+import { Meetup } from 'src/meetups/entities/meetup.entity';
 
 @Controller('admin')
 export class AdminController {
@@ -95,5 +97,32 @@ export class AdminController {
   @Delete('collections/:id')
   async deleteAdminCollection(@Param('id') id: number) {
     return await this.adminService.deleteAdminCollection(id);
+  }
+
+  // 포토스팟 관리
+  @Get('photospots/:id')
+  async getAdminAllPhotospot(@Param('id') id: number): Promise<Photospot[]> {
+    return this.adminService.getAdminAllPhotospot(id);
+  }
+
+  @Get('photospots/:id/:photospotId')
+  async getAdminPhotospot(@Param('photospotId') photospotId: number): Promise<Photospot> {
+    return this.adminService.getAdminPhotospot(photospotId);
+  }
+
+  @Delete('photospots/:id/:photospotId')
+  async deleteAdminPhotospot(@Param('photospotId') photospotId: number) {
+    await this.adminService.deleteAdminPhotospot(photospotId);
+  }
+
+  // 모임 관리
+  @Get('meetups')
+  async getAdminMeetupsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Meetup[]> {
+    return await this.adminService.getAdminMeetupsList(keyword, p);
+  }
+
+  @Delete('meetups/:id')
+  async deleteAdminMeetup(@Param('id') id: number) {
+    return await this.adminService.deleteAdminMeetup(id);
   }
 }
