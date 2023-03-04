@@ -9,6 +9,7 @@ import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
 import { User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
+import { Meetup } from 'src/meetups/entities/meetup.entity';
 
 @Controller('admin')
 export class AdminController {
@@ -112,5 +113,11 @@ export class AdminController {
   @Delete('photospots/:id/:photospotId')
   async deleteAdminPhotospot(@Param('photospotId') photospotId: number) {
     await this.adminService.deleteAdminPhotospot(photospotId);
+  }
+
+  // 모임 관리
+  @Get('meetups')
+  async getAdminMeetupsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Meetup[]> {
+    return await this.adminService.getAdminMeetupsList(keyword, p);
   }
 }
