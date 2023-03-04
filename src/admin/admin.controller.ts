@@ -106,7 +106,7 @@ export class AdminController {
   }
 
   @Get('photospots/:id/:photospotId')
-  async getAdminPhotospot(@Param('photospotId') photospotId: number): Promise<Photospot | null> {
+  async getAdminPhotospot(@Param('photospotId') photospotId: number): Promise<Photospot> {
     return this.adminService.getAdminPhotospot(photospotId);
   }
 
