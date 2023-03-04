@@ -18,7 +18,7 @@ export class User {
   @Column('varchar', { unique: true })
   username: string;
 
-  @Column('varchar')
+  @Column('varchar', { nullable: true})
   provider: string | null;
 
   @Column('bool', { default: false })
