@@ -20,7 +20,7 @@ export class AdminService {
     private jwtService: JwtService
   ) {}
 
-  // 관리자
+  // 관리자 관리
   async getAdminsList(alias: string) {
     return this.adminRepository.createQueryBuilder(alias);
   }
@@ -121,7 +121,7 @@ export class AdminService {
     }
   }
 
-  // 유저
+  // 유저 관리
   async getAdminUsersList(keyword: string, p: number = 1): Promise<any> {
     const usersList = this.adminUsersRepository.createQueryBuilder('user');
     if (keyword) {
@@ -139,5 +139,16 @@ export class AdminService {
       page,
       lastPage: Math.ceil(total / take),
     };
+  }
+
+  blockAdminUser(id: string, blockUser: any): Promise<any> {
+    return this.adminUsersRepository
+      .createQueryBuilder()
+      .update()
+      .set({
+        isBlock: blockUser.isBlock,
+      })
+      .where('id = :id', { id })
+      .execute();
   }
 }

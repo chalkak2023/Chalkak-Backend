@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AdminService } from 'src/admin/admin.service';
 import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
-import { AdminToken } from './auth.admin.decorator';
+import { AdminToken } from 'src/admin/auth.admin.decorator';
+import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
 
 @Controller('admin')
 export class AdminController {
@@ -75,5 +76,11 @@ export class AdminController {
   @Get('users')
   async getAdminUsersList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<any> {
     return await this.adminService.getAdminUsersList(keyword, p);
+  }
+
+  @Put('users/:id')
+  async blockAdminUser(@Param('id') id: string, @Body() blockUser: BlockAdminUserDto) {
+    const { isBlock } = blockUser;
+    await this.adminService.blockAdminUser(id, { isBlock: !isBlock });
   }
 }
