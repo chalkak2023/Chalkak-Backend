@@ -38,6 +38,7 @@ describe('MeetupsRepsitory', () => {
       jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
         select: jest.fn().mockReturnThis(),
         leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
         take: jest.fn().mockReturnThis(),
         skip: jest.fn().mockReturnThis(),
@@ -45,7 +46,8 @@ describe('MeetupsRepsitory', () => {
       } as any);
 
       const page = 1;
-      const result = await repository.getMeetups(page);
+      const keyword = 'keyword';
+      const result = await repository.getMeetups(page, keyword);
 
       expect(result).toBe(mockReturnValue);
       expect(repository.createQueryBuilder).toHaveBeenCalledTimes(1);

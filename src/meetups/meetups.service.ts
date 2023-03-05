@@ -14,8 +14,8 @@ export class MeetupsService {
     @InjectRepository(Join) private joinRepository: Repository<Join>,
     ) {}
 
-  async getMeetups(page: number): Promise<Meetup[]> {
-    return await this.meetupsRepository.getMeetups(page);
+  async getMeetups(page: number, keyword: string): Promise<Meetup[]> {
+    return await this.meetupsRepository.getMeetups(page, keyword);
   }
 
   async createMeetup(meetupDto: CreateMeetupDTO): Promise<void> {
