@@ -20,7 +20,7 @@ export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('varchar', { unique: true })
+  @Column('varchar', { unique: true, nullable: true })
   email: string;
 
   @Column('varchar', { unique: true })
