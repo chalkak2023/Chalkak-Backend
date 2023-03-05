@@ -25,7 +25,7 @@ export class User {
   email: string;
 
   @Column('varchar', { unique: true })
-  nickname: string;
+  username: string;
 
   @Column('bool', { default: false })
   isBlock: boolean;
