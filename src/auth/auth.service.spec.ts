@@ -14,8 +14,10 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { SignInBodyDTO, SignUpBodyDTO } from './dto/auth.dto';
+import { SignInBodyDTO, SignUpBodyDTO, SocialLoginBodyDTO } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
+import { SocialNaverService } from '../social/service/social.naver.service';
+import { SocialKakaoService } from 'src/social/service/social.kakao.service';
 jest.mock('bcrypt');
 
 const moduleMocker = new ModuleMocker(global);
@@ -28,6 +30,8 @@ describe('AuthService', () => {
   let mockJwtService: jest.Mocked<JwtService>;
   let mockConfigService: jest.Mocked<ConfigService>;
   let mockMailerAuthService: jest.Mocked<MailerAuthService>;
+  let mockSocialNaverService: jest.Mocked<SocialNaverService>;
+  let mockSocialKakaoService: jest.Mocked<SocialKakaoService>;
 
   // DB 모킹
   let users: any[] = [];
@@ -139,6 +143,8 @@ describe('AuthService', () => {
     mockJwtService = module.get(JwtService);
     mockConfigService = module.get(ConfigService);
     mockMailerAuthService = module.get(MailerAuthService);
+    mockSocialNaverService = module.get(SocialNaverService);
+    mockSocialKakaoService = module.get(SocialKakaoService);
 
     mockConfigService.get.mockImplementation((key: keyof typeof config) => config[key]);
   });
@@ -306,6 +312,67 @@ describe('AuthService', () => {
 
       expect(service.changePassword(body, user)).resolves.toStrictEqual({
         message: '비밀번호가 변경되었습니다.',
+      });
+    });
+  });
+
+  describe('oauthSignIn Method', () => {
+    it('should be defined', () => {
+      expect(service.oauthSignIn).toBeDefined();
+      expect(typeof service.oauthSignIn).toBe('function');
+    });
+
+    it('should be return success message when naver success situation', async () => {
+      const provider: 'kakao' | 'naver' = 'naver';
+      const body: SocialLoginBodyDTO = {
+        code: 'test',
+        state: 'chalkak',
+      };
+      const nickname = 'test-nickname'
+      const providerUserId = 1;
+      mockNaverUserRepository.findOne.mockResolvedValue({
+        id: 1,
+        username: 'test'
+      } as NaverUser);
+      mockSocialNaverService.getOauth2Token.mockResolvedValue({access_token: 'accessToken'})
+      mockSocialNaverService.getUserInfo.mockResolvedValue({id: providerUserId, nickname})
+      mockJwtService.sign.mockImplementation((payload: any, options: any) => {
+        return `token${options.secret}`;
+      });
+      const accessToken = `token${mockConfigService.get('JWT_ACCESS_TOKEN_SECRET')}`;
+      const refreshToken = `token${mockConfigService.get('JWT_REFRESH_TOKEN_SECRET')}`;
+
+      expect(service.oauthSignIn(provider, body)).resolves.toStrictEqual({
+        message: '로그인되었습니다.',
+        accessToken,
+        refreshToken,
+      });
+    });
+
+    it('should be return success message when kakao success situation', async () => {
+      const provider: 'kakao' | 'naver' = 'kakao';
+      const body: SocialLoginBodyDTO = {
+        code: 'test',
+        state: 'chalkak',
+      };
+      const nickname = 'test-nickname'
+      const providerUserId = 1;
+      mockKakaoUserRepository.findOne.mockResolvedValue({
+        id: 1,
+        username: 'test'
+      } as KakaoUser);
+      mockSocialKakaoService.getOauth2Token.mockResolvedValue({access_token: 'accessToken'})
+      mockSocialKakaoService.getUserInfo.mockResolvedValue({id: providerUserId, kakao_account: {profile: {nickname}}})
+      mockJwtService.sign.mockImplementation((payload: any, options: any) => {
+        return `token${options.secret}`;
+      });
+      const accessToken = `token${mockConfigService.get('JWT_ACCESS_TOKEN_SECRET')}`;
+      const refreshToken = `token${mockConfigService.get('JWT_REFRESH_TOKEN_SECRET')}`;
+
+      expect(service.oauthSignIn(provider, body)).resolves.toStrictEqual({
+        message: '로그인되었습니다.',
+        accessToken,
+        refreshToken,
       });
     });
   });
