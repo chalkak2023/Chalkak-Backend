@@ -1,6 +1,8 @@
+import { User } from 'src/auth/entities/user.entity';
+import { Collection } from 'src/collections/entities/collection.entity';
 import { FileSystemStoredFile } from 'nestjs-form-data/dist/classes/storage';
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -8,7 +10,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { PhotospotService } from './photospot.service';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { S3Service } from './../common/aws/s3.service';
-import { TypeOrmConfigService } from './../common/config/typeorm.config.service';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 
 const moduleMocker = new ModuleMocker(global);
@@ -135,19 +136,22 @@ describe('PhotospotService', () => {
   });
 
   describe('Service modifyPhotospot', () => {
+    const photospot = {id: 1, userId: 1, collectionId: 1, title: '테스트', description: '테스트입니다', latitude: 33.3333, longitude: 111.11111, imagePath: 'aws.bucket.image-path', createdAt: new Date(), updatedAt: new Date(), deletedAt: null, user: new User, collection: new Collection};
+    
     it('should db defined', () => {
       expect(service.modifyPhotospot).toBeDefined();
     });
+
     it('modifyPhotospot image가 있을 때 성공', async () => {
       const dto = { title: '테스트', description: '테스트 설명', image: {} as FileSystemStoredFile };
       const photospotId = 1;
-      const photospot = new Photospot();
       const imagePath = 'AWS path';
+      const userId = 1;
 
       mockPhotospotRepository.findOne.mockResolvedValue(photospot);
       mockS3Service.putObject.mockResolvedValue(imagePath);
 
-      await service.modifyPhotospot(dto, photospotId);
+      await service.modifyPhotospot(dto, photospotId,userId);
       expect(mockS3Service.putObject).toHaveBeenCalledTimes(1);
       expect(mockS3Service.putObject).toHaveBeenCalledWith(dto.image);
       expect(mockPhotospotRepository.update).toHaveBeenCalledTimes(1);
@@ -160,10 +164,10 @@ describe('PhotospotService', () => {
     it('modifyPhotospot image가 없을 때 성공', async () => {
       const dto = new ModifyPhotospotDto();
       const photospotId = 1;
-      const photospot = new Photospot();
+      const userId = 1;
 
       mockPhotospotRepository.findOne.mockResolvedValue(photospot);
-      await service.modifyPhotospot(dto, photospotId);
+      await service.modifyPhotospot(dto, photospotId,userId);
       expect(mockS3Service.putObject).toHaveBeenCalledTimes(0);
       expect(mockPhotospotRepository.update).toHaveBeenCalledTimes(1);
       expect(mockPhotospotRepository.update).toHaveBeenCalledWith({ id: photospotId }, dto);
@@ -172,33 +176,55 @@ describe('PhotospotService', () => {
     it('modifyPhotospot 해당 값 없을 때 실패', async () => {
       const dto = { title: '테스트', description: '테스트 설명', image: {} as FileSystemStoredFile };
       const photospotId = 1;
+      const userId = 1;
 
       mockPhotospotRepository.findOne.mockResolvedValue(null);
-      expect(service.modifyPhotospot(dto, photospotId)).rejects.toThrowError(new NotFoundException('해당 포토스팟을 찾을 수 없습니다.'));
+      expect(service.modifyPhotospot(dto, photospotId,userId)).rejects.toThrowError(new NotFoundException('해당 포토스팟을 찾을 수 없습니다.'));
     })
+
+    it('modifyPhotospot 권한이 없는 수정 실패', async () => {
+      const dto = new ModifyPhotospotDto();
+      const photospotId = 1;
+      const userId = 2;
+
+      mockPhotospotRepository.findOne.mockResolvedValue(photospot);
+      expect(service.modifyPhotospot(dto, photospotId,userId)).rejects.toThrowError(new NotAcceptableException('해당 포토스팟에 접근 할 수 없습니다'));
+    })
+    
   });
 
   
   describe('Service deletePhotospot', () => {
+    const photospot = {id: 1, userId: 1, collectionId: 1, title: '테스트', description: '테스트입니다', latitude: 33.3333, longitude: 111.11111, imagePath: 'aws.bucket.image-path', createdAt: new Date(), updatedAt: new Date(), deletedAt: null, user: new User, collection: new Collection};
+
     it('should db defined', () => {
       expect(service.deletePhotospot).toBeDefined();
     });
     it('deletePhotospot 성공', async () => {
       const photospotId = 1;
-      const photospot = new Photospot();
+      const userId = 1
  
       mockPhotospotRepository.findOne.mockResolvedValue(photospot);
 
-      await service.deletePhotospot(photospotId);
+      await service.deletePhotospot(photospotId, userId);
       expect(mockPhotospotRepository.softDelete).toHaveBeenCalledTimes(1);
       expect(mockPhotospotRepository.softDelete).toHaveBeenCalledWith(photospotId);
     });
 
     it('deletePhotospot 해당 값 못 찾을 경우', async () => {
       const photospotId = 1;
+      const userId = 1
 
       mockPhotospotRepository.findOne.mockResolvedValue(null);
-      expect(service.deletePhotospot(photospotId)).rejects.toThrowError(new NotFoundException('해당 포토스팟을 찾을 수 없습니다.'));
+      expect(service.deletePhotospot(photospotId, userId)).rejects.toThrowError(new NotFoundException('해당 포토스팟을 찾을 수 없습니다.'));
     });
+
+    it('deletePhotospot 권한이 없는 실패', async () => {
+      const photospotId = 1;
+      const userId = 2
+
+      mockPhotospotRepository.findOne.mockResolvedValue(photospot);
+      expect(service.deletePhotospot(photospotId, userId)).rejects.toThrowError(new NotAcceptableException('해당 포토스팟에 접근 할 수 없습니다'));
+    })
   });
 });

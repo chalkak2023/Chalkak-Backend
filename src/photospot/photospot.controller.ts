@@ -28,20 +28,24 @@ export class PhotospotController {
   }
 
   @Get('/:collectionId/photospots/:photospotId')
-  async getPhotospot(@Param('photospotId') photospotId: number): Promise<Photospot | null> {
+  async getPhotospot(@Param('photospotId') photospotId: number): Promise<Photospot> {
     return this.photospotService.getPhotospot(photospotId);
   }
 
   @Put('/:collectionId/photospots/:photospotId')
   @UseGuards(JwtGuard)
   @FormDataRequest()
-  async modifyPhotospot(@Body() modifyPhotospot: ModifyPhotospotDto, @Param('photospotId') photospotId: number): Promise<void> {
-    await this.photospotService.modifyPhotospot(modifyPhotospot, photospotId);
+  async modifyPhotospot(
+    @Body() modifyPhotospot: ModifyPhotospotDto,
+    @Param('photospotId') photospotId: number,
+    @InjectUser('id') userId: number
+  ): Promise<void> {
+    await this.photospotService.modifyPhotospot(modifyPhotospot, photospotId, userId);
   }
 
   @Delete('/:collectionId/photospots/:photospotId')
   @UseGuards(JwtGuard)
-  async deletePhotospot(@Param('photospotId') photospotId: number) {
-    await this.photospotService.deletePhotospot(photospotId);
+  async deletePhotospot(@Param('photospotId') photospotId: number, @InjectUser('id') userId: number) {
+    await this.photospotService.deletePhotospot(photospotId, userId);
   }
 }

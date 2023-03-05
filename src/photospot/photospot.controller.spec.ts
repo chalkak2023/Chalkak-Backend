@@ -92,10 +92,11 @@ describe('PhotospotController', () => {
     it('modifyPhotospot 성공', async () => {
       const dto = new ModifyPhotospotDto();
       const photospotId = 1;
-      await service.modifyPhotospot(dto, photospotId);
+      const userId = 1;
+      await service.modifyPhotospot(dto, photospotId, userId);
 
       expect(service.modifyPhotospot).toHaveBeenCalledTimes(1);
-      expect(service.modifyPhotospot).toHaveBeenCalledWith(dto, photospotId);
+      expect(service.modifyPhotospot).toHaveBeenCalledWith(dto, photospotId, userId);
     });
   });
 
@@ -106,10 +107,11 @@ describe('PhotospotController', () => {
 
     it('deletePhotospot 성공', async () => {
       const photospotId = 1;
-      await service.deletePhotospot(photospotId);
+      const userId = 1
+      await service.deletePhotospot(photospotId, userId);
 
       expect(service.deletePhotospot).toHaveBeenCalledTimes(1);
-      expect(service.deletePhotospot).toHaveBeenCalledWith(photospotId);
+      expect(service.deletePhotospot).toHaveBeenCalledWith(photospotId, userId);
     });
   });
 });
