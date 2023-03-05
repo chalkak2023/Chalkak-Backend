@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LocalUser, User } from './entities/user.entity';
+import { LocalUser, KaKaoUser, NaverUser } from './entities/user.entity';
 import {
   PostEmailVerificationBodyDTO,
   SignInBodyDTO,
@@ -30,6 +30,8 @@ import { SocialKakaoService } from 'src/social/service/social.kakao.service';
 export class AuthService {
   constructor(
     @InjectRepository(LocalUser) private localUsersRepository: Repository<LocalUser>,
+    @InjectRepository(KaKaoUser) private kakaoUsersRepository: Repository<KaKaoUser>,
+    @InjectRepository(NaverUser) private naverUsersRepository: Repository<NaverUser>,
     @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
     private jwtService: JwtService,
     private configService: ConfigService,
