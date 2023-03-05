@@ -10,4 +10,8 @@ export class CollectionsService {
   async getCollectionsList(keyword: string, p: number): Promise<Collection[]> {
     return await this.collectionUserKeywordRepository.getCollectionsList(keyword, p);
   }
+
+  async getColletion(collectionId: number): Promise<Collection> {
+    return await this.collectionUserKeywordRepository.getColletion(collectionId);
+  }
 }

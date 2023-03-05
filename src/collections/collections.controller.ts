@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { CollectionsService } from 'src/collections/collections.service';
 import { Collection } from 'src/collections/entities/collection.entity';
 
@@ -9,5 +9,10 @@ export class CollectionsController {
   @Get()
   async getCollectionsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Collection[]> {
     return await this.collectionsService.getCollectionsList(keyword, p);
+  }
+
+  @Get(':collectionId')
+  async getColletion(@Param('collectionId') collectionId: number): Promise<Collection> {
+    return await this.collectionsService.getColletion(collectionId);
   }
 }
