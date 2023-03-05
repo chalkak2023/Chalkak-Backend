@@ -1,8 +1,16 @@
 import { IntersectionType, PickType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
-import { IsEmail, IsInt, IsNumber, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsNumber, IsString, IsStrongPassword } from 'class-validator';
 
 export class SignUpBodyDTO {
+  @IsOptional()
+  @IsNotEmpty({
+    message: '유저명은 빈문자열이면 안 됩니다.'
+  })
+  @IsString({
+    message: '유저명은 문자열이어야 합니다.'
+  })
+  username?: string;
   @IsEmail(
     {},
     {

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { User } from './entities/user.entity';
+import { LocalUser } from './entities/user.entity';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -22,7 +22,7 @@ const moduleMocker = new ModuleMocker(global);
 
 describe('AuthService', () => {
   let service: AuthService;
-  let mockUserRepository: jest.Mocked<Repository<User>>;
+  let mockLocalUserRepository: jest.Mocked<Repository<LocalUser>>;
   let mockJwtService: jest.Mocked<JwtService>;
   let mockConfigService: jest.Mocked<ConfigService>;
   let mockMailerAuthService: jest.Mocked<MailerAuthService>;
@@ -89,7 +89,7 @@ describe('AuthService', () => {
       providers: [AuthService],
     })
       .useMocker((token) => {
-        if (token === getRepositoryToken(User)) {
+        if (token === getRepositoryToken(LocalUser)) {
           return {
             insert: jest.fn(),
             findOne: jest.fn(),
@@ -115,7 +115,7 @@ describe('AuthService', () => {
       .compile();
 
     service = module.get(AuthService);
-    mockUserRepository = module.get(getRepositoryToken(User));
+    mockLocalUserRepository = module.get(getRepositoryToken(LocalUser));
     mockJwtService = module.get(JwtService);
     mockConfigService = module.get(ConfigService);
     mockMailerAuthService = module.get(MailerAuthService);
@@ -135,16 +135,32 @@ describe('AuthService', () => {
 
     it('should be return success message when success situation', async () => {
       const body: SignUpBodyDTO = {
+        username: '테스트맨',
         email: 'testman@gmail.com',
         password: 'testpassword',
       };
 
-      mockUserRepository.insert.mockResolvedValue({ generatedMaps: [], identifiers: [], raw: false });
+      mockLocalUserRepository.insert.mockResolvedValue({ generatedMaps: [], identifiers: [], raw: false });
 
       expect(service.signUp(body)).resolves.toStrictEqual({
         message: '회원가입 되었습니다.',
       });
-      expect(mockUserRepository.insert).toHaveBeenCalledWith({ email: body.email, password: bcrypt.hashSync(body.password, 10) });
+    });
+
+    it('should be return fail message when username error situation', async () => {
+      const body: SignUpBodyDTO = {
+        username: '중복닉네임',
+        email: 'test@gmail.com',
+        password: 'testpassword',
+      };
+
+      mockLocalUserRepository.findOne.mockResolvedValueOnce(users[0])
+
+      expect(service.signUp(body)).rejects.toThrowError(
+        new BadRequestException({
+          message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
+        })
+      );
     });
 
     it('should be return fail message when error situation', async () => {
@@ -152,7 +168,7 @@ describe('AuthService', () => {
         email: 'test@gmail.com',
         password: 'testpassword',
       };
-      mockUserRepository.insert.mockRejectedValue(new Error());
+      mockLocalUserRepository.insert.mockRejectedValue(new Error());
 
       expect(service.signUp(body)).rejects.toThrowError(
         new BadRequestException({
@@ -176,7 +192,7 @@ describe('AuthService', () => {
       const response: any = {
         cookie: jest.fn(() => response),
       };
-      mockUserRepository.findOne.mockResolvedValue(users[0]);
+      mockLocalUserRepository.findOne.mockResolvedValue(users[0]);
       mockJwtService.sign.mockImplementation((payload: any, options: any) => {
         return `token${options.secret}`;
       });
@@ -287,10 +303,10 @@ describe('AuthService', () => {
       cache = {
         refreshToken: 1,
       };
-      mockUserRepository.findOne.mockResolvedValue({
+      mockLocalUserRepository.findOne.mockResolvedValue({
         id: 1,
         email: 'test@gmail.com',
-      } as User);
+      } as LocalUser);
       mockJwtService.sign.mockReturnValueOnce(newAccessToken);
       mockJwtService.verifyAsync.mockResolvedValue({})
 
