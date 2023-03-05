@@ -67,7 +67,7 @@ export class NaverUser extends User {
 
 @ChildEntity('kakao')
 @Unique('provider_userid_unique', ['provider', 'providerUserId'])
-export class KaKaoUser extends User {
+export class KakaoUser extends User {
   @Column('varchar')
   providerUserId: number;
 }
