@@ -53,7 +53,13 @@ export class AuthService {
 
   async signUp(body: SignUpBodyDTO) {
     const { username: _username, email, password } = body;
-    const username = _username || `${email.split('@')[0]}#${Math.floor(Math.random() * 10000) + 1}`
+    const user = !_.isNil(_username) ? await this.localUsersRepository.findOne({ where: { username: _username } }) : null;
+    if (!_.isNil(user)) {
+      throw new BadRequestException({
+        message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
+      });
+    }
+    const username = _username || `${email.split('@')[0]}#${Math.floor(Math.random() * 10000) + 1}`;
     const passwordHash = bcrypt.hashSync(password, 10);
     await this.localUsersRepository.insert({ username, email, password: passwordHash }).catch((err) => {
       throw new BadRequestException({
@@ -164,7 +170,7 @@ export class AuthService {
       });
     }
 
-    const newAccessToken = this.generateUserAccessToken(user)
+    const newAccessToken = this.generateUserAccessToken(user);
 
     return {
       accessToken: newAccessToken,
