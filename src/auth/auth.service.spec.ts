@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { LocalUser } from './entities/user.entity';
+import { KakaoUser, LocalUser, NaverUser } from './entities/user.entity';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -23,6 +23,8 @@ const moduleMocker = new ModuleMocker(global);
 describe('AuthService', () => {
   let service: AuthService;
   let mockLocalUserRepository: jest.Mocked<Repository<LocalUser>>;
+  let mockKakaoUserRepository: jest.Mocked<Repository<KakaoUser>>;
+  let mockNaverUserRepository: jest.Mocked<Repository<NaverUser>>;
   let mockJwtService: jest.Mocked<JwtService>;
   let mockConfigService: jest.Mocked<ConfigService>;
   let mockMailerAuthService: jest.Mocked<MailerAuthService>;
@@ -97,6 +99,22 @@ describe('AuthService', () => {
             update: jest.fn(),
           };
         }
+        if (token === getRepositoryToken(KakaoUser)) {
+          return {
+            insert: jest.fn(),
+            findOne: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+          };
+        }
+        if (token === getRepositoryToken(NaverUser)) {
+          return {
+            insert: jest.fn(),
+            findOne: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+          };
+        }
         if (token === CACHE_MANAGER) {
           return {
             get: jest.fn().mockImplementation((key: string) => cache[key]),
@@ -116,6 +134,8 @@ describe('AuthService', () => {
 
     service = module.get(AuthService);
     mockLocalUserRepository = module.get(getRepositoryToken(LocalUser));
+    mockKakaoUserRepository = module.get(getRepositoryToken(KakaoUser));
+    mockNaverUserRepository = module.get(getRepositoryToken(NaverUser));
     mockJwtService = module.get(JwtService);
     mockConfigService = module.get(ConfigService);
     mockMailerAuthService = module.get(MailerAuthService);
