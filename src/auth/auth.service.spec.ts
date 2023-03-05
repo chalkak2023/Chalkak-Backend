@@ -133,7 +133,7 @@ describe('AuthService', () => {
       expect(typeof service.signUp).toBe('function');
     });
 
-    it.only('should be return success message when success situation', async () => {
+    it('should be return success message when success situation', async () => {
       const body: SignUpBodyDTO = {
         username: '테스트맨',
         email: 'testman@gmail.com',
