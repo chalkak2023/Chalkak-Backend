@@ -1,5 +1,5 @@
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as _ from 'lodash';
@@ -29,15 +29,14 @@ export class PhotospotService {
   async getAllPhotospot(collectionId: number): Promise<Photospot[]> {
     const photospots = await this.photospotRepository.find({ where: { collectionId } });
 
-    console.log(_.isEmpty(photospots))
-    if (!photospots.length) {
+    if (_.isEmpty(photospots)) {
       throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
     }
 
     return photospots;
   }
 
-  async getPhotospot(photospotId: number): Promise<Photospot | null> {
+  async getPhotospot(photospotId: number): Promise<Photospot> {
     const photospot = await this.photospotRepository.findOne({ where: { id: photospotId } });
 
     if (_.isNil(photospot)) {
@@ -47,11 +46,15 @@ export class PhotospotService {
     return photospot;
   }
 
-  async modifyPhotospot(modifyPhotospotDto: ModifyPhotospotDto, photospotId: number): Promise<void> {
+  async modifyPhotospot(modifyPhotospotDto: ModifyPhotospotDto, photospotId: number, userId: number): Promise<void> {
     const { title, description, image }: ModifyPhotospotDto = modifyPhotospotDto;
     let updateData;
 
-    await this.getPhotospot(photospotId);
+    const photospot = await this.getPhotospot(photospotId);
+
+    if (photospot.userId !== userId) {
+      throw new NotAcceptableException('해당 포토스팟에 접근 할 수 없습니다');
+    }
 
     if (_.isNil(image)) {
       updateData = { title, description };
@@ -63,8 +66,12 @@ export class PhotospotService {
     this.photospotRepository.update({ id: photospotId }, updateData);
   }
 
-  async deletePhotospot(photospotId: number) {
-    await this.getPhotospot(photospotId);
+  async deletePhotospot(photospotId: number, userId: number) {
+    const photospot = await this.getPhotospot(photospotId);
+
+    if (photospot.userId !== userId) {
+      throw new NotAcceptableException('해당 포토스팟에 접근 할 수 없습니다');
+    }
 
     this.photospotRepository.softDelete(photospotId);
   }
