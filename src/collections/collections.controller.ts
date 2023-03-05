@@ -1,10 +1,12 @@
-import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { InjectUser } from 'src/auth/auth.decorator';
 import { CollectionsService } from 'src/collections/collections.service';
 import { JwtGuard } from 'src/auth/guard/jwt/jwt.guard';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
+import { UpdateCollectionContentDto } from 'src/collections/dto/update.collection.content.dto';
+import { UpdateCollectionKeywordDto } from 'src/collections/dto/update.collection.keyword.dto';
 
 @Controller('/api/collections')
 export class CollectionsController {
@@ -28,5 +30,26 @@ export class CollectionsController {
   ): Promise<void> {
     createCollectionDto.userId = userDTO.id;
     return await this.collectionsService.createCollection(createCollectionDto);
+  }
+
+  @Put(':collectionId')
+  @UseGuards(JwtGuard)
+  async updateCollectionContent(
+    @Body() updateCollectionContentDto: UpdateCollectionContentDto,
+    @Param('collectionId') collectionId: number,
+    @InjectUser('id') userId: number
+  ): Promise<void> {
+    await this.collectionsService.updateCollectionContent(updateCollectionContentDto, collectionId, userId);
+  }
+
+  @Put(':collectionId/keywords/:keywordId')
+  @UseGuards(JwtGuard)
+  async updateCollectionKeyword(
+    @Body() updateCollectionKeywordDto: UpdateCollectionKeywordDto,
+    @Param('collectionId') collectionId: number,
+    @Param('keywordId') keywordId: number,
+    @InjectUser('id') userId: number
+  ): Promise<void> {
+    await this.collectionsService.updateCollectionKeyword(updateCollectionKeywordDto, collectionId, keywordId, userId);
   }
 }
