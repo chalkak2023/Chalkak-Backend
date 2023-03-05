@@ -79,7 +79,7 @@ export class AuthService {
 
   async signIn(body: SignInBodyDTO, response: any) {
     const { email, password } = body;
-    const user = await this.localUsersRepository.findOne({ where: { email }, select: { id: true, email: true, password: true } });
+    const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password']});
     if (!user) {
       throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
     }
@@ -190,10 +190,11 @@ export class AuthService {
     return Math.floor(Math.random() * (maxm - minm + 1)) + minm;
   }
 
-  private generateUserAccessToken(user: { id: number; email: string }) {
+  private generateUserAccessToken(user: { id: number; username: string; email?: string }) {
     return this.jwtService.sign(
       {
         id: user.id,
+        username: user.username,
         email: user.email,
         role: 'user',
       },
