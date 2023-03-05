@@ -57,6 +57,7 @@ export class AuthController {
   }
 
   @Post('oauth/signin/:provider')
+  @HttpCode(200)
   async oauthSignIn(@Param() params: ProviderDTO, @Body() body: SocialLoginBodyDTO) {
     const { provider } = params;
     return await this.authService.oauthSignIn(provider, body);
