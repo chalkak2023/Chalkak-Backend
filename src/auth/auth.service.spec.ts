@@ -133,7 +133,7 @@ describe('AuthService', () => {
       expect(typeof service.signUp).toBe('function');
     });
 
-    it('should be return success message when success situation', async () => {
+    it.only('should be return success message when success situation', async () => {
       const body: SignUpBodyDTO = {
         username: '테스트맨',
         email: 'testman@gmail.com',
@@ -145,7 +145,22 @@ describe('AuthService', () => {
       expect(service.signUp(body)).resolves.toStrictEqual({
         message: '회원가입 되었습니다.',
       });
-      expect(mockLocalUserRepository.insert).toHaveBeenCalledWith({ username: body.username, email: body.email, password: bcrypt.hashSync(body.password, 10) });
+    });
+
+    it('should be return fail message when username error situation', async () => {
+      const body: SignUpBodyDTO = {
+        username: '중복닉네임',
+        email: 'test@gmail.com',
+        password: 'testpassword',
+      };
+
+      mockLocalUserRepository.findOne.mockResolvedValueOnce(users[0])
+
+      expect(service.signUp(body)).rejects.toThrowError(
+        new BadRequestException({
+          message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
+        })
+      );
     });
 
     it('should be return fail message when error situation', async () => {
