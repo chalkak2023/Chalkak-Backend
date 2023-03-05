@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
-import { PostEmailVerificationBodyDTO, SignInBodyDTO, SignUpBodyDTO, PutEmailVerificationBodyDTO, ChangePasswordBodyDTO } from './dto/auth.dto';
+import { PostEmailVerificationBodyDTO, SignInBodyDTO, SignUpBodyDTO, PutEmailVerificationBodyDTO, ChangePasswordBodyDTO, SocialLoginBodyDTO, ProviderDTO } from './dto/auth.dto';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -158,6 +158,28 @@ describe('AuthController', () => {
       expect(controller.changePassword(body, user)).resolves.toBe(mockReturnValue);
     });
   });
+
+  describe.only('POST /api/oauth/signin/:provider (oauthSignIn)', () => {
+    it('should be defined', () => {
+      expect(controller.oauthSignIn).toBeDefined();
+      expect(typeof controller.oauthSignIn).toBe('function');
+    });
+
+    it('should be return value returned by service same name method', async () => {
+      const params: ProviderDTO = {
+        provider: 'kakao'
+      }
+      const body: SocialLoginBodyDTO = {
+        code: 'test',
+        state: 'chalkak'
+      };
+      const mockReturnValue = { accessToken: 'accessToken', refreshToken: 'refreshToken', message: '로그인되었습니다.' };
+      service.oauthSignIn.mockResolvedValue(mockReturnValue);
+
+      expect(controller.oauthSignIn(params, body)).resolves.toBe(mockReturnValue);
+    });
+  });
+
 
   describe('GET /api/auth/refresh (refreshAccessToken)', () => {
     it('should be defined', () => {
