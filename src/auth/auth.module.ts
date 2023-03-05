@@ -7,9 +7,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { MailerProviderModule } from 'src/mailer/mailer.module';
 import { JwtRefreshStrategy } from './guard/jwt-refresh/jwt-refresh.strategy';
 import { JwtStrategy } from './guard/jwt/jwt.strategy';
+import { SocialModule } from 'src/social/social.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, LocalUser, NaverUser, KaKaoUser]), JwtModule, CacheModule.register(), MailerProviderModule],
+  imports: [TypeOrmModule.forFeature([User, LocalUser, NaverUser, KaKaoUser]), JwtModule, CacheModule.register(), MailerProviderModule, SocialModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
 })

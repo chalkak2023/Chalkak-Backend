@@ -23,6 +23,8 @@ import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
 import { Cache } from 'cache-manager';
 import _ from 'lodash';
+import { SocialNaverService } from '../social/service/social.naver.service';
+import { SocialKakaoService } from 'src/social/service/social.kakao.service';
 
 @Injectable()
 export class AuthService {
@@ -31,7 +33,9 @@ export class AuthService {
     @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private mailerAuthService: MailerAuthService
+    private mailerAuthService: MailerAuthService,
+    private socialKaKaoService: SocialKakaoService,
+    private socialNaverService: SocialNaverService
   ) {}
 
   async createSampleUser() {
