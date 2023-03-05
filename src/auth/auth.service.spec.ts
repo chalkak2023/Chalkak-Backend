@@ -135,6 +135,7 @@ describe('AuthService', () => {
 
     it('should be return success message when success situation', async () => {
       const body: SignUpBodyDTO = {
+        username: '테스트맨',
         email: 'testman@gmail.com',
         password: 'testpassword',
       };
@@ -144,7 +145,7 @@ describe('AuthService', () => {
       expect(service.signUp(body)).resolves.toStrictEqual({
         message: '회원가입 되었습니다.',
       });
-      expect(mockLocalUserRepository.insert).toHaveBeenCalledWith({ email: body.email, password: bcrypt.hashSync(body.password, 10) });
+      expect(mockLocalUserRepository.insert).toHaveBeenCalledWith({ username: body.username, email: body.email, password: bcrypt.hashSync(body.password, 10) });
     });
 
     it('should be return fail message when error situation', async () => {
