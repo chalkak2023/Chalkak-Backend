@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { LocalUser, User } from './entities/user.entity';
 import {
   PostEmailVerificationBodyDTO,
   SignInBodyDTO,
@@ -27,7 +27,7 @@ import _ from 'lodash';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User) private usersRepository: Repository<User>,
+    @InjectRepository(LocalUser) private localUsersRepository: Repository<LocalUser>,
     @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
     private jwtService: JwtService,
     private configService: ConfigService,
@@ -44,7 +44,7 @@ export class AuthService {
       };
       arr.push(temp);
     }
-    return await this.usersRepository.insert(arr).catch((err) => {
+    return await this.localUsersRepository.insert(arr).catch((err) => {
       throw new BadRequestException({
         message: '중복된 데이터가 이미 있습니다.',
       });
@@ -55,7 +55,7 @@ export class AuthService {
     const { username: _username, email, password } = body;
     const username = _username || `${email.split('@')[0]}#${Math.floor(Math.random() * 10000) + 1}`
     const passwordHash = bcrypt.hashSync(password, 10);
-    await this.usersRepository.insert({ username, email, password: passwordHash }).catch((err) => {
+    await this.localUsersRepository.insert({ username, email, password: passwordHash }).catch((err) => {
       throw new BadRequestException({
         message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.',
       });
@@ -67,7 +67,7 @@ export class AuthService {
 
   async signIn(body: SignInBodyDTO, response: any) {
     const { email, password } = body;
-    const user = await this.usersRepository.findOne({ where: { email }, select: { id: true, email: true, password: true } });
+    const user = await this.localUsersRepository.findOne({ where: { email }, select: { id: true, email: true, password: true } });
     if (!user) {
       throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
     }
@@ -122,7 +122,7 @@ export class AuthService {
   async changePassword(body: ChangePasswordBodyDTO, user: any) {
     const { password } = body;
     const passwordHash = bcrypt.hashSync(password, 10);
-    await this.usersRepository.update(user.id, { password: passwordHash });
+    await this.localUsersRepository.update(user.id, { password: passwordHash });
     return {
       message: '비밀번호가 변경되었습니다.',
     };
@@ -152,7 +152,7 @@ export class AuthService {
         message: '사용 만료되었습니다.',
       });
     }
-    const user = await this.usersRepository.findOne({
+    const user = await this.localUsersRepository.findOne({
       where: {
         id: userId,
       },
