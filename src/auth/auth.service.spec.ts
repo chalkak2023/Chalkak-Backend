@@ -336,7 +336,7 @@ describe('AuthService', () => {
       });
     });
 
-    it.skip('should throw exception when access token is not jwt token and is not signed by chalkak service', async () => {
+    it('should throw exception when access token is not jwt token and is not signed by chalkak service', async () => {
       const accessToken = 'accessToken';
       const refreshToken = 'refreshToken';
       cache = {};
@@ -348,7 +348,7 @@ describe('AuthService', () => {
 
       expect(service.refreshAccessToken(accessToken, refreshToken)).rejects.toThrowError(
         new UnauthorizedException({
-          message: '사용 만료되었습니다.',
+          message: '정상 발급된 액세스 토큰이 아닙니다.',
         })
       );
     });
