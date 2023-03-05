@@ -79,7 +79,10 @@ export class decodedAccessTokenDTO {
   readonly id: number;
 
   @IsString()
-  readonly email: string;
+  readonly username: string;
+
+  @IsString()
+  readonly email?: string;
 
   @IsString()
   readonly role: string;
