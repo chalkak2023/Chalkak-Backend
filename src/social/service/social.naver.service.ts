@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { AxiosError } from 'axios';
 import { response } from 'express';
 import { lastValueFrom } from 'rxjs';
+import { SocialLoginBodyDTO } from 'src/auth/dto/auth.dto';
 
 @Injectable()
 export class SocialNaverService {
@@ -13,7 +14,7 @@ export class SocialNaverService {
 
   constructor(private configService: ConfigService, private httpService: HttpService) {}
 
-  async getOauth2Token(code: string, state: string) {
+  async getOauth2Token({code, state}: SocialLoginBodyDTO) {
     const response = await lastValueFrom(
       this.httpService.get('https://nid.naver.com/oauth2.0/token', {
         params: {

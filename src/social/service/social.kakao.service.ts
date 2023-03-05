@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { AxiosError } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
+import { SocialLoginBodyDTO } from '../../auth/dto/auth.dto';
 
 @Injectable()
 export class SocialKakaoService {
@@ -14,7 +15,7 @@ export class SocialKakaoService {
 
   constructor(private configService: ConfigService, private httpService: HttpService) {}
 
-  async getOauth2Token(code: string) {
+  async getOauth2Token({code}: SocialLoginBodyDTO) {
     const response = await lastValueFrom(
       this.httpService.get('https://kauth.kakao.com/oauth/token', {
         params: {
