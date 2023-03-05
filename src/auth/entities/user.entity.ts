@@ -11,6 +11,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   TableInheritance,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -24,7 +25,7 @@ export class User {
   email: string;
 
   @Column('varchar', { unique: true })
-  username: string;
+  nickname: string;
 
   @Column('bool', { default: false })
   isBlock: boolean;
@@ -58,7 +59,15 @@ export class LocalUser extends User {
 }
 
 @ChildEntity('naver')
-export class NaverUser extends User {}
+@Unique('provider_userid_unique', ['provider', 'providerUserId'])
+export class NaverUser extends User {
+  @Column('varchar')
+  providerUserId: number;
+}
 
 @ChildEntity('kakao')
-export class KaKaoUser extends User {}
+@Unique('provider_userid_unique', ['provider', 'providerUserId'])
+export class KaKaoUser extends User {
+  @Column('varchar')
+  providerUserId: number;
+}
