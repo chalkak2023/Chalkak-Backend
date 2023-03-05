@@ -7,13 +7,16 @@ import moment from 'moment';
 import randomToken from 'rand-token';
 import _ from 'lodash';
 import { Admin } from 'src/admin/entities/admin.entity';
-import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
-import { SignupAdminResDto } from 'src/admin/dto/signup.admin.res.dto';
-import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 import { User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
+import { Faq } from 'src/admin/entities/faq.entity';
+import { SignupAdminResDto } from 'src/admin/dto/signup.admin.res.dto';
+import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
+import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
+import { CreateAdminFaqDto } from 'src/admin/dto/create.admin.faq.dto';
+import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
 
 @Injectable()
 export class AdminService {
@@ -23,12 +26,30 @@ export class AdminService {
     @InjectRepository(Collection) private adminCollectionsRepository: Repository<Collection>,
     @InjectRepository(Photospot) private adminPhotospotsRepository: Repository<Photospot>,
     @InjectRepository(Meetup) private adminMeetupsRepository: Repository<Meetup>,
+    @InjectRepository(Faq) private adminFaqRepository: Repository<Faq>,
     private jwtService: JwtService
   ) {}
 
   // 관리자 관리
-  async getAdminsList(alias: string) {
-    return this.adminRepository.createQueryBuilder(alias);
+  async getAdminsList(keyword: string, p: number = 1): Promise<any> {
+    const adminList = this.adminRepository.createQueryBuilder('admin');
+    if (keyword) {
+      adminList.where('admin.account LIKE :keyword OR admin.responsibility LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    }
+
+    const take = 6;
+    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const total = await adminList.getCount();
+    adminList.skip((page - 1) * take).take(take);
+
+    return {
+      data: await adminList.getMany(),
+      total,
+      page,
+      lastPage: Math.ceil(total / take),
+    };
   }
 
   private async hashPassword(password: string): Promise<string> {
@@ -117,7 +138,7 @@ export class AdminService {
 
   async deleteAdmin(id: number) {
     await this.isMasterAdmin(id);
-    this.adminRepository.delete(id);
+    return this.adminRepository.delete(id);
   }
 
   private async isMasterAdmin(id: number) {
@@ -181,19 +202,18 @@ export class AdminService {
   }
 
   async deleteAdminCollection(id: number) {
-    try {
-      await this.adminCollectionsRepository.findOne({ where: { id } });
-      return this.adminCollectionsRepository.softDelete(id);
-    } catch (error) {
-      throw new BadRequestException();
+    await this.adminCollectionsRepository.findOne({ where: { id } });
+    if (_.isNil(id)) {
+      throw new NotFoundException('해당 콜렉션 게시물을 찾을 수 없습니다.');
     }
+    return this.adminCollectionsRepository.softDelete(id);
   }
 
   // 포토스팟 관리
-  async getAdminAllPhotospot(id: number): Promise<Photospot[]> {
+  async getAdminPhotospotList(id: number): Promise<Photospot[]> {
     const photospots = await this.adminPhotospotsRepository.find({ where: { id } });
     if (!photospots.length) {
-      throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
+      throw new NotFoundException('해당 포토스팟 목록을 찾을 수 없습니다.');
     }
     return photospots;
   }
@@ -201,13 +221,16 @@ export class AdminService {
   async getAdminPhotospot(photospotId: number): Promise<Photospot> {
     const photospot = await this.adminPhotospotsRepository.findOne({ where: { id: photospotId } });
     if (_.isNil(photospot)) {
-      throw new NotFoundException('해당 포토스팟을 찾을 수 없습니다.');
+      throw new NotFoundException('해당 포토스팟 게시물을 찾을 수 없습니다.');
     }
     return photospot;
   }
 
   async deleteAdminPhotospot(photospotId: number) {
     await this.getAdminPhotospot(photospotId);
+    if (_.isNil(photospotId)) {
+      throw new NotFoundException('해당 포토스팟 게시물을 찾을 수 없습니다.');
+    }
     this.adminPhotospotsRepository.softDelete(photospotId);
   }
 
@@ -234,11 +257,54 @@ export class AdminService {
   }
 
   async deleteAdminMeetup(id: number) {
-    try {
-      await this.adminMeetupsRepository.findOne({ where: { id } });
-      return this.adminMeetupsRepository.delete(id);
-    } catch (error) {
-      throw new BadRequestException();
+    await this.adminMeetupsRepository.findOne({ where: { id } });
+    if (_.isNil(id)) {
+      throw new NotFoundException('해당 모임 게시물을 찾을 수 없습니다.');
     }
+    return this.adminMeetupsRepository.delete(id);
+  }
+
+  // 자주찾는질문 관리
+  async getAdminFaqList(keyword: string, p: number = 1): Promise<any> {
+    const faqList = this.adminFaqRepository.createQueryBuilder('faq');
+    if (keyword) {
+      faqList.where('faq.title LIKE :keyword OR faq.content LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      });
+    }
+
+    const take = 6;
+    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const total = await faqList.getCount();
+    faqList.skip((page - 1) * take).take(take);
+
+    return {
+      data: await faqList.getMany(),
+      total,
+      page,
+      lastPage: Math.ceil(total / take),
+    };
+  }
+
+  async getAdminFaq(id: number): Promise<Faq> {
+    const faq = await this.adminFaqRepository.findOne({ where: { id } });
+    if (_.isNil(faq)) {
+      throw new NotFoundException('해당 자주찾는질문 게시물을 찾을 수 없습니다.');
+    }
+    return faq;
+  }
+
+  async createAdminFaq(createAdminFaqDto: CreateAdminFaqDto): Promise<void> {
+    await this.adminFaqRepository.save(createAdminFaqDto);
+  }
+
+  async updateAdminFaq(updateAdminFaqtDto: UpdateAdminFaqDto, id: number) {
+    await this.getAdminFaq(id);
+    return this.adminFaqRepository.update({ id }, updateAdminFaqtDto);
+  }
+
+  async deleteAdminFaq(id: number) {
+    await this.getAdminFaq(id);
+    return this.adminFaqRepository.softDelete(id);
   }
 }

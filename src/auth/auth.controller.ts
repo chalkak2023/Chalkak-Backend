@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   PostEmailVerificationBodyDTO,
@@ -26,12 +26,14 @@ export class AuthController {
   }
 
   @Post('signin')
+  @HttpCode(200)
   async signIn(@Body() body: SignInBodyDTO, @Res({ passthrough: true }) response: any) {
     return await this.authService.signIn(body, response);
   }
 
   @Post('signout')
   @UseGuards(JwtGuard)
+  @HttpCode(200)
   async signOut(@InjectUser() user: any, @Res({ passthrough: true }) response: any) {
     return await this.authService.signOut(user, response);
   }
