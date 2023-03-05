@@ -10,7 +10,7 @@ export class SignUpBodyDTO {
   @IsString({
     message: '유저명은 문자열이어야 합니다.'
   })
-  username: string;
+  username?: string;
   @IsEmail(
     {},
     {
