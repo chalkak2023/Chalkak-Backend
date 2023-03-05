@@ -67,6 +67,7 @@ describe('MeetupsController', () => {
     };
     const userDTO: decodedAccessTokenDTO = {
       id: 1,
+      username: 'test',
       email: 'test@gmail.com',
       role: 'user',
       iat: 0,
@@ -99,6 +100,7 @@ describe('MeetupsController', () => {
     const meetupId = 1;
     const userDTO: decodedAccessTokenDTO = {
       id: 1,
+      username: 'test',
       email: 'test@gmail.com',
       role: 'user',
       iat: 0,
@@ -117,6 +119,7 @@ describe('MeetupsController', () => {
     const meetupId = 1;
     const userDTO: decodedAccessTokenDTO = {
       id: 1,
+      username: 'test',
       email: 'test@gmail.com',
       role: 'user',
       iat: 0,
@@ -135,6 +138,7 @@ describe('MeetupsController', () => {
     const meetupId = 1;
     const userDTO: decodedAccessTokenDTO = {
       id: 1,
+      username: 'test',
       email: 'test@gmail.com',
       role: 'user',
       iat: 0,
