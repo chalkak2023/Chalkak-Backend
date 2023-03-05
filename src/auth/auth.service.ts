@@ -16,6 +16,7 @@ import {
   SignUpBodyDTO,
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
+  SocialLoginBodyDTO,
 } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -140,9 +141,49 @@ export class AuthService {
     };
   }
 
-  async oauthSignIn() {
+  async oauthSignIn(provider: 'kakao' | 'naver', body: SocialLoginBodyDTO) {
+    const socialService = provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
+    const usersRepository = provider === 'kakao' ? this.kakaoUsersRepository : this.naverUsersRepository;
+    const token = await socialService.getOauth2Token(body);
+    const info = await socialService.getUserInfo(token.access_token);
+
+    const id = info.id;
+    const nickname = provider === 'kakao' ? info.kakao_account.profile.nickname : info.nickname
+
+    let user = await usersRepository.findOne({
+      where: {
+        providerUserId: id,
+      },
+    });
+    if (_.isNil(user)) {
+      await usersRepository
+        .insert({
+          providerUserId: id,
+          username: nickname
+        })
+        .catch((err) => {
+          console.error(err)
+          throw new BadRequestException({
+            message: '가입에 실패했습니다.',
+          });
+        });
+      user = await usersRepository.findOne({
+        where: {
+          providerUserId: id,
+        },
+      });
+    }
+
+    const accessToken = this.generateUserAccessToken({
+      id: user!.id,
+      username: user!.username
+    })
+    const refreshToken = this.generateUserRefreshToken()
+
     return {
-      message: 'message',
+      accessToken,
+      refreshToken,
+      message: '로그인되었습니다.',
     };
   }
 
