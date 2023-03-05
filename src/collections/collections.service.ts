@@ -49,4 +49,20 @@ export class CollectionsService {
     }
     await this.collectionKeywordsRepository.update({ id: keywordId }, updateCollectionKeywordDto);
   }
+
+  async deleteCollection(collectionId: number, userId: number) {
+    const collection = await this.getColletion(collectionId);
+    if (userId !== collection.userId) {
+      throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
+    }
+    return this.collectionsRepository.softDelete(collectionId);
+  }
+
+  async deleteCollectionKeyword(collectionId: number, keywordId: number, userId: number) {
+    const collection = await this.getColletion(collectionId);
+    if (userId !== collection.userId) {
+      throw new ForbiddenException('해당 콜렉션 키워드의 삭제 권한이 없습니다.');
+    }
+    return this.collectionKeywordsRepository.softDelete({ id: keywordId });
+  }
 }

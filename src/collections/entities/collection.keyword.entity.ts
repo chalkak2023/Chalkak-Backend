@@ -1,6 +1,6 @@
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Collection } from 'src/collections/entities/collection.entity';
 import { User } from 'src/auth/entities/user.entity';
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
-import { Collection } from './collection.entity';
 
 @Entity({ schema: 'chalkak', name: 'collection_keyword' })
 export class CollectionKeyword {
@@ -18,6 +18,9 @@ export class CollectionKeyword {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date | null;
 
   @ManyToOne(() => Collection, (collection) => collection.collection_keywords, {
     onDelete: 'CASCADE',

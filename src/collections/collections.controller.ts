@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { InjectUser } from 'src/auth/auth.decorator';
 import { CollectionsService } from 'src/collections/collections.service';
 import { JwtGuard } from 'src/auth/guard/jwt/jwt.guard';
@@ -51,5 +51,21 @@ export class CollectionsController {
     @InjectUser('id') userId: number
   ): Promise<void> {
     await this.collectionsService.updateCollectionKeyword(updateCollectionKeywordDto, collectionId, keywordId, userId);
+  }
+
+  @Delete(':collectionId')
+  @UseGuards(JwtGuard)
+  async deleteCollection(@Param('collectionId') collectionId: number, @InjectUser('id') userId: number) {
+    await this.collectionsService.deleteCollection(collectionId, userId);
+  }
+
+  @Delete(':collectionId/keywords/:keywordId')
+  @UseGuards(JwtGuard)
+  async deleteCollectionKeyword(
+    @Param('collectionId') collectionId: number,
+    @Param('keywordId') keywordId: number,
+    @InjectUser('id') userId: number
+  ) {
+    await this.collectionsService.deleteCollectionKeyword(collectionId, keywordId, userId);
   }
 }
