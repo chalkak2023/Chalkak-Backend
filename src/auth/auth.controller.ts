@@ -33,7 +33,7 @@ export class AuthController {
   }
 
   @Post('signout')
-  @UseGuards(UserGuard)
+  @UserGuard
   @HttpCode(200)
   async signOut(@InjectUser() user: any, @Res({ passthrough: true }) response: any) {
     return await this.authService.signOut(user, response);
@@ -50,7 +50,7 @@ export class AuthController {
   }
 
   @Patch('')
-  @UseGuards(UserGuard)
+  @UserGuard
   async changePassword(@Body() body: ChangePasswordBodyDTO, @InjectUser() user: any) {
     return await this.authService.changePassword(body, user);
   }

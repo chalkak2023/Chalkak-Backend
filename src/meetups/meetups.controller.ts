@@ -20,7 +20,7 @@ export class MeetupsController {
   }
 
   @Post()
-  @UseGuards(UserGuard)
+  @UserGuard
   async createMeetup(@Body() meetupDTO: CreateMeetupDTO, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
     meetupDTO.userId = userDTO.id;
     return await this.meetupsService.createMeetup(meetupDTO);
@@ -32,19 +32,19 @@ export class MeetupsController {
   }
 
   @Delete(':meetupId')
-  @UseGuards(UserGuard)
+  @UserGuard
   async deleteMeetup(@Param('meetupId') meetupId: number, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
     return await this.meetupsService.deleteMeetup(meetupId, userDTO.id);
   }
 
   @Post(':meetupId/join')
-  @UseGuards(UserGuard)
+  @UserGuard
   async addJoin(@Param('meetupId') meetupId: number, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
     return await this.meetupsService.addJoin(meetupId, userDTO.id);
   }
 
   @Delete(':meetupId/join')
-  @UseGuards(UserGuard)
+  @UserGuard
   async deleteJoin(@Param('meetupId') meetupId: number, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
     return await this.meetupsService.deleteJoin(meetupId, userDTO.id);
   }

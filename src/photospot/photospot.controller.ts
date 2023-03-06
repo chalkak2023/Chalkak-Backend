@@ -11,7 +11,7 @@ export class PhotospotController {
   constructor(private readonly photospotService: PhotospotService) {}
 
   @Post('/:collectionId/photospots')
-  @UseGuards(UserGuard)
+  @UserGuard
   @FormDataRequest()
   async createPhotospot(
     @Body() createPhtospotDto: CreatePhotospotDto,
@@ -32,7 +32,7 @@ export class PhotospotController {
   }
 
   @Put('/:collectionId/photospots/:photospotId')
-  @UseGuards(UserGuard)
+  @UserGuard
   @FormDataRequest()
   async modifyPhotospot(
     @Body() modifyPhotospot: ModifyPhotospotDto,
@@ -43,7 +43,7 @@ export class PhotospotController {
   }
 
   @Delete('/:collectionId/photospots/:photospotId')
-  @UseGuards(UserGuard)
+  @UserGuard
   async deletePhotospot(@Param('photospotId') photospotId: number, @InjectUser('id') userId: number) {
     await this.photospotService.deletePhotospot(photospotId, userId);
   }
