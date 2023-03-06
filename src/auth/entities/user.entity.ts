@@ -59,14 +59,14 @@ export class LocalUser extends User {
 }
 
 @ChildEntity('naver')
-@Unique('provider_userid_unique', ['provider', 'providerUserId'])
+@Unique('provider_naver_userid_unique', ['provider', 'providerUserId'])
 export class NaverUser extends User {
   @Column('varchar')
   providerUserId: number;
 }
 
 @ChildEntity('kakao')
-@Unique('provider_userid_unique', ['provider', 'providerUserId'])
+@Unique('provider_kakao_userid_unique', ['provider', 'providerUserId'])
 export class KakaoUser extends User {
   @Column('varchar')
   providerUserId: number;
