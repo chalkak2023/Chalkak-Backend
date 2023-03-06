@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LocalUser, KakaoUser, NaverUser } from './entities/user.entity';
+import { LocalUser, KakaoUser, NaverUser, User } from './entities/user.entity';
 import {
   PostEmailVerificationBodyDTO,
   SignInBodyDTO,
@@ -30,6 +30,7 @@ import { SocialKakaoService } from 'src/social/service/social.kakao.service';
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(User) private usersRepository: Repository<User>,
     @InjectRepository(LocalUser) private localUsersRepository: Repository<LocalUser>,
     @InjectRepository(KakaoUser) private kakaoUsersRepository: Repository<KakaoUser>,
     @InjectRepository(NaverUser) private naverUsersRepository: Repository<NaverUser>,
@@ -143,31 +144,40 @@ export class AuthService {
 
   async oauthSignIn(provider: 'kakao' | 'naver', body: SocialLoginBodyDTO) {
     const socialService = provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
-    const usersRepository = provider === 'kakao' ? this.kakaoUsersRepository : this.naverUsersRepository;
+    const socialUsersRepository = provider === 'kakao' ? this.kakaoUsersRepository : this.naverUsersRepository;
     const token = await socialService.getOauth2Token(body);
     const info = await socialService.getUserInfo(token.access_token);
 
     const id = info.id;
-    const nickname = provider === 'kakao' ? info.kakao_account.profile.nickname : info.nickname
+    let nickname = provider === 'kakao' ? info.kakao_account.profile.nickname : info.nickname;
 
-    let user = await usersRepository.findOne({
+    const sameUsernameUser = await this.usersRepository.findOne({
+      where: {
+        username: nickname,
+      },
+    });
+    if (!_.isNil(sameUsernameUser)) {
+      nickname = `${nickname}#${Math.floor(Math.random() * 10000) + 1}`;
+    }
+
+    let user = await socialUsersRepository.findOne({
       where: {
         providerUserId: id,
       },
     });
     if (_.isNil(user)) {
-      await usersRepository
+      await socialUsersRepository
         .insert({
           providerUserId: id,
-          username: nickname
+          username: nickname,
         })
         .catch((err) => {
-          console.error(err)
+          console.error(err);
           throw new BadRequestException({
             message: '가입에 실패했습니다.',
           });
         });
-      user = await usersRepository.findOne({
+      user = await socialUsersRepository.findOne({
         where: {
           providerUserId: id,
         },
@@ -176,9 +186,9 @@ export class AuthService {
 
     const accessToken = this.generateUserAccessToken({
       id: user!.id,
-      username: user!.username
-    })
-    const refreshToken = this.generateUserRefreshToken()
+      username: user!.username,
+    });
+    const refreshToken = this.generateUserRefreshToken();
     this.cacheManager.set(refreshToken, user!.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
 
     return {
