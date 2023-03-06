@@ -17,6 +17,7 @@ import {
 
 @Entity({ schema: 'chalkak', name: 'user' })
 @TableInheritance({ column: { type: 'varchar', name: 'provider' } })
+@Unique('provider_userid_unique', ['provider', 'providerUserId'])
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
@@ -29,6 +30,9 @@ export class User {
 
   @Column('bool', { default: false })
   isBlock: boolean;
+
+  @Column('varchar', { nullable: true })
+  providerUserId: string | null;
 
   @CreateDateColumn()
   createdAt: Date;
@@ -59,15 +63,7 @@ export class LocalUser extends User {
 }
 
 @ChildEntity('naver')
-@Unique('provider_naver_userid_unique', ['provider', 'providerUserId'])
-export class NaverUser extends User {
-  @Column('varchar')
-  providerUserId: number;
-}
+export class NaverUser extends User {}
 
 @ChildEntity('kakao')
-@Unique('provider_kakao_userid_unique', ['provider', 'providerUserId'])
-export class KakaoUser extends User {
-  @Column('varchar')
-  providerUserId: number;
-}
+export class KakaoUser extends User {}
