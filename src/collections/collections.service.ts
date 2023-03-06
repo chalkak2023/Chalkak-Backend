@@ -68,6 +68,7 @@ export class CollectionsService {
     if (collectionKeyword.userId !== userId) {
       throw new ForbiddenException('해당 콜렉션 키워드의 수정 권한이 없습니다.');
     }
+    await this.getCollectionKeyword(keywordId);
     await this.collectionKeywordsRepository.update({ id: keywordId }, updateCollectionKeywordDto);
   }
 
