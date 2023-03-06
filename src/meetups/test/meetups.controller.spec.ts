@@ -34,24 +34,25 @@ describe('MeetupsController', () => {
   describe('GET /api/meetups', () => {
     const page = 1;
     const pageUnderOne = 0;
+    const keyword = 'keyword';
     it('getMeetups', async () => {
       const mockReturnValue = [new Meetup()];
       mockService.getMeetups.mockResolvedValue(mockReturnValue);
-      const result = await controller.getMeetups(page);
+      const result = await controller.getMeetups(page, keyword);
 
       expect(result).toBe(mockReturnValue);
       expect(mockService.getMeetups).toHaveBeenCalled();
-      expect(mockService.getMeetups).toHaveBeenCalledWith(page);
+      expect(mockService.getMeetups).toHaveBeenCalledWith(page, keyword);
       expect(result).toBeInstanceOf(Array);
     });
-    it('getMeetups - If page is less than 1', async () => {
+    it('getMeetups - page is less than 1', async () => {
       const mockReturnValue = [new Meetup()];
       mockService.getMeetups.mockResolvedValue(mockReturnValue);
-      const result = await controller.getMeetups(pageUnderOne);
+      const result = await controller.getMeetups(pageUnderOne, keyword);
 
       expect(result).toBe(mockReturnValue);
       expect(mockService.getMeetups).toHaveBeenCalled();
-      expect(mockService.getMeetups).toHaveBeenCalledWith(page);
+      expect(mockService.getMeetups).toHaveBeenCalledWith(page, keyword);
       expect(result).toBeInstanceOf(Array);
     });
   });
