@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post, Put, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   PostEmailVerificationBodyDTO,
@@ -6,10 +6,12 @@ import {
   SignUpBodyDTO,
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
+  ProviderDTO,
 } from './dto/auth.dto';
 import { InjectUser, Token } from './auth.decorator';
 import { JwtGuard } from './guard/jwt/jwt.guard';
 import { JwtRefreshGuard } from './guard/jwt-refresh/jwt-refresh.guard';
+import { SocialLoginBodyDTO } from './dto/auth.dto';
 
 @Controller('api/auth')
 export class AuthController {
@@ -54,9 +56,11 @@ export class AuthController {
     return await this.authService.changePassword(body, user);
   }
 
-  @Post('oauth/signin')
-  async oauthSignIn() {
-    return await this.authService.oauthSignIn();
+  @Post('oauth/signin/:provider')
+  @HttpCode(200)
+  async oauthSignIn(@Param() params: ProviderDTO, @Body() body: SocialLoginBodyDTO) {
+    const { provider } = params;
+    return await this.authService.oauthSignIn(provider, body);
   }
 
   @Get('refresh')

@@ -2,6 +2,7 @@ import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Join } from 'src/meetups/entities/join.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
+import { CollectionKeyword } from 'src/collections/entities/collection.keyword.entity';
 import {
   ChildEntity,
   Column,
@@ -11,9 +12,9 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   TableInheritance,
+  Unique,
   UpdateDateColumn,
 } from 'typeorm';
-import { CollectionKeyword } from 'src/collections/entities/collection.keyword.entity';
 
 @Entity({ schema: 'chalkak', name: 'user' })
 @TableInheritance({ column: { type: 'varchar', name: 'provider' } })
@@ -21,7 +22,7 @@ export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
-  @Column('varchar', { unique: true })
+  @Column('varchar', { unique: true, nullable: true })
   email: string;
 
   @Column('varchar', { unique: true })
@@ -62,7 +63,15 @@ export class LocalUser extends User {
 }
 
 @ChildEntity('naver')
-export class NaverUser extends User {}
+@Unique('provider_userid_unique', ['provider', 'providerUserId'])
+export class NaverUser extends User {
+  @Column('varchar')
+  providerUserId: number;
+}
 
 @ChildEntity('kakao')
-export class KaKaoUser extends User {}
+@Unique('provider_userid_unique', ['provider', 'providerUserId'])
+export class KakaoUser extends User {
+  @Column('varchar')
+  providerUserId: number;
+}
