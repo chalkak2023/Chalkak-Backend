@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as _ from 'lodash';
@@ -21,16 +21,37 @@ export class CollectionsService {
     return await this.collectionUserKeywordRepository.getCollectionsList(keyword, p);
   }
 
-  async getColletion(collectionId: number): Promise<Collection> {
-    return await this.collectionUserKeywordRepository.getColletion(collectionId);
+  async getCollection(collectionId: number): Promise<Collection> {
+    const collection = await this.collectionUserKeywordRepository.getCollection(collectionId);
+    if (!collection) {
+      throw new NotFoundException(`해당 콜렉션을 찾을 수 없습니다.`);
+    }
+    return collection;
   }
 
-  async createCollection(createCollectionDto: CreateCollectionDto): Promise<void> {
-    await this.collectionsRepository.save(createCollectionDto);
+  async getCollectionKeyword(keywordId: number): Promise<CollectionKeyword> {
+    const collectionKeyword = await this.collectionKeywordsRepository.findOne({ where: { id: keywordId } });
+    if (_.isNil(collectionKeyword)) {
+      throw new NotFoundException('해당 콜렉션의 키워드를 찾을 수 없습니다.');
+    }
+    return collectionKeyword;
+  }
+
+  createCollection(createCollectionDto: CreateCollectionDto) {
+    const { userId, title, description, keyword } = createCollectionDto;
+    this.collectionsRepository.save({
+      userId,
+      title,
+      description,
+      collection_keywords: keyword.map((keyword) => ({
+        userId,
+        keyword,
+      })),
+    });
   }
 
   async updateCollectionContent(updateCollectionContentDto: UpdateCollectionContentDto, collectionId: number, userId: number) {
-    const collectionContent = await this.getColletion(collectionId);
+    const collectionContent = await this.getCollection(collectionId);
     if (collectionContent.userId !== userId) {
       throw new ForbiddenException('해당 콜렉션 내용의 수정 권한이 없습니다.');
     }
@@ -43,7 +64,7 @@ export class CollectionsService {
     keywordId: number,
     userId: number
   ) {
-    const collectionKeyword = await this.getColletion(collectionId);
+    const collectionKeyword = await this.getCollection(collectionId);
     if (collectionKeyword.userId !== userId) {
       throw new ForbiddenException('해당 콜렉션 키워드의 수정 권한이 없습니다.');
     }
@@ -51,18 +72,19 @@ export class CollectionsService {
   }
 
   async deleteCollection(collectionId: number, userId: number) {
-    const collection = await this.getColletion(collectionId);
+    const collection = await this.getCollection(collectionId);
     if (userId !== collection.userId) {
       throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
     }
-    return this.collectionsRepository.softDelete(collectionId);
+    this.collectionsRepository.softDelete(collectionId);
   }
 
   async deleteCollectionKeyword(collectionId: number, keywordId: number, userId: number) {
-    const collection = await this.getColletion(collectionId);
+    const collection = await this.getCollection(collectionId);
     if (userId !== collection.userId) {
       throw new ForbiddenException('해당 콜렉션 키워드의 삭제 권한이 없습니다.');
     }
-    return this.collectionKeywordsRepository.softDelete({ id: keywordId });
+    await this.getCollectionKeyword(keywordId);
+    this.collectionKeywordsRepository.softDelete({ id: keywordId });
   }
 }

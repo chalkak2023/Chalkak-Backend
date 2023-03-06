@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateCollectionDto {
   userId: number;
@@ -13,8 +13,13 @@ export class CreateCollectionDto {
   @IsString()
   description: string;
 
+  @IsArray()
   @IsOptional()
-  @IsNotEmpty()
-  @IsString()
-  keyword: string;
+  @IsNotEmpty({
+    each: true,
+  })
+  @IsString({
+    each: true,
+  })
+  keyword: string[];
 }

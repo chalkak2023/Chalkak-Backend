@@ -1,4 +1,10 @@
-import { PickType } from '@nestjs/mapped-types';
-import { CreateCollectionDto } from './create.collection.dto';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
-export class UpdateCollectionKeywordDto extends PickType(CreateCollectionDto, ['keyword'] as const) {}
+export class UpdateCollectionKeywordDto {
+  userId: number;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsString()
+  keyword: string;
+}

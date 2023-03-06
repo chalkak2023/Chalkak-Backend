@@ -3,6 +3,7 @@ import { InjectUser } from 'src/auth/auth.decorator';
 import { CollectionsService } from 'src/collections/collections.service';
 import { JwtGuard } from 'src/auth/guard/jwt/jwt.guard';
 import { Collection } from 'src/collections/entities/collection.entity';
+import { CollectionKeyword } from 'src/collections/entities/collection.keyword.entity';
 import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
 import { UpdateCollectionContentDto } from 'src/collections/dto/update.collection.content.dto';
@@ -18,16 +19,18 @@ export class CollectionsController {
   }
 
   @Get(':collectionId')
-  async getColletion(@Param('collectionId') collectionId: number): Promise<Collection> {
-    return await this.collectionsService.getColletion(collectionId);
+  async getCollection(@Param('collectionId') collectionId: number): Promise<Collection> {
+    return await this.collectionsService.getCollection(collectionId);
+  }
+
+  @Get('/:collectionId/keywords/:keywordId')
+  async getCollectionKeyword(@Param('keywordId') keywordId: number): Promise<CollectionKeyword> {
+    return this.collectionsService.getCollectionKeyword(keywordId);
   }
 
   @Post()
   @UseGuards(JwtGuard)
-  async createCollection(
-    @Body() createCollectionDto: CreateCollectionDto,
-    @InjectUser() userDTO: decodedAccessTokenDTO
-  ): Promise<void> {
+  async createCollection(@Body() createCollectionDto: CreateCollectionDto, @InjectUser() userDTO: decodedAccessTokenDTO) {
     createCollectionDto.userId = userDTO.id;
     return await this.collectionsService.createCollection(createCollectionDto);
   }
@@ -38,7 +41,7 @@ export class CollectionsController {
     @Body() updateCollectionContentDto: UpdateCollectionContentDto,
     @Param('collectionId') collectionId: number,
     @InjectUser('id') userId: number
-  ): Promise<void> {
+  ) {
     await this.collectionsService.updateCollectionContent(updateCollectionContentDto, collectionId, userId);
   }
 
@@ -49,7 +52,7 @@ export class CollectionsController {
     @Param('collectionId') collectionId: number,
     @Param('keywordId') keywordId: number,
     @InjectUser('id') userId: number
-  ): Promise<void> {
+  ) {
     await this.collectionsService.updateCollectionKeyword(updateCollectionKeywordDto, collectionId, keywordId, userId);
   }
 

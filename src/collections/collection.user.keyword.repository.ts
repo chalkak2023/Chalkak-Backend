@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { DataSource, Repository } from 'typeorm';
 import { Collection } from 'src/collections/entities/collection.entity';
@@ -41,8 +41,8 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
     };
   }
 
-  async getColletion(collectionId: number): Promise<Collection> {
-    const collection = await this.createQueryBuilder('collection')
+  async getCollection(collectionId: number): Promise<any> {
+    return await this.createQueryBuilder('collection')
       .select([
         'collection.id',
         'collection.userId',
@@ -56,10 +56,5 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
       .leftJoin('collection.collection_keywords', 'collection_keyword')
       .where('collection.id = :id', { id: collectionId })
       .getOne();
-
-    if (_.isNil(collection)) {
-      throw new NotFoundException(`해당 콜렉션을 찾을 수 없습니다.`);
-    }
-    return collection;
   }
 }
