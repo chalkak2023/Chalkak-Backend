@@ -6,7 +6,7 @@ import _ from 'lodash';
 import { AdminService } from 'src/admin/admin.service';
 
 @Injectable()
-export class RefreshTokenAdminStrategy extends PassportStrategy(Strategy, 'refresh') {
+export class RefreshTokenAdminStrategy extends PassportStrategy(Strategy, 'jwt-refresh-admin') {
   constructor(private adminService: AdminService) {
     super({
       ignoreExpiration: true,

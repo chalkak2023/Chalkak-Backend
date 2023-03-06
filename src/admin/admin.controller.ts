@@ -31,7 +31,7 @@ export class AdminController {
   }
 
   @Post('auth/signin')
-  @UseGuards(AuthGuard('local'))
+  @UseGuards(AuthGuard('local-admin'))
   @HttpCode(200)
   async signinAdmin(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const admin = req.user as SigninAdminDto;
@@ -43,7 +43,7 @@ export class AdminController {
   }
 
   @Get('auth/signin')
-  @UseGuards(AuthGuard('refresh'))
+  @UseGuards(AuthGuard('jwt-refresh-admin'))
   async reissueTokens(
     @Req() req: any,
     @Res({ passthrough: true }) res: Response,
@@ -63,7 +63,7 @@ export class AdminController {
 
   @Post('auth/signout')
   signoutAdmin(@Req() req: Request, @Res() res: Response): any {
-    res.cookie('jwt', '', { maxAge: 0 });
+    res.cookie('jwt-admin', '', { maxAge: 0 });
     return res.send({ message: '정상적으로 로그아웃하였습니다.' });
   }
 
