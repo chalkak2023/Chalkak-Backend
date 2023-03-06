@@ -29,7 +29,7 @@ export class MeetupsRepository extends Repository<Meetup> {
       ])
       .leftJoin('m.joins', 'j')
       .leftJoin('m.user', 'u')
-      .where('m.title LIKE :keyword OR m.content LIKE :keyword', {
+      .where('u.isBlock = false AND (m.title LIKE :keyword OR m.content LIKE :keyword)', {
         keyword: `%${keyword}%`,
       })
       .orderBy('m.id', 'DESC')
@@ -78,7 +78,7 @@ export class MeetupsRepository extends Repository<Meetup> {
       .leftJoin('m.joins', 'j')
       .leftJoin('m.user', 'mu')
       .leftJoin('j.user', 'u')
-      .where('m.id = :id', { id: meetupId })
+      .where('u.isBlock = false AND m.id = :id', { id: meetupId })
       .getOne();
 
     if (_.isNil(meetup)) {
