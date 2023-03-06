@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { Body, Controller, DefaultValuePipe, Delete, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
 import { InjectUser } from 'src/auth/auth.decorator';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
@@ -11,9 +12,12 @@ export class MeetupsController {
   constructor(private readonly meetupsService: MeetupsService) {}
 
   @Get()
-  async getMeetups(@Query('p', new DefaultValuePipe(1), ParseIntPipe) page: number): Promise<Meetup[]> {
+  async getMeetups(
+    @Query('p', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('keyword', new DefaultValuePipe('')) keyword: string
+  ): Promise<Meetup[]> {
     if (page < 1) { page = 1; }
-    return await this.meetupsService.getMeetups(page);
+    return await this.meetupsService.getMeetups(page, keyword);
   }
 
   @Post()

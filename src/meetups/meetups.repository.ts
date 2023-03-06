@@ -11,7 +11,7 @@ export class MeetupsRepository extends Repository<Meetup> {
     super(Meetup, dataSource.createEntityManager());
   }
 
-  async getMeetups(page: number): Promise<Meetup[]> {
+  async getMeetups(page: number, keyword: string): Promise<Meetup[]> {
     const pageLimit = 9;
     return await this.createQueryBuilder('m')
       .select([
@@ -28,6 +28,9 @@ export class MeetupsRepository extends Repository<Meetup> {
       ])
       .leftJoin('m.joins', 'j')
       .leftJoin('m.user', 'u')
+      .where('m.title LIKE :keyword OR m.content LIKE :keyword', {
+        keyword: `%${keyword}%`,
+      })
       .orderBy('m.id', 'DESC')
       .take(pageLimit)  // 몇개를 가져올지 - 기존의 limit
       .skip((page - 1) * pageLimit)  // 몇개를 건너뛰고 보여줄지 - 기존의 offset 
