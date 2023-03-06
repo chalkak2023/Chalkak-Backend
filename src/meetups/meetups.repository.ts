@@ -18,6 +18,7 @@ export class MeetupsRepository extends Repository<Meetup> {
         'm.id',
         'm.userId',
         'u.email',
+        'u.username',
         'm.title',
         'm.content',
         'm.place',
@@ -60,6 +61,7 @@ export class MeetupsRepository extends Repository<Meetup> {
         'm.id',
         'm.userId',
         'mu.email',
+        'mu.username',
         'm.title',
         'm.content',
         'm.place',
@@ -68,6 +70,7 @@ export class MeetupsRepository extends Repository<Meetup> {
         'm.createdAt',
         'j.userId',
         'u.email',
+        'u.username',
       ])
       .leftJoin('m.joins', 'j')
       .leftJoin('m.user', 'mu')
