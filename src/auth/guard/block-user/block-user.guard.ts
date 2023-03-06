@@ -1,12 +1,12 @@
-import { CanActivate, ExecutionContext, Inject, Injectable, BadRequestException, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Inject, Injectable, UnauthorizedException, ForbiddenException, CACHE_MANAGER } from '@nestjs/common';
+import { Cache } from 'cache-manager';
 import _ from 'lodash';
-import { Observable } from 'rxjs';
 import { User } from 'src/auth/entities/user.entity';
 import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlockUserGuard implements CanActivate {
-  constructor(@Inject(DataSource) private readonly dataSource: DataSource) {}
+  constructor(@Inject(DataSource) private readonly dataSource: DataSource, @Inject(CACHE_MANAGER) private readonly cacheManager: Cache) {}
 
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const {
