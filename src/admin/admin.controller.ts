@@ -63,7 +63,7 @@ export class AdminController {
 
   @Post('auth/signout')
   signoutAdmin(@Req() req: Request, @Res() res: Response): any {
-    res.cookie('jwt-admin', '', { maxAge: 0 });
+    res.cookie('auth-cookie', '', { maxAge: 0 });
     return res.send({ message: '정상적으로 로그아웃하였습니다.' });
   }
 
