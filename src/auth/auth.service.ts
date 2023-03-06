@@ -179,6 +179,7 @@ export class AuthService {
       username: user!.username
     })
     const refreshToken = this.generateUserRefreshToken()
+    this.cacheManager.set(refreshToken, user!.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
 
     return {
       accessToken,
