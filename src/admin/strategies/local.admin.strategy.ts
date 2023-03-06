@@ -6,7 +6,7 @@ import { AdminService } from 'src/admin/admin.service';
 import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 
 @Injectable()
-export class LocalAdminStrategy extends PassportStrategy(Strategy, 'local') {
+export class LocalAdminStrategy extends PassportStrategy(Strategy, 'local-admin') {
   constructor(private adminService: AdminService) {
     super({ usernameField: 'account' });
   }

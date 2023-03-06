@@ -5,7 +5,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import _ from 'lodash';
 
 @Injectable()
-export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
   constructor() {
     super({
       ignoreExpiration: false,
