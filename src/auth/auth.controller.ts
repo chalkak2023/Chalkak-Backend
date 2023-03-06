@@ -8,8 +8,7 @@ import {
   ChangePasswordBodyDTO,
   ProviderDTO,
 } from './dto/auth.dto';
-import { InjectUser, Token } from './auth.decorator';
-import { JwtGuard } from './guard/jwt/jwt.guard';
+import { InjectUser, Token, UserGuard } from './auth.decorator';
 import { JwtRefreshGuard } from './guard/jwt-refresh/jwt-refresh.guard';
 import { SocialLoginBodyDTO } from './dto/auth.dto';
 
@@ -34,7 +33,7 @@ export class AuthController {
   }
 
   @Post('signout')
-  @UseGuards(JwtGuard)
+  @UseGuards(UserGuard)
   @HttpCode(200)
   async signOut(@InjectUser() user: any, @Res({ passthrough: true }) response: any) {
     return await this.authService.signOut(user, response);
@@ -51,7 +50,7 @@ export class AuthController {
   }
 
   @Patch('')
-  @UseGuards(JwtGuard)
+  @UseGuards(UserGuard)
   async changePassword(@Body() body: ChangePasswordBodyDTO, @InjectUser() user: any) {
     return await this.authService.changePassword(body, user);
   }

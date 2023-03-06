@@ -1,8 +1,7 @@
 import _ from 'lodash';
 import { Body, Controller, DefaultValuePipe, Delete, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
-import { InjectUser } from 'src/auth/auth.decorator';
+import { InjectUser, UserGuard } from 'src/auth/auth.decorator';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
-import { JwtGuard } from 'src/auth/guard/jwt/jwt.guard';
 import { CreateMeetupDTO } from './dto/create-meetup.dto';
 import { Meetup } from './entities/meetup.entity';
 import { MeetupsService } from './meetups.service';
@@ -21,7 +20,7 @@ export class MeetupsController {
   }
 
   @Post()
-  @UseGuards(JwtGuard)
+  @UseGuards(UserGuard)
   async createMeetup(@Body() meetupDTO: CreateMeetupDTO, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
     meetupDTO.userId = userDTO.id;
     return await this.meetupsService.createMeetup(meetupDTO);
@@ -33,19 +32,19 @@ export class MeetupsController {
   }
 
   @Delete(':meetupId')
-  @UseGuards(JwtGuard)
+  @UseGuards(UserGuard)
   async deleteMeetup(@Param('meetupId') meetupId: number, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
     return await this.meetupsService.deleteMeetup(meetupId, userDTO.id);
   }
 
   @Post(':meetupId/join')
-  @UseGuards(JwtGuard)
+  @UseGuards(UserGuard)
   async addJoin(@Param('meetupId') meetupId: number, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
     return await this.meetupsService.addJoin(meetupId, userDTO.id);
   }
 
   @Delete(':meetupId/join')
-  @UseGuards(JwtGuard)
+  @UseGuards(UserGuard)
   async deleteJoin(@Param('meetupId') meetupId: number, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
     return await this.meetupsService.deleteJoin(meetupId, userDTO.id);
   }

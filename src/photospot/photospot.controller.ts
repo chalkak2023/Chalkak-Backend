@@ -4,15 +4,14 @@ import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 import { PhotospotService } from './photospot.service';
 import { Photospot } from './entities/photospot.entity';
-import { InjectUser } from '../auth/auth.decorator';
-import { JwtGuard } from '../auth/guard/jwt/jwt.guard';
+import { InjectUser, UserGuard } from '../auth/auth.decorator';
 
 @Controller('/api/collections')
 export class PhotospotController {
   constructor(private readonly photospotService: PhotospotService) {}
 
   @Post('/:collectionId/photospots')
-  @UseGuards(JwtGuard)
+  @UseGuards(UserGuard)
   @FormDataRequest()
   async createPhotospot(
     @Body() createPhtospotDto: CreatePhotospotDto,
@@ -33,7 +32,7 @@ export class PhotospotController {
   }
 
   @Put('/:collectionId/photospots/:photospotId')
-  @UseGuards(JwtGuard)
+  @UseGuards(UserGuard)
   @FormDataRequest()
   async modifyPhotospot(
     @Body() modifyPhotospot: ModifyPhotospotDto,
@@ -44,7 +43,7 @@ export class PhotospotController {
   }
 
   @Delete('/:collectionId/photospots/:photospotId')
-  @UseGuards(JwtGuard)
+  @UseGuards(UserGuard)
   async deletePhotospot(@Param('photospotId') photospotId: number, @InjectUser('id') userId: number) {
     await this.photospotService.deletePhotospot(photospotId, userId);
   }
