@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { CacheModule, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -24,6 +24,7 @@ import { PhotospotModule } from './photospot/photospot.module';
         expiresIn: '1h',
       },
     }),
+    CacheModule.register({ isGlobal: true }),
     AuthModule,
     CollectionsModule,
     MeetupsModule,

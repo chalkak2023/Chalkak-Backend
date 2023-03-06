@@ -26,6 +26,7 @@ import { Cache } from 'cache-manager';
 import _ from 'lodash';
 import { SocialNaverService } from '../social/service/social.naver.service';
 import { SocialKakaoService } from 'src/social/service/social.kakao.service';
+import { ForbiddenException } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -84,6 +85,11 @@ export class AuthService {
     const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password']});
     if (!user) {
       throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
+    }
+    if (user.isBlock) {
+      throw new ForbiddenException({
+        message: '블락된 상태여서 로그인할 수 없습니다.'
+      })
     }
     if (!bcrypt.compareSync(password, user.password)) {
       throw new UnauthorizedException({ message: '비밀번호가 일치하지 않습니다.' });
@@ -182,6 +188,11 @@ export class AuthService {
           providerUserId: id,
         },
       });
+    }
+    if (user!.isBlock) {
+      throw new ForbiddenException({
+        message: '블락된 상태여서 로그인할 수 없습니다.'
+      })
     }
 
     const accessToken = this.generateUserAccessToken({

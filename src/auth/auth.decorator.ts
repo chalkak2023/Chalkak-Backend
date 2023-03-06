@@ -1,4 +1,8 @@
-import { createParamDecorator, ExecutionContext } from "@nestjs/common";
+import { createParamDecorator, ExecutionContext, UseGuards } from '@nestjs/common';
+import { JwtGuard } from './guard/jwt/jwt.guard';
+import { BlockUserGuard } from './guard/block-user/block-user.guard';
+
+export const UserGuard = UseGuards(JwtGuard, BlockUserGuard);
 
 export const InjectUser = createParamDecorator((data: string, ctx: ExecutionContext) => {
   const { user } = ctx.switchToHttp().getRequest();
