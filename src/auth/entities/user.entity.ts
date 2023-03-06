@@ -17,7 +17,7 @@ import {
 
 @Entity({ schema: 'chalkak', name: 'user' })
 @TableInheritance({ column: { type: 'varchar', name: 'provider' } })
-@Unique('provider_naver_userid_unique', ['providerUserId'])
+@Unique('provider_userid_unique', ['providerUserId'])
 export class User {
   @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
