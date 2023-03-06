@@ -1,6 +1,16 @@
 import { User } from 'src/auth/entities/user.entity';
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
+import { CollectionKeyword } from './collection.keyword.entity';
 
 @Entity({ schema: 'chalkak', name: 'collection' })
 export class Collection {
@@ -18,10 +28,10 @@ export class Collection {
 
   @CreateDateColumn()
   createdAt: Date;
-  
+
   @UpdateDateColumn()
   updatedAt: Date;
-  
+
   @DeleteDateColumn()
   deletedAt: Date | null;
 
@@ -30,4 +40,9 @@ export class Collection {
 
   @OneToMany((type) => Photospot, (photospot) => photospot.collection)
   photospots: Photospot[];
+
+  @OneToMany((type) => CollectionKeyword, (collection_keyword) => collection_keyword.collection, {
+    cascade: true,
+  })
+  collection_keywords: CollectionKeyword[];
 }

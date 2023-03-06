@@ -96,7 +96,7 @@ describe('AuthService', () => {
       providers: [AuthService],
     })
       .useMocker((token) => {
-        if (token === getRepositoryToken(User)) {
+        if (token === getRepositoryToken(LocalUser)) {
           return {
             insert: jest.fn(),
             findOne: jest.fn(),

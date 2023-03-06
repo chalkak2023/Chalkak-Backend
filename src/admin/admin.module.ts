@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
-import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { PassportModule } from '@nestjs/passport';
 import { Admin } from 'src/admin/entities/admin.entity';
 import { AdminController } from 'src/admin/admin.controller';
 import { AdminService } from 'src/admin/admin.service';
@@ -15,7 +15,7 @@ import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Admin, Faq, User, Collection, Photospot, Meetup]), JwtModule],
+  imports: [TypeOrmModule.forFeature([Admin, Faq, User, Collection, Photospot, Meetup]), JwtModule, PassportModule],
   providers: [AdminService, LocalAdminStrategy, JwtAdminStrategy, RefreshTokenAdminStrategy],
   controllers: [AdminController],
   exports: [AdminService],
