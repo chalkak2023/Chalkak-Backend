@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from './auth.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { KakaoUser, LocalUser, NaverUser } from './entities/user.entity';
+import { KakaoUser, LocalUser, NaverUser, User } from './entities/user.entity';
 import { FindOptionsWhere, Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
@@ -24,6 +24,7 @@ const moduleMocker = new ModuleMocker(global);
 
 describe('AuthService', () => {
   let service: AuthService;
+  let mockUserRepository: jest.Mocked<Repository<User>>;
   let mockLocalUserRepository: jest.Mocked<Repository<LocalUser>>;
   let mockKakaoUserRepository: jest.Mocked<Repository<KakaoUser>>;
   let mockNaverUserRepository: jest.Mocked<Repository<NaverUser>>;
@@ -95,6 +96,14 @@ describe('AuthService', () => {
       providers: [AuthService],
     })
       .useMocker((token) => {
+        if (token === getRepositoryToken(User)) {
+          return {
+            insert: jest.fn(),
+            findOne: jest.fn(),
+            findOneBy: jest.fn(),
+            update: jest.fn(),
+          };
+        }
         if (token === getRepositoryToken(LocalUser)) {
           return {
             insert: jest.fn(),
@@ -137,6 +146,7 @@ describe('AuthService', () => {
       .compile();
 
     service = module.get(AuthService);
+    mockUserRepository = module.get(getRepositoryToken(User));
     mockLocalUserRepository = module.get(getRepositoryToken(LocalUser));
     mockKakaoUserRepository = module.get(getRepositoryToken(KakaoUser));
     mockNaverUserRepository = module.get(getRepositoryToken(NaverUser));
@@ -330,6 +340,7 @@ describe('AuthService', () => {
       };
       const nickname = 'test-nickname'
       const providerUserId = 1;
+      mockUserRepository.findOne.mockResolvedValue(null);
       mockNaverUserRepository.findOne.mockResolvedValue({
         id: 1,
         username: 'test'
@@ -357,6 +368,7 @@ describe('AuthService', () => {
       };
       const nickname = 'test-nickname'
       const providerUserId = 1;
+      mockUserRepository.findOne.mockResolvedValue(null);
       mockKakaoUserRepository.findOne.mockResolvedValue({
         id: 1,
         username: 'test'
