@@ -23,7 +23,7 @@ export class CollectionsController {
     return await this.collectionsService.getCollection(collectionId);
   }
 
-  @Get('/:collectionId/keywords/:keywordId')
+  @Get(':collectionId/keywords/:keywordId')
   async getCollectionKeyword(@Param('keywordId') keywordId: number): Promise<CollectionKeyword> {
     return this.collectionsService.getCollectionKeyword(keywordId);
   }

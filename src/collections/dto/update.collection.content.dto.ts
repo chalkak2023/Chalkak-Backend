@@ -1,4 +1,4 @@
-import { PickType } from '@nestjs/mapped-types';
+import { PartialType, PickType } from '@nestjs/mapped-types';
 import { CreateCollectionDto } from './create.collection.dto';
 
-export class UpdateCollectionContentDto extends PickType(CreateCollectionDto, ['title', 'description'] as const) {}
+export class UpdateCollectionContentDto extends PartialType(PickType(CreateCollectionDto, ['title', 'description'] as const)) {}
