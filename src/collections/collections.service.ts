@@ -8,6 +8,7 @@ import { CollectionKeyword } from 'src/collections/entities/collection.keyword.e
 import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { UpdateCollectionContentDto } from 'src/collections/dto/update.collection.content.dto';
 import { UpdateCollectionKeywordDto } from 'src/collections/dto/update.collection.keyword.dto';
+import { AddCollectionKeywordDto } from 'src/collections/dto/add.collection.keyword.dto';
 
 @Injectable()
 export class CollectionsService {
@@ -48,6 +49,15 @@ export class CollectionsService {
         keyword,
       })),
     });
+  }
+
+  async addCollectionKeyword(addCollectionKeywordDto: AddCollectionKeywordDto, collectionId: number, userId: number) {
+    const { keyword }: AddCollectionKeywordDto = addCollectionKeywordDto;
+    const collectionKeyword = await this.getCollection(collectionId);
+    if (userId !== collectionKeyword.userId) {
+      throw new ForbiddenException('해당 콜렉션 키워드의 추가 권한이 없습니다.');
+    }
+    await this.collectionKeywordsRepository.insert({ keyword, collectionId, userId });
   }
 
   async updateCollectionContent(updateCollectionContentDto: UpdateCollectionContentDto, collectionId: number, userId: number) {

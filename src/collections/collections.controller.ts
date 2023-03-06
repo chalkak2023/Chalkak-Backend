@@ -8,6 +8,7 @@ import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
 import { UpdateCollectionContentDto } from 'src/collections/dto/update.collection.content.dto';
 import { UpdateCollectionKeywordDto } from 'src/collections/dto/update.collection.keyword.dto';
+import { AddCollectionKeywordDto } from 'src/collections/dto/add.collection.keyword.dto';
 
 @Controller('/api/collections')
 export class CollectionsController {
@@ -30,9 +31,19 @@ export class CollectionsController {
 
   @Post()
   @UseGuards(JwtGuard)
-  async createCollection(@Body() createCollectionDto: CreateCollectionDto, @InjectUser() userDTO: decodedAccessTokenDTO) {
+  createCollection(@Body() createCollectionDto: CreateCollectionDto, @InjectUser() userDTO: decodedAccessTokenDTO) {
     createCollectionDto.userId = userDTO.id;
-    return await this.collectionsService.createCollection(createCollectionDto);
+    return this.collectionsService.createCollection(createCollectionDto);
+  }
+
+  @Post(':collectionId/keywords')
+  @UseGuards(JwtGuard)
+  async addCollectionKeyword(
+    @Body() addCollectionKeywordDto: AddCollectionKeywordDto,
+    @Param('collectionId') collectionId: number,
+    @InjectUser('id') userId: number
+  ): Promise<void> {
+    return await this.collectionsService.addCollectionKeyword(addCollectionKeywordDto, collectionId, userId);
   }
 
   @Put(':collectionId')
