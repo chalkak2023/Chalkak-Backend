@@ -20,7 +20,7 @@ export class BlockUserGuard implements CanActivate {
           message: '블락된 상태여서 사용할 수 없습니다.'
         })
       }
-      return !isBlock;
+      return true;
     }
     const user = await usersRepository.findOne({ where: { id: userId } });
     if (_.isNil(user)) {
