@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions, TypeOrmOptionsFactory } from '@nestjs/typeorm';
 import { Admin } from 'src/admin/entities/admin.entity';
 import { Faq } from 'src/admin/entities/faq.entity';
-import { KaKaoUser, NaverUser, User } from 'src/auth/entities/user.entity';
+import { KakaoUser, NaverUser, User } from 'src/auth/entities/user.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Join } from 'src/meetups/entities/join.entity';
@@ -23,7 +23,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       password: this.configService.get<string>('DATABASE_PASSWORD'),
       database: this.configService.get<string>('DATABASE_NAME'),
       synchronize: Boolean(this.configService.get<string>('DATABASE_SYNC')),  // 배포 시 false
-      entities: [User, LocalUser, NaverUser, KaKaoUser, Collection, Photospot, Meetup, Join, Admin, Faq],
+      entities: [User, LocalUser, NaverUser, KakaoUser, Collection, Photospot, Meetup, Join, Admin, Faq],
     };
   }
 }

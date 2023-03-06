@@ -9,13 +9,14 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { LocalUser, User } from './entities/user.entity';
+import { LocalUser, KakaoUser, NaverUser, User } from './entities/user.entity';
 import {
   PostEmailVerificationBodyDTO,
   SignInBodyDTO,
   SignUpBodyDTO,
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
+  SocialLoginBodyDTO,
 } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -23,15 +24,22 @@ import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
 import { Cache } from 'cache-manager';
 import _ from 'lodash';
+import { SocialNaverService } from '../social/service/social.naver.service';
+import { SocialKakaoService } from 'src/social/service/social.kakao.service';
 
 @Injectable()
 export class AuthService {
   constructor(
+    @InjectRepository(User) private usersRepository: Repository<User>,
     @InjectRepository(LocalUser) private localUsersRepository: Repository<LocalUser>,
+    @InjectRepository(KakaoUser) private kakaoUsersRepository: Repository<KakaoUser>,
+    @InjectRepository(NaverUser) private naverUsersRepository: Repository<NaverUser>,
     @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
     private jwtService: JwtService,
     private configService: ConfigService,
-    private mailerAuthService: MailerAuthService
+    private mailerAuthService: MailerAuthService,
+    private socialKaKaoService: SocialKakaoService,
+    private socialNaverService: SocialNaverService
   ) {}
 
   async createSampleUser() {
@@ -73,7 +81,7 @@ export class AuthService {
 
   async signIn(body: SignInBodyDTO, response: any) {
     const { email, password } = body;
-    const user = await this.localUsersRepository.findOne({ where: { email }, select: { id: true, email: true, password: true } });
+    const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password']});
     if (!user) {
       throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
     }
@@ -134,9 +142,59 @@ export class AuthService {
     };
   }
 
-  async oauthSignIn() {
+  async oauthSignIn(provider: 'kakao' | 'naver', body: SocialLoginBodyDTO) {
+    const socialService = provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
+    const socialUsersRepository = provider === 'kakao' ? this.kakaoUsersRepository : this.naverUsersRepository;
+    const token = await socialService.getOauth2Token(body);
+    const info = await socialService.getUserInfo(token.access_token);
+
+    const id = info.id;
+    let nickname = provider === 'kakao' ? info.kakao_account.profile.nickname : info.nickname;
+
+    const sameUsernameUser = await this.usersRepository.findOne({
+      where: {
+        username: nickname,
+      },
+    });
+    if (!_.isNil(sameUsernameUser)) {
+      nickname = `${nickname}#${Math.floor(Math.random() * 10000) + 1}`;
+    }
+
+    let user = await socialUsersRepository.findOne({
+      where: {
+        providerUserId: id,
+      },
+    });
+    if (_.isNil(user)) {
+      await socialUsersRepository
+        .insert({
+          providerUserId: id,
+          username: nickname,
+        })
+        .catch((err) => {
+          console.error(err);
+          throw new BadRequestException({
+            message: '가입에 실패했습니다.',
+          });
+        });
+      user = await socialUsersRepository.findOne({
+        where: {
+          providerUserId: id,
+        },
+      });
+    }
+
+    const accessToken = this.generateUserAccessToken({
+      id: user!.id,
+      username: user!.username,
+    });
+    const refreshToken = this.generateUserRefreshToken();
+    this.cacheManager.set(refreshToken, user!.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
+
     return {
-      message: 'message',
+      accessToken,
+      refreshToken,
+      message: '로그인되었습니다.',
     };
   }
 
@@ -184,10 +242,11 @@ export class AuthService {
     return Math.floor(Math.random() * (maxm - minm + 1)) + minm;
   }
 
-  private generateUserAccessToken(user: { id: number; email: string }) {
+  private generateUserAccessToken(user: { id: number; username: string; email?: string }) {
     return this.jwtService.sign(
       {
         id: user.id,
+        username: user.username,
         email: user.email,
         role: 'user',
       },

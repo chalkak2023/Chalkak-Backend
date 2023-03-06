@@ -1,6 +1,6 @@
 import { IntersectionType, PickType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
-import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsNumber, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsNumber, IsString, IsStrongPassword, IsIn } from 'class-validator';
 
 export class SignUpBodyDTO {
   @IsOptional()
@@ -49,12 +49,40 @@ export class PutEmailVerificationBodyDTO extends IntersectionType(PickType(SignU
 
 export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password']) {}
 
+export class ProviderDTO {
+  @IsIn(['kakao', 'naver'], {
+    message: '소셜 로그인은 kakao와 naver만 지원합니다.'
+  })
+  provider: 'kakao' | 'naver'
+}
+
+export class SocialLoginBodyDTO {
+  @IsNotEmpty({
+    message: 'code는 비어있으면 안 됩니다.'
+  })
+  @IsString({
+    message: 'code는 문자열이어야 합니다.'
+  })
+  code: string;
+  @IsOptional()
+  @IsNotEmpty({
+    message: 'state는 비어있으면 안 됩니다.'
+  })
+  @IsString({
+    message: 'state는 문자열이어야 합니다.'
+  })
+  state?: string;
+}
+
 export class decodedAccessTokenDTO {
   @IsNumber()
   readonly id: number;
 
   @IsString()
-  readonly email: string;
+  readonly username: string;
+
+  @IsString()
+  readonly email?: string;
 
   @IsString()
   readonly role: string;
