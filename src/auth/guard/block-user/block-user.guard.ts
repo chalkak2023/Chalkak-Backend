@@ -15,12 +15,12 @@ export class BlockUserGuard implements CanActivate {
     const usersRepository = this.dataSource.getRepository(User);
     const isBlock = await this.cacheManager.get<boolean>(`user-${userId}-block`);
     if (!_.isNil(isBlock)) {
-      if (!isBlock) {
+      if (isBlock) {
         throw new ForbiddenException({
           message: '블락된 상태여서 사용할 수 없습니다.'
         })
       }
-      return isBlock;
+      return true;
     }
     const user = await usersRepository.findOne({ where: { id: userId } });
     if (_.isNil(user)) {
