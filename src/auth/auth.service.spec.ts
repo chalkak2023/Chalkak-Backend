@@ -96,7 +96,7 @@ describe('AuthService', () => {
       providers: [AuthService],
     })
       .useMocker((token) => {
-        if (token === getRepositoryToken(LocalUser)) {
+        if (token === getRepositoryToken(User)) {
           return {
             insert: jest.fn(),
             findOne: jest.fn(),
@@ -163,7 +163,7 @@ describe('AuthService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('signUp Method', () => {
+  describe('signUp Method(회원가입 메소드)', () => {
     it('should be defined', () => {
       expect(service.signUp).toBeDefined();
       expect(typeof service.signUp).toBe('function');
@@ -176,7 +176,28 @@ describe('AuthService', () => {
         password: 'testpassword',
       };
 
-      mockLocalUserRepository.insert.mockResolvedValue({ generatedMaps: [], identifiers: [], raw: false });
+      mockLocalUserRepository.insert.mockResolvedValue({
+        generatedMaps: [{ id: 3 }],
+        identifiers: [
+          {
+            id: 3,
+            isBlock: false,
+            createdAt: new Date('2023-03-06T15:01:25.962Z'),
+            updatedAt: new Date('2023-03-06T15:01:25.962Z'),
+            deletedAt: null,
+          },
+        ],
+        raw: {
+          fieldCount: 0,
+          affectedRows: 1,
+          insertId: 3,
+          serverStatus: 2,
+          warningCount: 0,
+          message: '',
+          protocol41: true,
+          changedRows: 0,
+        },
+      });
 
       expect(service.signUp(body)).resolves.toStrictEqual({
         message: '회원가입 되었습니다.',
@@ -184,13 +205,14 @@ describe('AuthService', () => {
     });
 
     it('should be return fail message when username error situation', async () => {
+      const { username } = users[0]
       const body: SignUpBodyDTO = {
-        username: '중복닉네임',
-        email: 'test@gmail.com',
-        password: 'testpassword',
+        username,
+        email: 'test5@gmail.com',
+        password: 'qwer1234',
       };
 
-      mockLocalUserRepository.findOne.mockResolvedValueOnce(users[0])
+      mockUserRepository.findOne.mockResolvedValueOnce(users[0]);
 
       expect(service.signUp(body)).rejects.toThrowError(
         new BadRequestException({
@@ -338,15 +360,15 @@ describe('AuthService', () => {
         code: 'test',
         state: 'chalkak',
       };
-      const nickname = 'test-nickname'
+      const nickname = 'test-nickname';
       const providerUserId = 1;
       mockUserRepository.findOne.mockResolvedValue(null);
       mockNaverUserRepository.findOne.mockResolvedValue({
         id: 1,
-        username: 'test'
+        username: 'test',
       } as NaverUser);
-      mockSocialNaverService.getOauth2Token.mockResolvedValue({access_token: 'accessToken'})
-      mockSocialNaverService.getUserInfo.mockResolvedValue({id: providerUserId, nickname})
+      mockSocialNaverService.getOauth2Token.mockResolvedValue({ access_token: 'accessToken' });
+      mockSocialNaverService.getUserInfo.mockResolvedValue({ id: providerUserId, nickname });
       mockJwtService.sign.mockImplementation((payload: any, options: any) => {
         return `token${options.secret}`;
       });
@@ -366,15 +388,15 @@ describe('AuthService', () => {
         code: 'test',
         state: 'chalkak',
       };
-      const nickname = 'test-nickname'
+      const nickname = 'test-nickname';
       const providerUserId = 1;
       mockUserRepository.findOne.mockResolvedValue(null);
       mockKakaoUserRepository.findOne.mockResolvedValue({
         id: 1,
-        username: 'test'
+        username: 'test',
       } as KakaoUser);
-      mockSocialKakaoService.getOauth2Token.mockResolvedValue({access_token: 'accessToken'})
-      mockSocialKakaoService.getUserInfo.mockResolvedValue({id: providerUserId, kakao_account: {profile: {nickname}}})
+      mockSocialKakaoService.getOauth2Token.mockResolvedValue({ access_token: 'accessToken' });
+      mockSocialKakaoService.getUserInfo.mockResolvedValue({ id: providerUserId, kakao_account: { profile: { nickname } } });
       mockJwtService.sign.mockImplementation((payload: any, options: any) => {
         return `token${options.secret}`;
       });
@@ -407,7 +429,7 @@ describe('AuthService', () => {
         email: 'test@gmail.com',
       } as LocalUser);
       mockJwtService.sign.mockReturnValueOnce(newAccessToken);
-      mockJwtService.verifyAsync.mockResolvedValue({})
+      mockJwtService.verifyAsync.mockResolvedValue({});
 
       expect(service.refreshAccessToken(accessToken, refreshToken)).resolves.toStrictEqual({
         accessToken: newAccessToken,
