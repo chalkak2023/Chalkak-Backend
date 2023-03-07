@@ -53,11 +53,17 @@ export class AuthService {
       };
       arr.push(temp);
     }
-    return await this.localUsersRepository.insert(arr).catch((err) => {
+    try {
+      await this.localUsersRepository.insert(arr);
+    } catch (err) {
       throw new BadRequestException({
         message: '중복된 데이터가 이미 있습니다.',
       });
-    });
+    }
+
+    return {
+      message: '유저 샘플 데이터를 생성했습니다.',
+    };
   }
 
   async signUp(body: SignUpBodyDTO) {
@@ -72,11 +78,13 @@ export class AuthService {
     }
     const username = _username || `${email.split('@')[0]}#${Math.floor(Math.random() * 10000) + 1}`;
     const passwordHash = bcrypt.hashSync(password, 10);
-    await this.localUsersRepository.insert({ username, email, password: passwordHash }).catch((err) => {
+    try {
+      await this.localUsersRepository.insert({ username, email, password: passwordHash });
+    } catch (e) {
       throw new BadRequestException({
         message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.',
       });
-    });
+    }
     return {
       message: '회원가입 되었습니다.',
     };
@@ -171,17 +179,16 @@ export class AuthService {
       },
     });
     if (_.isNil(user)) {
-      await socialUsersRepository
-        .insert({
+      try {
+        await socialUsersRepository.insert({
           providerUserId: id,
           username: nickname,
-        })
-        .catch((err) => {
-          console.error(err);
-          throw new BadRequestException({
-            message: '가입에 실패했습니다.',
-          });
         });
+      } catch (err) {
+        throw new BadRequestException({
+          message: '가입에 실패했습니다.',
+        });
+      }
       user = await socialUsersRepository.findOne({
         where: {
           providerUserId: id,
@@ -209,17 +216,17 @@ export class AuthService {
   }
 
   async refreshAccessToken(accessToken: string, refreshToken: string) {
-    await this.jwtService
-      .verifyAsync(accessToken, {
+    try {
+      await this.jwtService.verifyAsync(accessToken, {
         secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
-      })
-      .catch((err: Error) => {
-        if (err.name === 'JsonWebTokenError') {
-          throw new BadRequestException({
-            message: '정상 발급된 액세스 토큰이 아닙니다.',
-          });
-        }
       });
+    } catch (err) {
+      if (err.name === 'JsonWebTokenError') {
+        throw new BadRequestException({
+          message: '정상 발급된 액세스 토큰이 아닙니다.',
+        });
+      }
+    }
     const userId = await this.cacheManager.get<number>(refreshToken);
     if (_.isNil(userId)) {
       throw new UnauthorizedException({
