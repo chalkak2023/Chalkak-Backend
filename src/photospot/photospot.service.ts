@@ -17,9 +17,9 @@ export class PhotospotService {
   ) {}
 
   async createPhotospot(createPhtospotDto: CreatePhotospotDto, userId: number, collectionId: number): Promise<void> {
-    const collections = await this.collectionRepository.findOne({ where: { id: collectionId } });
-
-    if (_.isEmpty(collections)) {
+    const collection = await this.collectionRepository.findOne({ where: { id: collectionId } });
+  
+    if (_.isNil(collection)) {
       throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
     }
 
@@ -34,9 +34,9 @@ export class PhotospotService {
   }
 
   async getAllPhotospot(collectionId: number): Promise<Photospot[]> {
-    const collections = await this.collectionRepository.findOne({ where: { id: collectionId } });
+    const collection = await this.collectionRepository.findOne({ where: { id: collectionId } });
 
-    if (_.isEmpty(collections)) {
+    if (_.isNil(collection)) {
       throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
     }
 
