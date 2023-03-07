@@ -13,7 +13,10 @@ import { PhotospotModule } from './photospot/photospot.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot({ 
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env', 
+    }),
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
     JwtModule.register({
       secret: 'test',
