@@ -1,7 +1,4 @@
-import { User } from 'src/auth/entities/user.entity';
-import { Collection } from 'src/collections/entities/collection.entity';
 import { FileSystemStoredFile } from 'nestjs-form-data/dist/classes/storage';
-import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 import { BadRequestException, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
@@ -9,29 +6,40 @@ import { Repository } from 'typeorm';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PhotospotService } from './photospot.service';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
+import { User } from 'src/auth/entities/user.entity';
+import { Collection } from 'src/collections/entities/collection.entity';
+import { CollectionKeyword } from 'src/collections/entities/collection.keyword.entity';
 import { S3Service } from './../common/aws/s3.service';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
+import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 
 const moduleMocker = new ModuleMocker(global);
 
 describe('PhotospotService', () => {
   let service: PhotospotService;
   let mockPhotospotRepository: jest.Mocked<Repository<Photospot>>;
+  let mockCollectionRepository: jest.Mocked<Repository<Collection>>;
   let mockS3Service: jest.Mocked<S3Service>;
-  const REPOSITORY_TOKEN = getRepositoryToken(Photospot);
+  const PHOTOSPOT_REPOSITORY_TOKEN = getRepositoryToken(Photospot);
+  const COLLECTION_REPOSITORY_TOKEN = getRepositoryToken(Collection);
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [PhotospotService],
     })
       .useMocker((token) => {
-        if (token === REPOSITORY_TOKEN) {
+        if (token === PHOTOSPOT_REPOSITORY_TOKEN) {
           return {
             insert: jest.fn(),
             findOne: jest.fn(),
             find: jest.fn(),
             update: jest.fn(),
             softDelete: jest.fn(),
+          };
+        }
+        if (token === COLLECTION_REPOSITORY_TOKEN) {
+          return {
+            findOne: jest.fn(),
           };
         }
         if (typeof token === 'function') {
@@ -43,7 +51,8 @@ describe('PhotospotService', () => {
       .compile();
 
     service = module.get(PhotospotService);
-    mockPhotospotRepository = module.get(REPOSITORY_TOKEN);
+    mockPhotospotRepository = module.get(PHOTOSPOT_REPOSITORY_TOKEN);
+    mockCollectionRepository = module.get(COLLECTION_REPOSITORY_TOKEN);
     mockS3Service = module.get(S3Service);
   });
 
@@ -56,6 +65,7 @@ describe('PhotospotService', () => {
       expect(service.getAllPhotospot).toBeDefined();
       expect(mockS3Service.putObject).toBeDefined();
       expect(mockPhotospotRepository.insert).toBeDefined();
+      expect(mockCollectionRepository.findOne).toBeDefined();
     });
 
     it('createPhotospot 성공', async () => {
@@ -64,9 +74,12 @@ describe('PhotospotService', () => {
       const collectionId = 1;
       const { title, description, latitude, longitude, image } = dto;
       const imagePath = 'AWS path';
+      const collection = {id: 1, userId: 1, title: '테스트', description: "테스트 내용", createdAt: new Date(), updatedAt: new Date(),deletedAt: null, user: {} as User, photospots: [{}] as Photospot[], collection_keywords: [{}] as CollectionKeyword[]}
 
+      mockCollectionRepository.findOne.mockResolvedValue(collection)
       mockS3Service.putObject.mockResolvedValue(imagePath);
       await service.createPhotospot(dto, userId, collectionId);
+      expect(mockCollectionRepository.findOne).toHaveBeenCalledTimes(1);
       expect(mockS3Service.putObject).toHaveBeenCalledTimes(1);
       expect(mockS3Service.putObject).toHaveBeenCalledWith(image);
       expect(mockPhotospotRepository.insert).toHaveBeenCalledTimes(1);
@@ -85,7 +98,9 @@ describe('PhotospotService', () => {
       const dto = new CreatePhotospotDto();
       const userId = 1;
       const collectionId = 1;
+      const collection = {id: 1, userId: 1, title: '테스트', description: "테스트 내용", createdAt: new Date(), updatedAt: new Date(),deletedAt: null, user: {} as User, photospots: [{}] as Photospot[], collection_keywords: [{}] as CollectionKeyword[]}
 
+      mockCollectionRepository.findOne.mockResolvedValue(collection)
       mockPhotospotRepository.insert.mockRejectedValue(new Error());
       expect(service.createPhotospot(dto, userId, collectionId)).rejects.toThrowError(
         new BadRequestException('요청이 올바르지 않습니다.')
@@ -97,18 +112,23 @@ describe('PhotospotService', () => {
     it('should db defined', () => {
       expect(service.getAllPhotospot).toBeDefined();
     });
+
     it('getAllPhotospot 성공', async () => {
       const collectionId = 1;
       const photospots = [new Photospot()];
+      const collection = {id: 1, userId: 1, title: '테스트', description: "테스트 내용", createdAt: new Date(), updatedAt: new Date(),deletedAt: null, user: {} as User, photospots: [{}] as Photospot[], collection_keywords: [{}] as CollectionKeyword[]}
 
+
+      mockCollectionRepository.findOne.mockResolvedValue(collection);
       mockPhotospotRepository.find.mockResolvedValue(photospots);
       expect(service.getAllPhotospot(collectionId)).resolves.toStrictEqual(photospots);
     });
 
     it('getAllPhotospot 해당 값 못 찾을 경우', async () => {
       const collectionId = 1;
+      const collection = null
 
-      mockPhotospotRepository.find.mockResolvedValue([]);
+      mockCollectionRepository.findOne.mockResolvedValue(collection);
       expect(service.getAllPhotospot(collectionId)).rejects.toThrowError(
         new NotFoundException('해당 콜렉션을 찾을 수 없습니다.')
       );
