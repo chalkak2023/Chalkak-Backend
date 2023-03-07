@@ -25,7 +25,6 @@ export class PhotospotService {
 
     try {
       const { title, description, latitude, longitude, image }: CreatePhotospotDto = createPhtospotDto;
-
       const imagePath = await this.s3Service.putObject(image);
       await this.photospotRepository.insert({ title, description, latitude, longitude, imagePath, userId, collectionId });
     } catch (error) {
