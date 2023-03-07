@@ -6,11 +6,11 @@ import { PhotospotService } from './photospot.service';
 import { Photospot } from './entities/photospot.entity';
 import { InjectUser, UserGuard } from '../auth/auth.decorator';
 
-@Controller('/api/collections')
+@Controller('/api/collections/:collectionId/photospots')
 export class PhotospotController {
   constructor(private readonly photospotService: PhotospotService) {}
 
-  @Post('/:collectionId/photospots')
+  @Post()
   @UserGuard
   @FormDataRequest()
   async createPhotospot(
@@ -21,17 +21,18 @@ export class PhotospotController {
     await this.photospotService.createPhotospot(createPhtospotDto, userId, collectionId);
   }
 
-  @Get('/:collectionId')
+  @Get()
   async getAllPhotospot(@Param('collectionId') collectionId: number): Promise<Photospot[]> {
     return this.photospotService.getAllPhotospot(collectionId);
   }
 
-  @Get('/:collectionId/photospots/:photospotId')
+  @Get('/:photospotId')
   async getPhotospot(@Param('photospotId') photospotId: number): Promise<Photospot> {
     return this.photospotService.getPhotospot(photospotId);
   }
 
-  @Put('/:collectionId/photospots/:photospotId')
+
+  @Put('/:photospotId')
   @UserGuard
   @FormDataRequest()
   async modifyPhotospot(
@@ -42,7 +43,7 @@ export class PhotospotController {
     await this.photospotService.modifyPhotospot(modifyPhotospot, photospotId, userId);
   }
 
-  @Delete('/:collectionId/photospots/:photospotId')
+  @Delete('/:photospotId')
   @UserGuard
   async deletePhotospot(@Param('photospotId') photospotId: number, @InjectUser('id') userId: number) {
     await this.photospotService.deletePhotospot(photospotId, userId);

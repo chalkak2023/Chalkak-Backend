@@ -67,4 +67,10 @@ export class AuthController {
   async refreshAccessToken(@Token('accessToken') accessToken: string, @Token('refreshToken') refreshToken: string) {
     return await this.authService.refreshAccessToken(accessToken, refreshToken);
   }
+
+  @Get('islogin')
+  @UserGuard
+  isLogin() {
+    return true;
+  }
 }
