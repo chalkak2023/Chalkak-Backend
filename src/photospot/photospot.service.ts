@@ -5,16 +5,24 @@ import { Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { Photospot } from '../photospot/entities/photospot.entity';
+import { Collection } from '../collections/entities/collection.entity';
 import { S3Service } from './../common/aws/s3.service';
 
 @Injectable()
 export class PhotospotService {
   constructor(
     @InjectRepository(Photospot) private photospotRepository: Repository<Photospot>,
+    @InjectRepository(Collection) private collectionRepository: Repository<Collection>,
     private readonly s3Service: S3Service
   ) {}
 
   async createPhotospot(createPhtospotDto: CreatePhotospotDto, userId: number, collectionId: number): Promise<void> {
+    const collections = await this.collectionRepository.find({ where: { id: collectionId } });
+
+    if (_.isEmpty(collections)) {
+      throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
+    }
+
     try {
       const { title, description, latitude, longitude, image }: CreatePhotospotDto = createPhtospotDto;
 
@@ -27,12 +35,13 @@ export class PhotospotService {
   }
 
   async getAllPhotospot(collectionId: number): Promise<Photospot[]> {
-    const photospots = await this.photospotRepository.find({ where: { collectionId } });
+    const collections = await this.collectionRepository.find({ where: { id: collectionId } });
 
-    if (_.isEmpty(photospots)) {
+    if (_.isEmpty(collections)) {
       throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
     }
 
+    const photospots = await this.photospotRepository.find({ where: { collectionId } });
     return photospots;
   }
 
