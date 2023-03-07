@@ -5,6 +5,7 @@ import { MeetupsService } from '../meetups.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { Meetup } from '../entities/meetup.entity';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
+import { CACHE_MANAGER } from '@nestjs/common';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -16,6 +17,13 @@ describe('MeetupsController', () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MeetupsController],
     }).useMocker((token) => {
+      if (token === CACHE_MANAGER) {
+          return {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+          };
+      }
       if (typeof token === 'function') {
         const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
         const Mock = moduleMocker.generateFromMetadata(mockMetadata);

@@ -6,6 +6,7 @@ import { FileSystemStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { PhotospotController } from './photospot.controller';
 import { PhotospotService } from './photospot.service';
+import { CACHE_MANAGER } from '@nestjs/common';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -24,6 +25,13 @@ describe('PhotospotController', () => {
       controllers: [PhotospotController],
     })
       .useMocker((token) => {
+        if (token === CACHE_MANAGER) {
+          return {
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
+          };
+        }
         if (typeof token === 'function') {
           const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
           const Mock = moduleMocker.generateFromMetadata(mockMetadata);

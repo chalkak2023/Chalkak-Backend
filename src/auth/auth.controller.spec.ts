@@ -3,6 +3,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { PostEmailVerificationBodyDTO, SignInBodyDTO, SignUpBodyDTO, PutEmailVerificationBodyDTO, ChangePasswordBodyDTO, SocialLoginBodyDTO, ProviderDTO } from './dto/auth.dto';
+import { CACHE_MANAGER } from '@nestjs/common';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -10,11 +11,23 @@ describe('AuthController', () => {
   let controller: AuthController;
   let service: jest.Mocked<AuthService>;
 
+  let cache: Record<string, any> = {}
+
   beforeEach(async () => {
+    cache = {};
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
     })
       .useMocker((token) => {
+        if (token === CACHE_MANAGER) {
+          return {
+            get: jest.fn().mockImplementation((key: string) => cache[key]),
+            set: jest.fn().mockImplementation((key: string, value: any, options: any) => (cache[key] = value)),
+            del: jest.fn().mockImplementation((key: string) => {
+              delete cache[key];
+            }),
+          };
+        }
         if (typeof token === 'function') {
           const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
           const Mock = moduleMocker.generateFromMetadata(mockMetadata);
@@ -159,7 +172,7 @@ describe('AuthController', () => {
     });
   });
 
-  describe.only('POST /api/oauth/signin/:provider (oauthSignIn)', () => {
+  describe('POST /api/oauth/signin/:provider (oauthSignIn)', () => {
     it('should be defined', () => {
       expect(controller.oauthSignIn).toBeDefined();
       expect(typeof controller.oauthSignIn).toBe('function');

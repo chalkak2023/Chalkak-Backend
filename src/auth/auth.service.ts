@@ -53,28 +53,38 @@ export class AuthService {
       };
       arr.push(temp);
     }
-    return await this.localUsersRepository.insert(arr).catch((err) => {
+    try {
+      await this.localUsersRepository.insert(arr);
+    } catch (err) {
       throw new BadRequestException({
         message: '중복된 데이터가 이미 있습니다.',
       });
-    });
+    }
+
+    return {
+      message: '유저 샘플 데이터를 생성했습니다.',
+    };
   }
 
   async signUp(body: SignUpBodyDTO) {
     const { username: _username, email, password } = body;
-    const user = !_.isNil(_username) ? await this.localUsersRepository.findOne({ where: { username: _username } }) : null;
-    if (!_.isNil(user)) {
-      throw new BadRequestException({
-        message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
-      });
+    if (!_.isNil(_username)) {
+      const user = await this.usersRepository.findOne({ where: { username: _username } });
+      if (!_.isNil(user)) {
+        throw new BadRequestException({
+          message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
+        });
+      }
     }
     const username = _username || `${email.split('@')[0]}#${Math.floor(Math.random() * 10000) + 1}`;
     const passwordHash = bcrypt.hashSync(password, 10);
-    await this.localUsersRepository.insert({ username, email, password: passwordHash }).catch((err) => {
+    try {
+      await this.localUsersRepository.insert({ username, email, password: passwordHash });
+    } catch (e) {
       throw new BadRequestException({
         message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.',
       });
-    });
+    }
     return {
       message: '회원가입 되었습니다.',
     };
@@ -82,17 +92,14 @@ export class AuthService {
 
   async signIn(body: SignInBodyDTO, response: any) {
     const { email, password } = body;
-    const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password']});
-    if (!user) {
-      throw new NotFoundException({ message: '가입하지 않은 이메일입니다.' });
+    const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password'] });
+    if (!user || !bcrypt.compareSync(password, user.password)) {
+      throw new NotFoundException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' });
     }
     if (user.isBlock) {
       throw new ForbiddenException({
-        message: '블락된 상태여서 로그인할 수 없습니다.'
-      })
-    }
-    if (!bcrypt.compareSync(password, user.password)) {
-      throw new UnauthorizedException({ message: '비밀번호가 일치하지 않습니다.' });
+        message: '블락된 상태여서 로그인할 수 없습니다.',
+      });
     }
     const accessToken = this.generateUserAccessToken(user);
     const refreshToken = this.generateUserRefreshToken();
@@ -172,17 +179,16 @@ export class AuthService {
       },
     });
     if (_.isNil(user)) {
-      await socialUsersRepository
-        .insert({
+      try {
+        await socialUsersRepository.insert({
           providerUserId: id,
           username: nickname,
-        })
-        .catch((err) => {
-          console.error(err);
-          throw new BadRequestException({
-            message: '가입에 실패했습니다.',
-          });
         });
+      } catch (err) {
+        throw new BadRequestException({
+          message: '가입에 실패했습니다.',
+        });
+      }
       user = await socialUsersRepository.findOne({
         where: {
           providerUserId: id,
@@ -191,8 +197,8 @@ export class AuthService {
     }
     if (user!.isBlock) {
       throw new ForbiddenException({
-        message: '블락된 상태여서 로그인할 수 없습니다.'
-      })
+        message: '블락된 상태여서 로그인할 수 없습니다.',
+      });
     }
 
     const accessToken = this.generateUserAccessToken({
@@ -210,17 +216,17 @@ export class AuthService {
   }
 
   async refreshAccessToken(accessToken: string, refreshToken: string) {
-    await this.jwtService
-      .verifyAsync(accessToken, {
+    try {
+      await this.jwtService.verifyAsync(accessToken, {
         secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
-      })
-      .catch((err: Error) => {
-        if (err.name === 'JsonWebTokenError') {
-          throw new BadRequestException({
-            message: '정상 발급된 액세스 토큰이 아닙니다.',
-          });
-        }
       });
+    } catch (err) {
+      if (err.name === 'JsonWebTokenError') {
+        throw new BadRequestException({
+          message: '정상 발급된 액세스 토큰이 아닙니다.',
+        });
+      }
+    }
     const userId = await this.cacheManager.get<number>(refreshToken);
     if (_.isNil(userId)) {
       throw new UnauthorizedException({
