@@ -2,9 +2,9 @@ import { Type } from "class-transformer";
 import { IsNumber, IsOptional, IsString } from "class-validator";
 
 export class CreateMeetupDTO {
-  @IsOptional()
   @IsNumber()
-  userId: number;
+  @IsOptional()
+  userId?: number;
 
   @IsString()
   readonly title: string;
