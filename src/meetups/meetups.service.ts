@@ -1,18 +1,21 @@
 import _ from 'lodash';
-import { BadRequestException, ConflictException, ForbiddenException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, ForbiddenException, HttpException, Injectable } from '@nestjs/common';
 import { CreateMeetupDTO } from './dto/create-meetup.dto';
 import { Meetup } from './entities/meetup.entity';
 import { MeetupsRepository } from './meetups.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Join } from './entities/join.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
+import { QueueService } from 'src/queue/queue.service';
 
 @Injectable()
 export class MeetupsService {
   constructor(
     private meetupsRepository: MeetupsRepository, 
     @InjectRepository(Join) private joinRepository: Repository<Join>,
-    ) {}
+    private dataSource: DataSource,
+    private queueService: QueueService
+  ) {}
 
   async getMeetups(page: number, keyword: string): Promise<Meetup[]> {
     return await this.meetupsRepository.getMeetups(page, keyword);
@@ -40,21 +43,41 @@ export class MeetupsService {
     });
   }
 
-  async addJoin(meetupId: number, userId: number) {
-    const join = await this.getJoin(meetupId, userId);
-    if (!_.isNil(join)) {
-      throw new ConflictException(`이미 참여하고 있는 유저입니다.`);
+  async addJoinQueue(meetupId: number, userId: number) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await this.queueService.addJoinJob(meetupId, userId);
+      await queryRunner.commitTransaction();
+      // return { message: '참여 완료' };
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      console.log(err.message);
+      // throw err;
+      throw new HttpException(err.message, err.status);
+  } finally {
+      await queryRunner.release();
     }
-    const meetup = await this.getMeetup(meetupId);
-    if (meetup.headcount <= meetup.joins.length) {
-      throw new ForbiddenException('정원이 다 찼습니다.');
-    }
-    await this.joinRepository.insert({
-      meetupId, userId
-    });
   }
 
+  // async addJoin(meetupId: number, userId: number) {
+  //   const join = await this.getJoin(meetupId, userId);
+  //   if (!_.isNil(join)) {
+  //     throw new ConflictException(`이미 참여하고 있는 유저입니다.`);
+  //   }
+  //   const meetup = await this.getMeetup(meetupId);
+  //   if (meetup.headcount <= meetup.joins.length) {
+  //     throw new ForbiddenException('정원이 다 찼습니다.');
+  //   }
+  //   await this.joinRepository.insert({
+  //     meetupId, userId
+  //   });
+  //   // await this.meetupsRepository.addJoin(meetupId, userId, meetup.joins.length);
+  // }
+
   async deleteJoin(meetupId: number, userId: number) {
+    await this.getMeetup(meetupId);
     const join = await this.getJoin(meetupId, userId);
     if (_.isNil(join)) {
       throw new BadRequestException(`모임에 참여중인 유저가 아닙니다.`);
