@@ -49,14 +49,14 @@ export class MeetupsService {
     const eventName = `finishJoin-${userId}-${Math.floor(Math.random() * 89999) + 1}`
     await this.joinQueue.add(
       'addJoinQueue',
-      { meetupId, userId, eventName},
+      { meetupId, userId, eventName },
       { removeOnComplete: true, removeOnFail: true },
     );
     await this.waitFinish(eventName, 2);
   }
 
   private async waitFinish(eventName: string, sec: number) {
-    new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const wait = setTimeout(() => {
         this.eventEmitter.removeAllListeners(eventName);
         resolve({ 
