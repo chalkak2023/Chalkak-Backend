@@ -5,17 +5,17 @@ import { Meetup } from './entities/meetup.entity';
 import { MeetupsRepository } from './meetups.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Join } from './entities/join.entity';
-import { DataSource, Repository } from 'typeorm';
-import { QueueService } from 'src/queue/queue.service';
+import { Repository } from 'typeorm';
 import { EventEmitter2 } from '@nestjs/event-emitter';
+import { InjectQueue } from '@nestjs/bull';
+import { Queue } from 'bull';
 
 @Injectable()
 export class MeetupsService {
   constructor(
     private meetupsRepository: MeetupsRepository,
     @InjectRepository(Join) private joinRepository: Repository<Join>,
-    private dataSource: DataSource,
-    private queueService: QueueService,
+    @InjectQueue('joinQueue') private joinQueue: Queue,
     private eventEmitter: EventEmitter2
   ) {}
 
@@ -46,38 +46,52 @@ export class MeetupsService {
   }
 
   async addJoinQueue(meetupId: number, userId: number) {
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      const eventName = `finishJoin-${userId}-${Math.floor(Math.random() * 89999) + 1}`
-      await this.queueService.addJoinJob(meetupId, userId, eventName);
-      await queryRunner.commitTransaction();
-      return this.waitFinish(eventName, 2);
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      console.log(err.message);
-      // throw err;
-      throw new HttpException(err.message, err.status);
-    } finally {
-      await queryRunner.release();
-    }
+    const eventName = `finishJoin-${userId}-${Math.floor(Math.random() * 89999) + 1}`
+    await this.joinQueue.add(
+      'addJoinQueue',
+      { meetupId, userId, eventName},
+      { removeOnComplete: true, removeOnFail: true },
+    );
+    await this.waitFinish(eventName, 2);
   }
 
-  // async addJoin(meetupId: number, userId: number) {
-  //   const join = await this.getJoin(meetupId, userId);
-  //   if (!_.isNil(join)) {
-  //     throw new ConflictException(`이미 참여하고 있는 유저입니다.`);
-  //   }
-  //   const meetup = await this.getMeetup(meetupId);
-  //   if (meetup.headcount <= meetup.joins.length) {
-  //     throw new ForbiddenException('정원이 다 찼습니다.');
-  //   }
-  //   await this.joinRepository.insert({
-  //     meetupId, userId
-  //   });
-  //   // await this.meetupsRepository.addJoin(meetupId, userId, meetup.joins.length);
-  // }
+  private async waitFinish(eventName: string, sec: number) {
+    new Promise((resolve, reject) => {
+      const wait = setTimeout(() => {
+        this.eventEmitter.removeAllListeners(eventName);
+        resolve({ 
+          message: '다시 시도해주세요.',
+        });
+      }, sec * 1000);
+      const listenFn = ({ success, exception }: { success: boolean, exception?: HttpException }) => {
+        clearTimeout(wait)
+        this.eventEmitter.removeAllListeners(eventName);
+        success ? 
+          resolve({ message: '참여 성공' }) : 
+          reject(exception);
+      };
+      this.eventEmitter.addListener(eventName, listenFn);
+    });
+  }
+
+  async addJoin(meetupId: number, userId: number, eventName: string) {
+    try {
+      const join = await this.getJoin(meetupId, userId);
+      if (!_.isNil(join)) {
+        throw new ConflictException(`이미 참여하고 있는 유저입니다.`);
+      }
+      const meetup = await this.getMeetup(meetupId);
+      if (meetup.headcount <= meetup.joins.length) {
+        throw new ForbiddenException('정원이 다 찼습니다.');
+      }
+      await this.joinRepository.insert({
+        meetupId, userId
+      });
+      return this.eventEmitter.emit(eventName, { success: true });
+    } catch (err) {
+      return this.eventEmitter.emit(eventName, { success: false, exception: err });
+    }
+  }
 
   async deleteJoin(meetupId: number, userId: number) {
     await this.getMeetup(meetupId);
@@ -90,26 +104,7 @@ export class MeetupsService {
       throw new ForbiddenException('모임의 주최자는 참여 취소를 할 수 없습니다.');
     }
     await this.joinRepository.delete({
-      meetupId,
-      userId,
-    });
-  }
-
-  private waitFinish(eventName: string, sec: number) {
-    return new Promise((resolve, reject) => {
-      const wait = setTimeout(() => {
-        this.eventEmitter.removeAllListeners(eventName);
-        resolve({
-          message: '참여 요청',
-        });
-      }, sec * 1000);
-      const listenFn = ({ success, exception }: { success: boolean, exception?: HttpException }) => {
-        clearTimeout(wait)
-        this.eventEmitter.removeAllListeners(eventName);
-        success ? resolve({ message: '참여 성공' }) : reject(exception);
-        return ;
-      };
-      this.eventEmitter.addListener(eventName, listenFn);
+      meetupId, userId,
     });
   }
 }

@@ -10,10 +10,6 @@ import { MeetupsModule } from './meetups/meetups.module';
 import { AdminModule } from './admin/admin.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PhotospotModule } from './photospot/photospot.module';
-import { QueueModule } from './queue/queue.module';
-import { JoinModule } from './join/join.module';
-import { APP_FILTER } from '@nestjs/core';
-import { AllExceptionsFilter } from './common/filters/all-exception.filter';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
@@ -38,16 +34,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     MeetupsModule,
     AdminModule,
     PhotospotModule,
-    QueueModule,
-    JoinModule
   ],
   controllers: [AppController],
-  providers: [
-    AppService, 
-    // {
-    //   provide: APP_FILTER,
-    //   useClass: AllExceptionsFilter,
-    // }
-  ],
+  providers: [AppService],
 })
 export class AppModule {}

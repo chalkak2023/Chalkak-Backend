@@ -40,7 +40,6 @@ export class MeetupsController {
   @Post(':meetupId/join')
   @UserGuard
   async addJoin(@Param('meetupId') meetupId: number, @InjectUser() userDTO: decodedAccessTokenDTO) {
-    // return await this.meetupsService.addJoin(meetupId, userDTO.id);
     return await this.meetupsService.addJoinQueue(meetupId, userDTO.id);
   }
 

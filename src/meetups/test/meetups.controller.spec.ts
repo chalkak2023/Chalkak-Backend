@@ -135,11 +135,11 @@ describe('MeetupsController', () => {
       exp: 0
     }
     it('addJoin', async () => {
-      mockService.addJoin.mockResolvedValue();
+      mockService.addJoinQueue.mockResolvedValue();
       await controller.addJoin(meetupId, userDTO);
 
-      expect(mockService.addJoin).toHaveBeenCalled();
-      expect(mockService.addJoin).toHaveBeenCalledWith(meetupId, userDTO.id);
+      expect(mockService.addJoinQueue).toHaveBeenCalled();
+      expect(mockService.addJoinQueue).toHaveBeenCalledWith(meetupId, userDTO.id);
     });
   });
 
