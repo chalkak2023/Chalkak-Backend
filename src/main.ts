@@ -19,7 +19,7 @@ async function bootstrap() {
     })
   );
   app.use(cookieParser());
-  app.useGlobalFilters(new AllExceptionsFilter());
+  // app.useGlobalFilters(new AllExceptionsFilter());
   await app.listen(8080);
 }
 bootstrap();

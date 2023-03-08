@@ -17,6 +17,6 @@ export class QueueConsumer {
 
   @Process('addJoinQueue')
   async handleAddJoinQueue(job: Job) {
-    return await this.joinService.addJoin(job.data.meetupId, job.data.userId);
+    return await this.joinService.addJoin(job.data.meetupId, job.data.userId, job.data.eventName);
   }
 }

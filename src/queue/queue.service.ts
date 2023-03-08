@@ -8,10 +8,10 @@ export class QueueService {
     @InjectQueue('joinQueue') private joinQueue: Queue
   ) {}
 
-  async addJoinJob(meetupId: number, userId: number) {
+  async addJoinJob(meetupId: number, userId: number, eventName: string) {
     const job = await this.joinQueue.add(
       'addJoinQueue',
-      { meetupId, userId, },
+      { meetupId, userId, eventName},
       { removeOnComplete: true, removeOnFail: true },
     );
     return job;

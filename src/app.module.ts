@@ -14,6 +14,7 @@ import { QueueModule } from './queue/queue.module';
 import { JoinModule } from './join/join.module';
 import { APP_FILTER } from '@nestjs/core';
 import { AllExceptionsFilter } from './common/filters/all-exception.filter';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -29,6 +30,9 @@ import { AllExceptionsFilter } from './common/filters/all-exception.filter';
       },
     }),
     CacheModule.register({ isGlobal: true }),
+    EventEmitterModule.forRoot({
+      global: true
+    }),
     AuthModule,
     CollectionsModule,
     MeetupsModule,
@@ -40,10 +44,10 @@ import { AllExceptionsFilter } from './common/filters/all-exception.filter';
   controllers: [AppController],
   providers: [
     AppService, 
-    {
-      provide: APP_FILTER,
-      useClass: AllExceptionsFilter,
-    }
+    // {
+    //   provide: APP_FILTER,
+    //   useClass: AllExceptionsFilter,
+    // }
   ],
 })
 export class AppModule {}

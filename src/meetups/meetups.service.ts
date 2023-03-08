@@ -7,14 +7,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Join } from './entities/join.entity';
 import { DataSource, Repository } from 'typeorm';
 import { QueueService } from 'src/queue/queue.service';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()
 export class MeetupsService {
   constructor(
-    private meetupsRepository: MeetupsRepository, 
+    private meetupsRepository: MeetupsRepository,
     @InjectRepository(Join) private joinRepository: Repository<Join>,
     private dataSource: DataSource,
-    private queueService: QueueService
+    private queueService: QueueService,
+    private eventEmitter: EventEmitter2
   ) {}
 
   async getMeetups(page: number, keyword: string): Promise<Meetup[]> {
@@ -48,15 +50,16 @@ export class MeetupsService {
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      await this.queueService.addJoinJob(meetupId, userId);
+      const eventName = `finishJoin-${userId}-${Math.floor(Math.random() * 89999) + 1}`
+      await this.queueService.addJoinJob(meetupId, userId, eventName);
       await queryRunner.commitTransaction();
-      // return { message: '참여 완료' };
+      return this.waitFinish(eventName, 2);
     } catch (err) {
       await queryRunner.rollbackTransaction();
       console.log(err.message);
       // throw err;
       throw new HttpException(err.message, err.status);
-  } finally {
+    } finally {
       await queryRunner.release();
     }
   }
@@ -87,7 +90,26 @@ export class MeetupsService {
       throw new ForbiddenException('모임의 주최자는 참여 취소를 할 수 없습니다.');
     }
     await this.joinRepository.delete({
-      meetupId, userId
+      meetupId,
+      userId,
+    });
+  }
+
+  private waitFinish(eventName: string, sec: number) {
+    return new Promise((resolve, reject) => {
+      const wait = setTimeout(() => {
+        this.eventEmitter.removeAllListeners(eventName);
+        resolve({
+          message: '참여 요청',
+        });
+      }, sec * 1000);
+      const listenFn = ({ success, exception }: { success: boolean, exception?: HttpException }) => {
+        clearTimeout(wait)
+        this.eventEmitter.removeAllListeners(eventName);
+        success ? resolve({ message: '참여 성공' }) : reject(exception);
+        return ;
+      };
+      this.eventEmitter.addListener(eventName, listenFn);
     });
   }
 }
