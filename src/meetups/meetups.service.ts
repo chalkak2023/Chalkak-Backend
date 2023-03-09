@@ -52,10 +52,10 @@ export class MeetupsService {
       { meetupId, userId, eventName },
       { removeOnComplete: true, removeOnFail: true },
     );
-    await this.waitFinish(eventName, 2);
+    return this.waitFinish(eventName, 2);
   }
 
-  private async waitFinish(eventName: string, sec: number) {
+  private waitFinish(eventName: string, sec: number) {
     return new Promise((resolve, reject) => {
       const wait = setTimeout(() => {
         this.eventEmitter.removeAllListeners(eventName);

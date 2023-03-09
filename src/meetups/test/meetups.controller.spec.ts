@@ -135,7 +135,7 @@ describe('MeetupsController', () => {
       exp: 0
     }
     it('addJoin', async () => {
-      mockService.addJoinQueue.mockResolvedValue();
+      mockService.addJoinQueue.mockResolvedValue({});
       await controller.addJoin(meetupId, userDTO);
 
       expect(mockService.addJoinQueue).toHaveBeenCalled();
