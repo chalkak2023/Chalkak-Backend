@@ -1,11 +1,12 @@
-import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 import { Injectable, NotFoundException, BadRequestException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
+import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 import { Photospot } from '../photospot/entities/photospot.entity';
 import { Collection } from '../collections/entities/collection.entity';
+import { Photo } from './entities/photo.entity';
 import { S3Service } from './../common/aws/s3.service';
 
 @Injectable()
@@ -13,24 +14,35 @@ export class PhotospotService {
   constructor(
     @InjectRepository(Photospot) private photospotRepository: Repository<Photospot>,
     @InjectRepository(Collection) private collectionRepository: Repository<Collection>,
+    @InjectRepository(Photo) private PhotoRepository: Repository<Photo>,
     private readonly s3Service: S3Service
   ) {}
 
-  async createPhotospot(createPhtospotDto: CreatePhotospotDto, userId: number, collectionId: number): Promise<void> {
+  async createPhotospot(
+    createPhtospotDto: CreatePhotospotDto,
+    files: Express.Multer.File[],
+    userId: number,
+    collectionId: number
+  ): Promise<void> {
     const collection = await this.collectionRepository.findOne({ where: { id: collectionId } });
-  
+
     if (_.isNil(collection)) {
       throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
     }
-
-    try {
-      const { title, description, latitude, longitude, image }: CreatePhotospotDto = createPhtospotDto;
-      const imagePath = await this.s3Service.putObject(image);
-      await this.photospotRepository.insert({ title, description, latitude, longitude, imagePath, userId, collectionId });
-    } catch (error) {
-      console.log(error);
-      throw new BadRequestException('요청이 올바르지 않습니다.');
-    }
+    const { title, description, latitude, longitude }: CreatePhotospotDto = createPhtospotDto;
+    const images = await Promise.all(files.map((file) => this.s3Service.putObject(file)));
+    await this.photospotRepository.insert({
+      title,
+      description,
+      latitude,
+      longitude,
+      userId,
+      collectionId,
+      photos: images.map((image) => ({
+        userId,
+        image,
+      })),
+    });
   }
 
   async getAllPhotospot(collectionId: number): Promise<Photospot[]> {
@@ -40,7 +52,7 @@ export class PhotospotService {
       throw new NotFoundException('해당 콜렉션을 찾을 수 없습니다.');
     }
 
-    const photospots = await this.photospotRepository.find({ where: { collectionId } });
+    const photospots = await this.photospotRepository.find({ where: { collectionId }, relations: {photos: true} });
     return photospots;
   }
 
@@ -57,7 +69,6 @@ export class PhotospotService {
   async modifyPhotospot(modifyPhotospotDto: ModifyPhotospotDto, photospotId: number, userId: number): Promise<void> {
     const { title, description, image }: ModifyPhotospotDto = modifyPhotospotDto;
     let updateData;
-
     const photospot = await this.getPhotospot(photospotId);
 
     if (photospot.userId !== userId) {
@@ -68,7 +79,7 @@ export class PhotospotService {
       updateData = { title, description };
     } else {
       const imagePath = await this.s3Service.putObject(image);
-      updateData = { title, description, imagePath };
+      updateData = { title, description };
     }
 
     this.photospotRepository.update({ id: photospotId }, updateData);

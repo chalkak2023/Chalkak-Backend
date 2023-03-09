@@ -26,9 +26,6 @@ export class Photospot {
   @Column('double')
   longitude: number;
 
-  @Column('varchar')
-  imagePath: string;
-
   @CreateDateColumn()
   createdAt: Date;
   
