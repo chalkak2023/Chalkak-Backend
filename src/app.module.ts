@@ -10,6 +10,7 @@ import { MeetupsModule } from './meetups/meetups.module';
 import { AdminModule } from './admin/admin.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PhotospotModule } from './photospot/photospot.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
@@ -25,6 +26,9 @@ import { PhotospotModule } from './photospot/photospot.module';
       },
     }),
     CacheModule.register({ isGlobal: true }),
+    EventEmitterModule.forRoot({
+      global: true
+    }),
     AuthModule,
     CollectionsModule,
     MeetupsModule,
