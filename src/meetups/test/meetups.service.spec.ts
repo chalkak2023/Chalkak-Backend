@@ -8,6 +8,9 @@ import { MeetupsRepository } from '../meetups.repository';
 import { MeetupsService } from '../meetups.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { Meetup } from '../entities/meetup.entity';
+import Bull, { Queue } from 'bull';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { getQueueToken } from '@nestjs/bull';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -15,6 +18,8 @@ describe('MeetupsService', () => {
   let service: MeetupsService;
   let mockMeetupRepository: jest.Mocked<MeetupsRepository>;
   let mockJoinRepository: jest.Mocked<Repository<Join>>;
+  let mockJoinQueue: jest.Mocked<Queue>;
+  let mockEventEmitter: jest.Mocked<EventEmitter2>;
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -28,6 +33,11 @@ describe('MeetupsService', () => {
           delete: jest.fn(),
         };
       }
+      if (token === getQueueToken('joinQueue')) {
+        return {
+          add: jest.fn(),
+        };
+      }
       if (typeof token === 'function') {
         const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
         const Mock = moduleMocker.generateFromMetadata(mockMetadata);
@@ -38,6 +48,8 @@ describe('MeetupsService', () => {
     service = module.get(MeetupsService);
     mockMeetupRepository = module.get(MeetupsRepository);
     mockJoinRepository = module.get(getRepositoryToken(Join));
+    mockJoinQueue = module.get(getQueueToken('joinQueue'));
+    mockEventEmitter = module.get(EventEmitter2);
   });
 
   it('should be defined', () => {
@@ -139,18 +151,24 @@ describe('MeetupsService', () => {
   describe('addJoin Method', () => {
     const meetupId = 1;
     const userId = 1;
+    const eventName = 'eventName';
     it('Fail - already join', async () => {
       const mockFindOneReturnValue = new Join();
       mockJoinRepository.findOne.mockResolvedValue(mockFindOneReturnValue);
-      try {
-        await service.addJoin(meetupId, userId);
-      } catch (err) {
-        expect(mockJoinRepository.findOne).toHaveBeenCalled();
-        expect(mockJoinRepository.findOne).toHaveBeenCalledWith(
-          { where: { meetupId, userId } }
-        );
-        expect(err).toBeInstanceOf(ConflictException);
-      }
+      const mockEmitReturnValue = false;
+      mockEventEmitter.emit.mockReturnValue(mockEmitReturnValue);
+
+      const result = await service.addJoin(meetupId, userId, eventName);
+
+      expect(mockJoinRepository.findOne).toHaveBeenCalled();
+      expect(mockJoinRepository.findOne).toHaveBeenCalledWith(
+        { where: { meetupId, userId } }
+      );
+      expect(mockEventEmitter.emit).toHaveBeenCalled();
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        eventName, { success: false, exception: new ConflictException(`이미 참여하고 있는 유저입니다.`) }
+      );
+      expect(result).toBe(mockEmitReturnValue);
     });
     it('Fail - headcount full', async () => {
       const mockFindOneReturnValue = null;
@@ -159,17 +177,22 @@ describe('MeetupsService', () => {
       mockGetMeetupReturnValue.headcount = 1;
       mockGetMeetupReturnValue.joins = [new Join()];
       mockMeetupRepository.getMeetup.mockResolvedValue(mockGetMeetupReturnValue);
-      try {
-        await service.addJoin(meetupId, userId);
-      } catch (err) {
-        expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
-        expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
-        expect(mockJoinRepository.findOne).toHaveBeenCalled();
-        expect(mockJoinRepository.findOne).toHaveBeenCalledWith(
-          { where: { meetupId, userId } }
-        );
-        expect(err).toBeInstanceOf(ForbiddenException);
-      }
+      const mockEmitReturnValue = false;
+      mockEventEmitter.emit.mockReturnValue(mockEmitReturnValue);
+
+      const result = await service.addJoin(meetupId, userId, eventName);
+
+      expect(mockJoinRepository.findOne).toHaveBeenCalled();
+      expect(mockJoinRepository.findOne).toHaveBeenCalledWith({ 
+        where: { meetupId, userId } 
+      });
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
+      expect(mockEventEmitter.emit).toHaveBeenCalled();
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        eventName, { success: false, exception: new ForbiddenException('정원이 다 찼습니다.') }
+      );
+      expect(result).toBe(mockEmitReturnValue);
     });
     it('Success', async () => {
       const mockFindOneReturnValue = null;
@@ -179,7 +202,10 @@ describe('MeetupsService', () => {
       mockGetMeetupReturnValue.joins = [new Join()];
       mockMeetupRepository.getMeetup.mockResolvedValue(mockGetMeetupReturnValue);
       mockJoinRepository.insert.mockResolvedValue({ generatedMaps: [], identifiers: [], raw: false });
-      await service.addJoin(meetupId, userId);
+      const mockEmitReturnValue = true;
+      mockEventEmitter.emit.mockReturnValue(mockEmitReturnValue);
+
+      const result = await service.addJoin(meetupId, userId, eventName);
 
       expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
       expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
@@ -191,6 +217,11 @@ describe('MeetupsService', () => {
       expect(mockJoinRepository.insert).toHaveBeenCalledWith(
         { meetupId, userId }
       );
+      expect(mockEventEmitter.emit).toHaveBeenCalled();
+      expect(mockEventEmitter.emit).toHaveBeenCalledWith(
+        eventName, { success: true }
+      );
+      expect(result).toBe(mockEmitReturnValue);
     });
   });
 
@@ -249,4 +280,14 @@ describe('MeetupsService', () => {
       );
     });
   });
+
+  // describe('waitFinish Method', () => {
+  //   const eventName = 'eventName';
+  //   const sec = 2;
+  //   it('Success', async () => {
+  //     const mockRemoveAllListenersReturnValue = new EventEmitter2();
+  //     mockEventEmitter.removeAllListeners.mockReturnValue(mockRemoveAllListenersReturnValue);
+
+  //   });
+  // });
 });
