@@ -187,12 +187,24 @@ export class AdminService {
         search: `%${search}%`,
       });
     }
-
-    const take = 6;
-    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+      collectionsList
+        .select([
+          'collection.id',
+          'collection.userId',
+          'collection.title',
+          'collection.description',
+          'collection.createdAt',
+          'collection_keyword',
+        ])
+        .leftJoin('collection.user', 'user')
+        .leftJoin('collection.photospots', 'photospot')
+        .leftJoin('collection.collection_keywords', 'collection_keyword')
+        .orderBy('collection.id');
+        
+    const take = 9;
+    const page: number = p > 0 ? parseInt(p as any) : 1;
     const total = await collectionsList.getCount();
     collectionsList.skip((page - 1) * take).take(take);
-
     return {
       data: await collectionsList.getMany(),
       total,
