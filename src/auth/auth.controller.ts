@@ -28,15 +28,15 @@ export class AuthController {
 
   @Post('signin')
   @HttpCode(200)
-  async signIn(@Body() body: SignInBodyDTO, @Res({ passthrough: true }) response: any) {
-    return await this.authService.signIn(body, response);
+  async signIn(@Body() body: SignInBodyDTO) {
+    return await this.authService.signIn(body);
   }
 
   @Post('signout')
   @UserGuard
   @HttpCode(200)
-  async signOut(@InjectUser() user: any, @Res({ passthrough: true }) response: any) {
-    return await this.authService.signOut(user, response);
+  async signOut(@InjectUser() user: any) {
+    return await this.authService.signOut(user);
   }
 
   @Post('emailverification')

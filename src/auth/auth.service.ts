@@ -90,7 +90,7 @@ export class AuthService {
     };
   }
 
-  async signIn(body: SignInBodyDTO, response: any) {
+  async signIn(body: SignInBodyDTO) {
     const { email, password } = body;
     const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password'] });
     if (!user || !bcrypt.compareSync(password, user.password)) {
@@ -111,7 +111,7 @@ export class AuthService {
     };
   }
 
-  async signOut(user: any, response: any) {
+  async signOut(user: any) {
     await this.cacheManager.del(user.id);
     return {
       message: '로그아웃 되었습니다.',
