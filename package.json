@@ -45,6 +45,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.29.4",
     "mysql": "^2.18.1",
+    "nest-winston": "^1.9.1",
     "nestjs-form-data": "^1.8.7",
     "nodemailer": "^6.9.1",
     "passport": "^0.6.0",
@@ -53,7 +54,9 @@
     "rand-token": "^1.0.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
-    "typeorm": "^0.3.12"
+    "typeorm": "^0.3.12",
+    "winston": "^3.8.2",
+    "winston-daily-rotate-file": "^4.7.1"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
