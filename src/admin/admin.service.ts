@@ -236,7 +236,25 @@ export class AdminService {
 
   // 모임 관리
   async getAdminMeetupsList(search: string, p: number = 1): Promise<any> {
-    const meetupsList = this.adminMeetupsRepository.createQueryBuilder('meetup');
+    const meetupsList = this.adminMeetupsRepository
+    .createQueryBuilder('m')
+    .select([
+      'm.id',
+      'm.userId',
+      'u.email',
+      'u.username',
+      'm.title',
+      'm.content',
+      'm.place',
+      'm.schedule',
+      'm.headcount',
+      'm.createdAt',
+      'j',
+    ])
+    .leftJoin('m.joins', 'j')
+    .leftJoin('m.user', 'u')
+    .orderBy('m.id');
+
     if (search) {
       meetupsList.where('meetup.title LIKE :search OR meetup.content LIKE :search OR meetup.place LIKE :search', {
         search: `%${search}%`,
