@@ -41,13 +41,13 @@ export class VerifyTokenDTO {
   verifyToken: number;
 }
 
-export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email', 'password']) {}
+export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email', 'password'] as const) {}
 
-export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email']) {}
+export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email'] as const) {}
 
-export class PutEmailVerificationBodyDTO extends IntersectionType(PickType(SignUpBodyDTO, ['email']), VerifyTokenDTO) {}
+export class PutEmailVerificationBodyDTO extends IntersectionType(PickType(SignUpBodyDTO, ['email'] as const), VerifyTokenDTO) {}
 
-export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password']) {}
+export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password'] as const) {}
 
 export class ProviderDTO {
   @IsIn(['kakao', 'naver'], {
