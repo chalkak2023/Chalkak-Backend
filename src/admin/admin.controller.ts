@@ -21,8 +21,8 @@ export class AdminController {
 
   // 관리자 관리
   @Get('auth')
-  async getAdminsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Admin[]> {
-    return await this.adminService.getAdminsList(keyword, p);
+  async getAdminsList(@Query('search') search: string, @Query('p') p: number = 1): Promise<Admin[]> {
+    return await this.adminService.getAdminsList(search, p);
   }
 
   @Post('auth/signup')
@@ -69,8 +69,8 @@ export class AdminController {
 
   // 유저 관리
   @Get('users')
-  async getAdminUsersList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<User[]> {
-    return await this.adminService.getAdminUsersList(keyword, p);
+  async getAdminUsersList(@Query('search') search: string, @Query('p') p: number = 1): Promise<User[]> {
+    return await this.adminService.getAdminUsersList(search, p);
   }
 
   @Put('users/:id')
@@ -81,8 +81,8 @@ export class AdminController {
 
   // 콜렉션 관리
   @Get('collections')
-  async getAdminCollectionsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Collection[]> {
-    return await this.adminService.getAdminCollectionsList(keyword, p);
+  async getAdminCollectionsList(@Query('search') search: string, @Query('p') p: number = 1): Promise<Collection[]> {
+    return await this.adminService.getAdminCollectionsList(search, p);
   }
 
   @Delete('collections/:id')
@@ -91,25 +91,25 @@ export class AdminController {
   }
 
   // 포토스팟 관리
-  @Get('photospots/:id')
-  async getAdminPhotospotList(@Param('id') id: number): Promise<Photospot[]> {
-    return this.adminService.getAdminPhotospotList(id);
+  @Get(':collectionId/photospots')
+  async getAdminPhotospotList(@Param('collectionId') collectionId: number): Promise<Photospot[]> {
+    return this.adminService.getAdminPhotospotList(collectionId);
   }
 
-  @Get('photospots/:id/:photospotId')
+  @Get(':collectionId/photospots/:photospotId')
   async getAdminPhotospot(@Param('photospotId') photospotId: number): Promise<Photospot> {
     return this.adminService.getAdminPhotospot(photospotId);
   }
 
-  @Delete('photospots/:id/:photospotId')
+  @Delete(':collectionId/photospots/:photospotId')
   async deleteAdminPhotospot(@Param('photospotId') photospotId: number) {
     await this.adminService.deleteAdminPhotospot(photospotId);
   }
 
   // 모임 관리
   @Get('meetups')
-  async getAdminMeetupsList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Meetup[]> {
-    return await this.adminService.getAdminMeetupsList(keyword, p);
+  async getAdminMeetupsList(@Query('search') search: string, @Query('p') p: number = 1): Promise<Meetup[]> {
+    return await this.adminService.getAdminMeetupsList(search, p);
   }
 
   @Delete('meetups/:id')
@@ -119,8 +119,8 @@ export class AdminController {
 
   // 자주찾는질문 관리
   @Get('faq')
-  async getAdminFaqList(@Query('keyword') keyword: string, @Query('p') p: number = 1): Promise<Faq[]> {
-    return await this.adminService.getAdminFaqList(keyword, p);
+  async getAdminFaqList(@Query('search') search: string, @Query('p') p: number = 1): Promise<Faq[]> {
+    return await this.adminService.getAdminFaqList(search, p);
   }
 
   @Get('faq/:id')

@@ -31,11 +31,11 @@ export class AdminService {
   ) {}
 
   // 관리자 관리
-  async getAdminsList(keyword: string, p: number = 1): Promise<any> {
+  async getAdminsList(search: string, p: number = 1): Promise<any> {
     const adminList = this.adminRepository.createQueryBuilder('admin');
-    if (keyword) {
-      adminList.where('admin.account LIKE :keyword OR admin.responsibility LIKE :keyword', {
-        keyword: `%${keyword}%`,
+    if (search) {
+      adminList.where('admin.account LIKE :search OR admin.responsibility LIKE :search', {
+        search: `%${search}%`,
       });
     }
 
@@ -149,10 +149,10 @@ export class AdminService {
   }
 
   // 유저 관리
-  async getAdminUsersList(keyword: string, p: number = 1): Promise<any> {
+  async getAdminUsersList(search: string, p: number = 1): Promise<any> {
     const usersList = this.adminUsersRepository.createQueryBuilder('user');
-    if (keyword) {
-      usersList.where('user.email LIKE :keyword', { keyword: `%${keyword}%` });
+    if (search) {
+      usersList.where('user.email LIKE :search', { search: `%${search}%` });
     }
 
     const take = 6;
@@ -180,19 +180,31 @@ export class AdminService {
   }
 
   // 콜렉션 관리
-  async getAdminCollectionsList(keyword: string, p: number = 1): Promise<any> {
+  async getAdminCollectionsList(search: string, p: number = 1): Promise<any> {
     const collectionsList = this.adminCollectionsRepository.createQueryBuilder('collection');
-    if (keyword) {
-      collectionsList.where('collection.title LIKE :keyword OR collection.description LIKE :keyword', {
-        keyword: `%${keyword}%`,
+    if (search) {
+      collectionsList.where('collection.title LIKE :search OR collection.description LIKE :search', {
+        search: `%${search}%`,
       });
     }
-
-    const take = 6;
-    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+      collectionsList
+        .select([
+          'collection.id',
+          'collection.userId',
+          'collection.title',
+          'collection.description',
+          'collection.createdAt',
+          'collection_keyword',
+        ])
+        .leftJoin('collection.user', 'user')
+        .leftJoin('collection.photospots', 'photospot')
+        .leftJoin('collection.collection_keywords', 'collection_keyword')
+        .orderBy('collection.id');
+        
+    const take = 9;
+    const page: number = p > 0 ? parseInt(p as any) : 1;
     const total = await collectionsList.getCount();
     collectionsList.skip((page - 1) * take).take(take);
-
     return {
       data: await collectionsList.getMany(),
       total,
@@ -210,8 +222,8 @@ export class AdminService {
   }
 
   // 포토스팟 관리
-  async getAdminPhotospotList(id: number): Promise<Photospot[]> {
-    const photospots = await this.adminPhotospotsRepository.find({ where: { id } });
+  async getAdminPhotospotList(collectionId: number): Promise<Photospot[]> {
+    const photospots = await this.adminPhotospotsRepository.find({ where: { collectionId } });
     if (!photospots.length) {
       throw new NotFoundException('해당 포토스팟 목록을 찾을 수 없습니다.');
     }
@@ -235,11 +247,29 @@ export class AdminService {
   }
 
   // 모임 관리
-  async getAdminMeetupsList(keyword: string, p: number = 1): Promise<any> {
-    const meetupsList = this.adminMeetupsRepository.createQueryBuilder('meetup');
-    if (keyword) {
-      meetupsList.where('meetup.title LIKE :keyword OR meetup.content LIKE :keyword OR meetup.place LIKE :keyword', {
-        keyword: `%${keyword}%`,
+  async getAdminMeetupsList(search: string, p: number = 1): Promise<any> {
+    const meetupsList = this.adminMeetupsRepository
+    .createQueryBuilder('m')
+    .select([
+      'm.id',
+      'm.userId',
+      'u.email',
+      'u.username',
+      'm.title',
+      'm.content',
+      'm.place',
+      'm.schedule',
+      'm.headcount',
+      'm.createdAt',
+      'j',
+    ])
+    .leftJoin('m.joins', 'j')
+    .leftJoin('m.user', 'u')
+    .orderBy('m.id');
+
+    if (search) {
+      meetupsList.where('meetup.title LIKE :search OR meetup.content LIKE :search OR meetup.place LIKE :search', {
+        search: `%${search}%`,
       });
     }
 
@@ -265,11 +295,11 @@ export class AdminService {
   }
 
   // 자주찾는질문 관리
-  async getAdminFaqList(keyword: string, p: number = 1): Promise<any> {
+  async getAdminFaqList(search: string, p: number = 1): Promise<any> {
     const faqList = this.adminFaqRepository.createQueryBuilder('faq');
-    if (keyword) {
-      faqList.where('faq.title LIKE :keyword OR faq.content LIKE :keyword', {
-        keyword: `%${keyword}%`,
+    if (search) {
+      faqList.where('faq.title LIKE :search OR faq.content LIKE :search', {
+        search: `%${search}%`,
       });
     }
 
