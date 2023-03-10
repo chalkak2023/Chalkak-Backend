@@ -1,3 +1,4 @@
+![Node.js CI](https://github.com/chalkak2023/Chalkak-Backend/actions/workflows/node.js.yml/badge.svg)
 # 찰칵(Chalkak)
 
 여기저기 흩어져 있는 출사 관련 정보 및 커뮤니티를 한 곳에서!
