@@ -663,7 +663,7 @@ describe('AuthService', () => {
       cache = {
         refreshToken: 1,
       };
-      mockLocalUserRepository.findOne.mockResolvedValue({
+      mockUserRepository.findOne.mockResolvedValue({
         id: 1,
         email: 'test@gmail.com',
       } as LocalUser);
