@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { DataSource, Repository } from 'typeorm';
 import { Collection } from 'src/collections/entities/collection.entity';
+import { GetCollectionsListDto } from 'src/collections/dto/get.collections.list.dto';
 
 @Injectable()
 export class CollectionUserKeywordRepository extends Repository<Collection> {
@@ -9,27 +10,36 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
     super(Collection, dataSource.createEntityManager());
   }
 
-  async getCollectionsList(keyword: string, p: number = 1): Promise<any> {
+  async getCollectionsList({ search, p, userId }: GetCollectionsListDto) {
     const collectionsList = this.createQueryBuilder('collection');
-    if (keyword) {
-      collectionsList.where('collection.title LIKE :keyword OR collection.description LIKE :keyword', {
-        keyword: `%${keyword}%`,
-      });
-      this.createQueryBuilder('collection')
-        .select([
-          'collection.id',
-          'collection.userId',
-          'collection.title',
-          'collection.description',
-          'collection.createdAt',
-          'collection_keyword',
-        ])
-        .leftJoin('collection.user', 'user')
-        .leftJoin('collection.photospots', 'photospot')
-        .leftJoin('collection.collection_keywords', 'collection_keyword')
-        .orderBy('collection.id', 'DESC');
+    let myCollectionQuery = 'collection.userId = :userId';
+    let searchCollectionQuery = 'collection.title LIKE :search OR collection.description LIKE :search';
+
+    if (!search && !userId) {
+      collectionsList;
+    } else if (search && !userId) {
+      collectionsList.where(searchCollectionQuery, { search: `%${search}%` });
+    } else if (!search && userId) {
+      collectionsList.where(myCollectionQuery, { userId });
+    } else {
+      collectionsList.where(`${myCollectionQuery} AND (${searchCollectionQuery})`, { userId, search: `%${search}%` });
     }
-    const take = 9;
+
+    collectionsList
+      .select([
+        'collection.id',
+        'collection.userId',
+        'collection.title',
+        'collection.description',
+        'collection.createdAt',
+        'collection_keyword',
+      ])
+      .leftJoin('collection.user', 'user')
+      .leftJoin('collection.photospots', 'photospot')
+      .leftJoin('collection.collection_keywords', 'collection_keyword')
+      .orderBy('collection.id', 'DESC');
+
+    const take = 18;
     const page: number = p > 0 ? parseInt(p as any) : 1;
     const total = await collectionsList.getCount();
     collectionsList.skip((page - 1) * take).take(take);
@@ -41,7 +51,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
     };
   }
 
-  async getCollection(collectionId: number): Promise<any> {
+  async getCollection(collectionId: number): Promise<Collection | null> {
     return await this.createQueryBuilder('collection')
       .select([
         'collection.id',
