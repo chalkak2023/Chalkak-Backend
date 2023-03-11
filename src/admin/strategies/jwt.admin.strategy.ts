@@ -14,7 +14,7 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
         (request: Request) => {
           let data = request?.cookies['auth-cookie'];
           if (!data) {
-            return new BadRequestException();
+            return new UnauthorizedException();
           }
           return data.accessToken;
         },

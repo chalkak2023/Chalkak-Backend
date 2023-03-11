@@ -144,7 +144,7 @@ export class AdminService {
   private async isMasterAdmin(id: number) {
     const admin = await this.adminRepository.findOne({ where: { id }, select: { account: true } });
     if (admin?.account === 'master') {
-      throw new UnauthorizedException('마스터 관리자 계정은 삭제할 수 없습니다.');
+      throw new BadRequestException('마스터 관리자 계정은 삭제할 수 없습니다.');
     }
   }
 

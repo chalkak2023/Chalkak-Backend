@@ -222,7 +222,7 @@ export class AuthService {
       });
     } catch (err) {
       if (err.name === 'JsonWebTokenError') {
-        throw new BadRequestException({
+        throw new UnauthorizedException({
           message: '정상 발급된 액세스 토큰이 아닙니다.',
         });
       }
@@ -240,7 +240,7 @@ export class AuthService {
       select: ['id', 'email'],
     });
     if (_.isNil(user)) {
-      throw new NotFoundException({
+      throw new UnauthorizedException({
         message: '탈퇴한 유저입니다.',
       });
     }
