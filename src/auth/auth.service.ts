@@ -233,7 +233,7 @@ export class AuthService {
         message: '사용 만료되었습니다.',
       });
     }
-    const user = await this.localUsersRepository.findOne({
+    const user = await this.usersRepository.findOne({
       where: {
         id: userId,
       },
