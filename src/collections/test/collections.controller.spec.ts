@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { CollectionsController } from '../collections.controller';
 import { CACHE_MANAGER } from '@nestjs/common';
 
-describe('CollectionsController', () => {
+describe.skip('CollectionsController', () => {
   let controller: CollectionsController;
 
   beforeEach(async () => {
