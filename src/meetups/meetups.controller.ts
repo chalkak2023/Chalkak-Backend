@@ -1,10 +1,11 @@
 import _ from 'lodash';
-import { Body, Controller, DefaultValuePipe, Delete, Get, Param, ParseIntPipe, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Delete, Get, Param, ParseIntPipe, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { InjectUser, UserGuard } from 'src/auth/auth.decorator';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
 import { CreateMeetupDTO } from './dto/create-meetup.dto';
 import { Meetup } from './entities/meetup.entity';
 import { MeetupsService } from './meetups.service';
+import { Request } from 'express';
 
 @Controller('api/meetups')
 export class MeetupsController {
@@ -13,8 +14,11 @@ export class MeetupsController {
   @Get()
   async getMeetups(
     @Query('p', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('keyword', new DefaultValuePipe('')) keyword: string
+    @Query('keyword', new DefaultValuePipe('')) keyword: string, 
+    @Req() req: Request
   ): Promise<Meetup[]> {
+    console.log('cookie test: ');
+    console.log(req.cookies);
     if (page < 1) { page = 1; }
     return await this.meetupsService.getMeetups(page, keyword);
   }
