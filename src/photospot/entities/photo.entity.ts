@@ -1,4 +1,4 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { Photospot } from './photospot.entity';
 import { User } from './../../auth/entities/user.entity';
 
@@ -7,10 +7,10 @@ export class Photo {
   @PrimaryGeneratedColumn({type: 'int', name: 'id'})
   id: number;
 
-  @Column('int')
+  @PrimaryColumn('int')
   userId: number;
 
-  @Column('int')
+  @PrimaryColumn('int')
   photospotId: number;
 
   @Column('varchar')

@@ -5,7 +5,7 @@ import * as _ from 'lodash'
 export class FileVaildationPipe implements PipeTransform {
   transform(value: any, metadata: ArgumentMetadata) {
     const imageType = ['IMAGE/PNG', 'IMAGE/JPEG', 'IMAGE/JPG'];
-
+    
     if (_.isNil(value)) {
       throw new BadRequestException('이미지 파일을 입력하셔야 합니다.');
     }
