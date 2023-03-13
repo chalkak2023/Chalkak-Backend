@@ -14,9 +14,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ 
+    ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env', 
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
     }),
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
     JwtModule.register({
@@ -27,7 +27,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     }),
     CacheModule.register({ isGlobal: true }),
     EventEmitterModule.forRoot({
-      global: true
+      global: true,
     }),
     AuthModule,
     CollectionsModule,
@@ -38,4 +38,6 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
   controllers: [AppController],
   providers: [AppService],
 })
+
+
 export class AppModule {}

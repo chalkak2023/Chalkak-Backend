@@ -13,7 +13,7 @@ export class PhotospotService {
   constructor(
     @InjectRepository(Photospot) private photospotRepository: Repository<Photospot>,
     @InjectRepository(Collection) private collectionRepository: Repository<Collection>,
-    private readonly s3Service: S3Service
+    private readonly s3Service: S3Service,
   ) {}
 
   async createPhotospot(createPhtospotDto: CreatePhotospotDto, userId: number, collectionId: number): Promise<void> {
@@ -27,8 +27,7 @@ export class PhotospotService {
       const { title, description, latitude, longitude, image }: CreatePhotospotDto = createPhtospotDto;
       const imagePath = await this.s3Service.putObject(image);
       await this.photospotRepository.insert({ title, description, latitude, longitude, imagePath, userId, collectionId });
-    } catch (error) {
-      console.log(error);
+    } catch {
       throw new BadRequestException('요청이 올바르지 않습니다.');
     }
   }
