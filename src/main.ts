@@ -6,8 +6,7 @@ import { AppModule } from './app.module';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.enableCors({
-    origin: 'https://chalkak.vercel.app/',
-    // origin: true,
+    origin: true,
     credentials: true,
   });
   app.useGlobalPipes(
