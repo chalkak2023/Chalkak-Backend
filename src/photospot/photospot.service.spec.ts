@@ -1,4 +1,3 @@
-import { FileSystemStoredFile } from 'nestjs-form-data/dist/classes/storage';
 import { BadRequestException, NotAcceptableException, NotFoundException } from '@nestjs/common';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
