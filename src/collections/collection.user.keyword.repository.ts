@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { DataSource, Repository } from 'typeorm';
 import { Collection } from 'src/collections/entities/collection.entity';
-import { GetCollectionsListDto } from 'src/collections/dto/get.collections.list.dto';
+import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
 
 @Injectable()
 export class CollectionUserKeywordRepository extends Repository<Collection> {
@@ -10,7 +10,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
     super(Collection, dataSource.createEntityManager());
   }
 
-  async getCollectionsList({ search, p, userId }: GetCollectionsListDto) {
+  async getCollectionsList({ search, p, userId }: GetCollectionsListQueryDto) {
     const collectionsList = this.createQueryBuilder('collection');
     let myCollectionQuery = 'collection.userId = :userId';
     let searchCollectionQuery = 'collection.title LIKE :search OR collection.description LIKE :search';
@@ -48,7 +48,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
       total,
       page,
       lastPage: Math.ceil(total / take),
-    };
+    }; 
   }
 
   async getCollection(collectionId: number): Promise<Collection | null> {

@@ -7,21 +7,21 @@ import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
 import { UpdateCollectionDto } from 'src/collections/dto/update.collection.dto';
 import { GetCollectionIdDto } from 'src/collections/dto/get.collection.id.dto';
-import { GetCollectionsListDto } from 'src/collections/dto/get.collections.list.dto';
+import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
 
 @Controller('/api/collections')
 export class CollectionsController {
   constructor(private collectionsService: CollectionsService) {}
 
   @Get()
-  async getCollectionsList(@Query() getCollectionsListDto: GetCollectionsListDto) {
-    return await this.collectionsService.getCollectionsList(getCollectionsListDto);
+  async getCollectionsList(@Query() GetCollectionsListQueryDto: GetCollectionsListQueryDto) {
+    return await this.collectionsService.getCollectionsList(GetCollectionsListQueryDto);
   }
 
   @Get(':collectionId')
   async getCollection(@Param() { collectionId }: GetCollectionIdDto): Promise<Collection> {
     return await this.collectionsService.getCollection(collectionId);
-  }
+  } 
 
   @Post()
   @UseGuards(JwtGuard)

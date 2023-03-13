@@ -8,7 +8,7 @@ import { CollectionKeyword } from 'src/collections/entities/collection.keyword.e
 import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { UpdateCollectionDto } from 'src/collections/dto/update.collection.dto';
 import { GetCollectionIdDto } from 'src/collections/dto/get.collection.id.dto';
-import { GetCollectionsListDto } from 'src/collections/dto/get.collections.list.dto';
+import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
 
 @Injectable()
 export class CollectionsService {
@@ -18,9 +18,9 @@ export class CollectionsService {
     @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>
   ) {}
 
-  async getCollectionsList(getCollectionsListDto: GetCollectionsListDto) {
-    getCollectionsListDto.p = getCollectionsListDto.p || 1;
-    return await this.collectionUserKeywordRepository.getCollectionsList(getCollectionsListDto);
+  async getCollectionsList(GetCollectionsListQueryDto: GetCollectionsListQueryDto) {
+    GetCollectionsListQueryDto.p = GetCollectionsListQueryDto.p || 1;
+    return await this.collectionUserKeywordRepository.getCollectionsList(GetCollectionsListQueryDto);
   }
 
   async getCollection(collectionId: GetCollectionIdDto['collectionId']): Promise<Collection> {
