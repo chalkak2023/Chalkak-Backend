@@ -6,7 +6,6 @@ import { PhotospotService } from './photospot.service';
 import { Photospot } from './entities/photospot.entity';
 import { InjectUser, UserGuard } from '../auth/auth.decorator';
 import { FileVaildationPipe } from './pipes/FileValidation.pipe';
-import { ModifyFileVaildationPipe } from './pipes/ModifyFileValidation.pipe';
 
 @Controller('/api/collections/:collectionId/photospots')
 export class PhotospotController {
@@ -16,7 +15,7 @@ export class PhotospotController {
   @UserGuard
   @UseInterceptors(FilesInterceptor('files'))
   async createPhotospot(
-    @UploadedFiles(FileVaildationPipe) files: Express.Multer.File[],
+    @UploadedFiles(new FileVaildationPipe('create')) files: Express.Multer.File[],
     @Body() createPhtospotDto: CreatePhotospotDto,
     @Param('collectionId') collectionId: number,
     @InjectUser('id') userId: number
@@ -39,7 +38,7 @@ export class PhotospotController {
   @UserGuard
   @UseInterceptors(FilesInterceptor('files'))
   async modifyPhotospot(
-    @UploadedFiles(ModifyFileVaildationPipe) files: Express.Multer.File[],
+    @UploadedFiles(new FileVaildationPipe('modify')) files: Express.Multer.File[],
     @Body() modifyPhotospot: ModifyPhotospotDto,
     @Param('photospotId') photospotId: number,
     @InjectUser('id') userId: number

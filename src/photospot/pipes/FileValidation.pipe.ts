@@ -3,11 +3,16 @@ import * as _ from 'lodash'
 
 @Injectable()
 export class FileVaildationPipe implements PipeTransform {
+  constructor(private readonly mode: string){}
   transform(value: any, metadata: ArgumentMetadata) {
     const imageType = ['IMAGE/PNG', 'IMAGE/JPEG', 'IMAGE/JPG'];
     
-    if (_.isNil(value)) {
-      throw new BadRequestException('이미지 파일을 입력하셔야 합니다.');
+    if (_.isEmpty(value)) {
+      if (this.mode === 'create') {
+        throw new BadRequestException('이미지 파일을 입력하셔야 합니다.');
+      } else if (this.mode === 'modify'){
+        return [];
+      }
     }
 
     if (value.length > 5) {
