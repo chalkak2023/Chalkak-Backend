@@ -6,7 +6,7 @@ import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.
 
 @Injectable()
 export class CollectionUserKeywordRepository extends Repository<Collection> {
-  constructor(private dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource) {
     super(Collection, dataSource.createEntityManager());
   }
 

@@ -11,7 +11,7 @@ import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.
 
 @Controller('/api/collections')
 export class CollectionsController {
-  constructor(private collectionsService: CollectionsService) {}
+  constructor(private readonly collectionsService: CollectionsService) {}
 
   @Get()
   async getCollectionsList(@Query() getCollectionsListQueryDto: GetCollectionsListQueryDto) {

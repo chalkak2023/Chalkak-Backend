@@ -13,7 +13,7 @@ import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.
 @Injectable()
 export class CollectionsService {
   constructor(
-    private collectionUserKeywordRepository: CollectionUserKeywordRepository,
+    private readonly collectionUserKeywordRepository: CollectionUserKeywordRepository,
     @InjectRepository(Collection) private readonly collectionsRepository: Repository<Collection>,
     @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>
   ) {}
