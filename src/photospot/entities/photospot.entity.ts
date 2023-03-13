@@ -1,6 +1,7 @@
-import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Collection } from '../../collections/entities/collection.entity';
 import { User } from '../../auth/entities/user.entity';
+import { Photo } from './photo.entity';
 
 @Entity({ schema: 'chalkak', name: 'photospot' })
 export class Photospot {
@@ -25,9 +26,6 @@ export class Photospot {
   @Column('double')
   longitude: number;
 
-  @Column('varchar')
-  imagePath: string;
-
   @CreateDateColumn()
   createdAt: Date;
   
@@ -42,4 +40,7 @@ export class Photospot {
 
   @ManyToOne((type) => Collection, (collection) => collection.photospots)
   collection: Collection;
+
+  @OneToMany(() => Photo, (photo) => photo.photospot)
+  photos: Photo[]
 }
