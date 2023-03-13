@@ -44,6 +44,14 @@ export class CollectionsService {
     });
   }
 
+  async getCollectionKeyword(collectionId: number): Promise<CollectionKeyword[]> {
+    const collectionKeyword = await this.collectionKeywordsRepository.find({ where: { collectionId } });
+    if (_.isNil(collectionKeyword)) {
+      throw new NotFoundException('해당 콜렉션의 키워드를 찾을 수 없습니다.');
+    }
+    return collectionKeyword;
+  }
+
   async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number) {
     const { title, description, keyword } = updateCollectionDto;
     const collection = await this.getCollection(collectionId);
@@ -52,7 +60,7 @@ export class CollectionsService {
     }
     await this.collectionsRepository.update({ id: collectionId }, { title, description });
     if (keyword) {
-      const prevKeywordObj = await this.collectionKeywordsRepository.find({ where: { collectionId } });
+      const prevKeywordObj = await this.getCollectionKeyword(collectionId)
       const prevKeyword = prevKeywordObj.map((obj) => obj.keyword);
       const newKeywords = _.difference(keyword, prevKeyword);
       const delKeywords = _.difference(prevKeyword, keyword);
