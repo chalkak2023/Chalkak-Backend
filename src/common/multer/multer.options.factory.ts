@@ -1,15 +1,14 @@
 import { MulterOptions } from '@nestjs/platform-express/multer/interfaces/multer-options.interface';
 import { diskStorage } from 'multer';
 import path from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 export const multerOptionsFactory = (): MulterOptions => {
   return {
     storage: diskStorage({
       filename(req, file, cb) {
-        const image = Buffer.from(file.originalname, 'latin1').toString('utf-8');
-        const ext = path.extname(image);
-        const basename = path.basename(image, ext);
-        cb(null, `${basename}-${new Date().getTime()}${ext}`);
+        const ext = path.extname(file.originalname);
+        cb(null, `${uuidv4()}-${new Date().getTime()}${ext}`);
       },
     }),
   };
