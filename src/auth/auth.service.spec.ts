@@ -260,9 +260,6 @@ describe('AuthService', () => {
         email: 'test@gmail.com',
         password: 'testpassword',
       };
-      const response: any = {
-        cookie: jest.fn(() => response),
-      };
       mockLocalUserRepository.findOne.mockResolvedValue(users[0]);
       mockJwtService.sign.mockImplementation((payload: any, options: any) => {
         return `token${options.secret}`;
@@ -270,7 +267,7 @@ describe('AuthService', () => {
       const accessToken = `token${mockConfigService.get('JWT_ACCESS_TOKEN_SECRET')}`;
       const refreshToken = `token${mockConfigService.get('JWT_REFRESH_TOKEN_SECRET')}`;
 
-      expect(service.signIn(body, response)).resolves.toStrictEqual({
+      expect(service.signIn(body)).resolves.toStrictEqual({
         message: '로그인 되었습니다.',
         accessToken,
         refreshToken,
@@ -282,12 +279,9 @@ describe('AuthService', () => {
         email: 'fake' + users[0].email,
         password: 'testpassword',
       };
-      const response: any = {
-        cookie: jest.fn(() => response),
-      };
       mockLocalUserRepository.findOne.mockResolvedValue(null);
 
-      expect(service.signIn(body, response)).rejects.toThrowError(
+      expect(service.signIn(body)).rejects.toThrowError(
         new NotFoundException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' })
       );
     });
@@ -297,12 +291,9 @@ describe('AuthService', () => {
         email: users[0].email,
         password: 'faketestpassword',
       };
-      const response: any = {
-        cookie: jest.fn(() => response),
-      };
       mockLocalUserRepository.findOne.mockResolvedValue(users[0]);
 
-      expect(service.signIn(body, response)).rejects.toThrowError(
+      expect(service.signIn(body)).rejects.toThrowError(
         new NotFoundException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' })
       );
     });
@@ -312,12 +303,9 @@ describe('AuthService', () => {
         email: users[2].email,
         password: 'testpassword',
       };
-      const response: any = {
-        cookie: jest.fn(() => response),
-      };
       mockLocalUserRepository.findOne.mockResolvedValue(users[2]);
 
-      expect(service.signIn(body, response)).rejects.toThrowError(
+      expect(service.signIn(body)).rejects.toThrowError(
         new ForbiddenException({
           message: '블락된 상태여서 로그인할 수 없습니다.',
         })
@@ -335,12 +323,8 @@ describe('AuthService', () => {
       const user = {
         id: 1,
       };
-      const response: any = {
-        cookie: jest.fn(() => response),
-        clearCookie: jest.fn(() => response),
-      };
 
-      expect(service.signOut(user, response)).resolves.toStrictEqual({
+      expect(service.signOut(user)).resolves.toStrictEqual({
         message: '로그아웃 되었습니다.',
       });
     });
@@ -663,7 +647,7 @@ describe('AuthService', () => {
       cache = {
         refreshToken: 1,
       };
-      mockLocalUserRepository.findOne.mockResolvedValue({
+      mockUserRepository.findOne.mockResolvedValue({
         id: 1,
         email: 'test@gmail.com',
       } as LocalUser);
