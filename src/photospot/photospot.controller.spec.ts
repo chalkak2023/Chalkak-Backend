@@ -3,7 +3,6 @@ import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { Test, TestingModule } from '@nestjs/testing';
 import { FileSystemStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
-import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { PhotospotController } from './photospot.controller';
 import { PhotospotService } from './photospot.service';
 import { CACHE_MANAGER } from '@nestjs/common';
@@ -57,10 +56,11 @@ describe('PhotospotController', () => {
       const dto = new CreatePhotospotDto();
       const userId = 1;
       const collectionId = 1;
+      const filse = [{}] as Express.Multer.File[];
 
-      service.createPhotospot(dto, userId, collectionId);
+      service.createPhotospot(dto, filse, userId, collectionId);
       expect(service.createPhotospot).toHaveBeenCalledTimes(1);
-      expect(service.createPhotospot).toHaveBeenCalledWith(dto, userId, collectionId);
+      expect(service.createPhotospot).toHaveBeenCalledWith(dto, filse, userId, collectionId);
     });
   });
 
@@ -101,10 +101,11 @@ describe('PhotospotController', () => {
       const dto = new ModifyPhotospotDto();
       const photospotId = 1;
       const userId = 1;
-      await service.modifyPhotospot(dto, photospotId, userId);
+      const filse = [{}] as Express.Multer.File[];
+      await service.modifyPhotospot(dto, filse, photospotId, userId);
 
       expect(service.modifyPhotospot).toHaveBeenCalledTimes(1);
-      expect(service.modifyPhotospot).toHaveBeenCalledWith(dto, photospotId, userId);
+      expect(service.modifyPhotospot).toHaveBeenCalledWith(dto, filse, photospotId, userId);
     });
   });
 
@@ -115,7 +116,7 @@ describe('PhotospotController', () => {
 
     it('deletePhotospot 성공', async () => {
       const photospotId = 1;
-      const userId = 1
+      const userId = 1;
       await service.deletePhotospot(photospotId, userId);
 
       expect(service.deletePhotospot).toHaveBeenCalledTimes(1);
