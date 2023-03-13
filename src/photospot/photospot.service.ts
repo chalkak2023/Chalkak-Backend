@@ -16,7 +16,7 @@ export class PhotospotService {
     @InjectRepository(Collection) private collectionRepository: Repository<Collection>,
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
     private readonly s3Service: S3Service,
-    private readonly dataSource: DataSource
+    private readonly dataSource: DataSource,
   ) {}
 
   async createPhotospot(
