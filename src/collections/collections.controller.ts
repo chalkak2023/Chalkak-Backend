@@ -14,8 +14,8 @@ export class CollectionsController {
   constructor(private collectionsService: CollectionsService) {}
 
   @Get()
-  async getCollectionsList(@Query() GetCollectionsListQueryDto: GetCollectionsListQueryDto) {
-    return await this.collectionsService.getCollectionsList(GetCollectionsListQueryDto);
+  async getCollectionsList(@Query() getCollectionsListQueryDto: GetCollectionsListQueryDto) {
+    return await this.collectionsService.getCollectionsList(getCollectionsListQueryDto);
   }
 
   @Get(':collectionId')

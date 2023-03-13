@@ -18,9 +18,9 @@ export class CollectionsService {
     @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>
   ) {}
 
-  async getCollectionsList(GetCollectionsListQueryDto: GetCollectionsListQueryDto) {
-    GetCollectionsListQueryDto.p = GetCollectionsListQueryDto.p || 1;
-    return await this.collectionUserKeywordRepository.getCollectionsList(GetCollectionsListQueryDto);
+  async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto) {
+    getCollectionsListQueryDto.p = getCollectionsListQueryDto.p || 1;
+    return await this.collectionUserKeywordRepository.getCollectionsList(getCollectionsListQueryDto);
   }
 
   async getCollection(collectionId: GetCollectionIdDto['collectionId']): Promise<Collection> {
