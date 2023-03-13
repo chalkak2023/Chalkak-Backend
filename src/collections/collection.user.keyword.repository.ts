@@ -11,6 +11,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
   }
 
   async getCollectionsList({ search, p, userId }: GetCollectionsListQueryDto) {
+    const take = 18;
     const collectionsList = this.createQueryBuilder('collection');
     let myCollectionQuery = 'collection.userId = :userId';
     let searchCollectionQuery = 'collection.title LIKE :search OR collection.description LIKE :search';
@@ -25,7 +26,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
       collectionsList.where(`${myCollectionQuery} AND (${searchCollectionQuery})`, { userId, search: `%${search}%` });
     }
 
-    collectionsList
+    return await collectionsList
       .select([
         'collection.id',
         'collection.userId',
@@ -37,18 +38,10 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
       .leftJoin('collection.user', 'user')
       .leftJoin('collection.photospots', 'photospot')
       .leftJoin('collection.collection_keywords', 'collection_keyword')
-      .orderBy('collection.id', 'DESC');
-
-    const take = 18;
-    const page: number = p > 0 ? parseInt(p as any) : 1;
-    const total = await collectionsList.getCount();
-    collectionsList.skip((page - 1) * take).take(take);
-    return {
-      data: await collectionsList.getMany(),
-      total,
-      page,
-      lastPage: Math.ceil(total / take),
-    }; 
+      .orderBy('collection.id', 'DESC')
+      .take(take)
+      .skip((p - 1) * take)
+      .getMany()
   }
 
   async getCollection(collectionId: number): Promise<Collection | null> {
