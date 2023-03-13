@@ -52,13 +52,7 @@ export class CollectionsService {
     return collectionKeyword;
   }
 
-  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number) {
-    const { title, description, keyword } = updateCollectionDto;
-    const collection = await this.getCollection(collectionId);
-    if (collection.userId !== userId) {
-      throw new ForbiddenException('해당 콜렉션 내용의 수정 권한이 없습니다.');
-    }
-    await this.collectionsRepository.update({ id: collectionId }, { title, description });
+  async updateCollectionKeywords({ keyword }: UpdateCollectionDto, collectionId: number, userId: number) {
     if (keyword) {
       const prevKeywordObj = await this.getCollectionKeyword(collectionId)
       const prevKeyword = prevKeywordObj.map((obj) => obj.keyword);
@@ -71,7 +65,16 @@ export class CollectionsService {
         await this.collectionKeywordsRepository.softDelete({ keyword: keywordText, collectionId, userId });
       }
     }
-    return {};
+  }
+  
+  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number) {
+    const { title, description } = updateCollectionDto;
+    const collection = await this.getCollection(collectionId);
+    if (collection.userId !== userId) {
+      throw new ForbiddenException('해당 콜렉션 내용의 수정 권한이 없습니다.');
+    }
+    await this.collectionsRepository.update({ id: collectionId }, { title, description });
+    return await this.updateCollectionKeywords(updateCollectionDto, collectionId, userId)
   }
 
   async deleteCollection(collectionId: number, userId: number) {
