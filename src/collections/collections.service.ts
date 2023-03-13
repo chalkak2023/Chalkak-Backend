@@ -62,7 +62,7 @@ export class CollectionsService {
         await this.collectionKeywordsRepository.insert({ keyword: keywordText, collectionId, userId });
       }
       for (let keywordText of delKeywords) {
-        await this.collectionKeywordsRepository.softDelete({ keyword: keywordText, collectionId, userId });
+        await this.collectionKeywordsRepository.delete({ keyword: keywordText, collectionId, userId });
       }
     }
   }
