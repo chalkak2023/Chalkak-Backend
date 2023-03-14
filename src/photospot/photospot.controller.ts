@@ -1,10 +1,11 @@
-import { Controller, Post, Get, Put, Delete, Body, Param, Query, UsePipes, UseGuards } from '@nestjs/common';
-import { FormDataRequest } from 'nestjs-form-data/dist/decorators/form-data';
+import { Controller, Post, Get, Put, Delete, Body, Param, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 import { PhotospotService } from './photospot.service';
 import { Photospot } from './entities/photospot.entity';
 import { InjectUser, UserGuard } from '../auth/auth.decorator';
+import { FileVaildationPipe } from './pipes/FileValidation.pipe';
 
 @Controller('/api/collections/:collectionId/photospots')
 export class PhotospotController {
@@ -12,13 +13,14 @@ export class PhotospotController {
 
   @Post()
   @UserGuard
-  @FormDataRequest()
+  @UseInterceptors(FilesInterceptor('files'))
   async createPhotospot(
+    @UploadedFiles(new FileVaildationPipe('create')) files: Express.Multer.File[],
     @Body() createPhtospotDto: CreatePhotospotDto,
     @Param('collectionId') collectionId: number,
     @InjectUser('id') userId: number
   ): Promise<void> {
-    await this.photospotService.createPhotospot(createPhtospotDto, userId, collectionId);
+    await this.photospotService.createPhotospot(createPhtospotDto, files, userId, collectionId);
   }
 
   @Get()
@@ -34,18 +36,25 @@ export class PhotospotController {
 
   @Put('/:photospotId')
   @UserGuard
-  @FormDataRequest()
+  @UseInterceptors(FilesInterceptor('files'))
   async modifyPhotospot(
+    @UploadedFiles(new FileVaildationPipe('modify')) files: Express.Multer.File[],
     @Body() modifyPhotospot: ModifyPhotospotDto,
     @Param('photospotId') photospotId: number,
     @InjectUser('id') userId: number
-  ): Promise<void> {
-    await this.photospotService.modifyPhotospot(modifyPhotospot, photospotId, userId);
+  ): Promise<void> {    
+    await this.photospotService.modifyPhotospot(modifyPhotospot, files, photospotId, userId);
   }
 
   @Delete('/:photospotId')
   @UserGuard
   async deletePhotospot(@Param('photospotId') photospotId: number, @InjectUser('id') userId: number) {
     await this.photospotService.deletePhotospot(photospotId, userId);
+  }
+
+  @Delete('/:photospotId/photo/:photoId')
+  @UserGuard
+  async deletePhoto(@Param('photoId') photoId: number, @InjectUser('id') userId: number) {
+    await this.photospotService.deletePhoto(photoId, userId);
   }
 }

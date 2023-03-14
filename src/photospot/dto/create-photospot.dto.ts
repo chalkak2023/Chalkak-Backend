@@ -1,6 +1,4 @@
-import { FileSystemStoredFile } from 'nestjs-form-data/dist/classes/storage';
 import { IsNotEmpty, IsNumberString, IsString } from 'class-validator';
-import { IsFile, HasMimeType } from 'nestjs-form-data/dist/decorators';
 
 export class CreatePhotospotDto {
   @IsNotEmpty()
@@ -18,9 +16,4 @@ export class CreatePhotospotDto {
   @IsNotEmpty()
   @IsNumberString()
   longitude: number;
-
-  @IsNotEmpty()
-  @IsFile()
-  @HasMimeType(['image/jpeg', 'image/png'])
-  image: FileSystemStoredFile;
 }

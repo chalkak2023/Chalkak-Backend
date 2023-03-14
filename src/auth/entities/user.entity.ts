@@ -1,3 +1,4 @@
+import { Photo } from './../../photospot/entities/photo.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Join } from 'src/meetups/entities/join.entity';
@@ -58,6 +59,9 @@ export class User {
 
   @OneToMany((type) => Join, (join) => join.user)
   joins: Join[];
+
+  @OneToMany(() => Photo, (photo) => photo.user)
+  photos: Photo[];
 }
 
 @ChildEntity('local')

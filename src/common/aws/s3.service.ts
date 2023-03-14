@@ -2,7 +2,6 @@ import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
 import { createReadStream } from 'fs';
-import path from 'path'
 
 @Injectable()
 export class S3Service {
@@ -21,19 +20,14 @@ export class S3Service {
   }
 
   async putObject(image: any) {
-    const file = Buffer.from(image.originalName, 'latin1').toString('utf-8');
-    const ext = path.extname(file)
-    const basename = path.basename(file, ext)
-    const fileName = `${basename}-${new Date().getTime()}${ext}`
-
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
-        Key: fileName,
+        Key: image.filename,
         Body: createReadStream(image.path),
-        ContentType: image.busBoyMimeType,
+        ContentType: image.mimetype,
       })
     );
-    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${fileName}`;
+    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${image.filename}`;
   }
 }
