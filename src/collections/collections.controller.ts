@@ -36,7 +36,7 @@ export class CollectionsController {
     @Body() updateCollectionDto: UpdateCollectionDto,
     @Param('collectionId') collectionId: number,
     @InjectUser('id') userId: number
-  ): Promise<{} | undefined> {
+  ): Promise<void> {
     return await this.collectionsService.updateCollection(updateCollectionDto, collectionId, userId);
   }
 

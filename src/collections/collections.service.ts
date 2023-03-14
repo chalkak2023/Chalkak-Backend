@@ -64,11 +64,10 @@ export class CollectionsService {
       for (let keywordText of delKeywords) {
         await this.collectionKeywordsRepository.delete({ keyword: keywordText, collectionId, userId });
       }
-      return {}
     }
   }
   
-  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number): Promise<{} | undefined> {
+  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number):Promise<void> {
     const { title, description } = updateCollectionDto;
     const collection = await this.getCollection(collectionId);
     if (collection.userId !== userId) {
@@ -83,6 +82,6 @@ export class CollectionsService {
     if (userId !== collection.userId) {
       throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
     }
-    return this.collectionsRepository.softDelete(collectionId);
+    this.collectionsRepository.softDelete(collectionId);
   }
 }
