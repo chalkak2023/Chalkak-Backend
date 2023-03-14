@@ -46,9 +46,6 @@ export class CollectionsService {
 
   async getCollectionKeyword(collectionId: number): Promise<CollectionKeyword[]> {
     const collectionKeyword = await this.collectionKeywordsRepository.find({ where: { collectionId } });
-    if (_.isNil(collectionKeyword)) {
-      throw new NotFoundException('해당 콜렉션의 키워드를 찾을 수 없습니다.');
-    }
     return collectionKeyword;
   }
 
