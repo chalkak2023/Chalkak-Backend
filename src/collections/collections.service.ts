@@ -64,6 +64,7 @@ export class CollectionsService {
       for (let keywordText of delKeywords) {
         await this.collectionKeywordsRepository.delete({ keyword: keywordText, collectionId, userId });
       }
+      return {}
     }
   }
   
@@ -82,6 +83,6 @@ export class CollectionsService {
     if (userId !== collection.userId) {
       throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
     }
-    this.collectionsRepository.softDelete(collectionId);
+    return this.collectionsRepository.softDelete(collectionId);
   }
 }

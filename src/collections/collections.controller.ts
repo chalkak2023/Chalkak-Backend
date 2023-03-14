@@ -43,6 +43,6 @@ export class CollectionsController {
   @Delete(':collectionId')
   @UseGuards(JwtGuard)
   async deleteCollection(@Param('collectionId') collectionId: number, @InjectUser('id') userId: number) {
-    await this.collectionsService.deleteCollection(collectionId, userId);
+    return await this.collectionsService.deleteCollection(collectionId, userId);
   }
 }
