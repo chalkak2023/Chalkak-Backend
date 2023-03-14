@@ -12,7 +12,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
 
   async getCollectionsList({ p, search, userId }: GetCollectionsListQueryDto) {
     const take = 18;
-    let whereQuery = this.isThereSearchUserid(search, userId)
+    const whereQuery = this.isThereSearchUserid(search, userId)
     return await this.createQueryBuilder('c')
       .where( whereQuery.q1, whereQuery.q2)
       .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'ck'])
@@ -26,9 +26,9 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
   }
 
   isThereSearchUserid(search?: string, userId?: number) {
-    let myCollectionQuery = 'c.userId = :userId';
-    let searchCollectionQuery = 'c.title LIKE :search OR c.description LIKE :search';
-    let query = { q1: '', q2: {} };
+    const myCollectionQuery = 'c.userId = :userId';
+    const searchCollectionQuery = 'c.title LIKE :search OR c.description LIKE :search';
+    const query = { q1: '', q2: {} };
 
     if (search && !userId) {
       query.q1 = searchCollectionQuery
