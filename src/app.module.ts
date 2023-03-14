@@ -11,6 +11,7 @@ import { AdminModule } from './admin/admin.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PhotospotModule } from './photospot/photospot.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CacheConfigService } from './common/config/cache.config.service';
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
         expiresIn: '1h',
       },
     }),
-    CacheModule.register({ isGlobal: true }),
+    CacheModule.registerAsync({ isGlobal: true, useClass: CacheConfigService}),
     EventEmitterModule.forRoot({
       global: true,
     }),

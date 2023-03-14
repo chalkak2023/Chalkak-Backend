@@ -17,6 +17,7 @@ import {
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
   SocialLoginBodyDTO,
+  decodedAccessTokenDTO,
 } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -67,16 +68,24 @@ export class AuthService {
   }
 
   async signUp(body: SignUpBodyDTO) {
-    const { username: _username, email, password } = body;
-    if (!_.isNil(_username)) {
-      const user = await this.usersRepository.findOne({ where: { username: _username } });
-      if (!_.isNil(user)) {
-        throw new BadRequestException({
-          message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
-        });
-      }
+    const { username, email, password, verifyToken } = body;
+    const cachedVerifyToken = await this.cacheManager.get(email + '_verifyToken');
+    if (!cachedVerifyToken) {
+      throw new NotFoundException({
+        message: '인증번호를 요청하지 않았거나 만료되었습니다.',
+      });
     }
-    const username = _username || `${email.split('@')[0]}#${Math.floor(Math.random() * 10000) + 1}`;
+    if (verifyToken != cachedVerifyToken) {
+      throw new BadRequestException({
+        message: '인증번호가 일치하지 않습니다.',
+      });
+    }
+    const user = await this.usersRepository.findOne({ where: { username } });
+    if (!_.isNil(user)) {
+      throw new BadRequestException({
+        message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
+      });
+    }
     const passwordHash = bcrypt.hashSync(password, 10);
     try {
       await this.localUsersRepository.insert({ username, email, password: passwordHash });
@@ -90,7 +99,7 @@ export class AuthService {
     };
   }
 
-  async signIn(body: SignInBodyDTO, response: any) {
+  async signIn(body: SignInBodyDTO) {
     const { email, password } = body;
     const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password'] });
     if (!user || !bcrypt.compareSync(password, user.password)) {
@@ -103,7 +112,7 @@ export class AuthService {
     }
     const accessToken = this.generateUserAccessToken(user);
     const refreshToken = this.generateUserRefreshToken();
-    this.cacheManager.set(refreshToken, user.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
+    this.cacheManager.set(refreshToken, user.id, { ttl: 60 * 60 * 3 });
     return {
       message: '로그인 되었습니다.',
       accessToken,
@@ -111,8 +120,8 @@ export class AuthService {
     };
   }
 
-  async signOut(user: any, response: any) {
-    await this.cacheManager.del(user.id);
+  async signOut(user: decodedAccessTokenDTO) {
+    await this.cacheManager.del(String(user.id));
     return {
       message: '로그아웃 되었습니다.',
     };
@@ -122,7 +131,7 @@ export class AuthService {
     const { email } = body;
     const verifyToken = this.generateRandomNumber();
     await this.mailerAuthService.sendMailAuthMail(email, verifyToken);
-    this.cacheManager.set(email + '_verifyToken', verifyToken, { ttl: 1000 * 60 * 5 });
+    this.cacheManager.set(email + '_verifyToken', verifyToken, { ttl: 60 * 5 });
     return {
       message: '이메일 인증번호가 요청되었습니다.',
     };
@@ -146,7 +155,7 @@ export class AuthService {
     };
   }
 
-  async changePassword(body: ChangePasswordBodyDTO, user: any) {
+  async changePassword(body: ChangePasswordBodyDTO, user: decodedAccessTokenDTO) {
     const { password } = body;
     const passwordHash = bcrypt.hashSync(password, 10);
     await this.localUsersRepository.update(user.id, { password: passwordHash });
@@ -206,7 +215,7 @@ export class AuthService {
       username: user!.username,
     });
     const refreshToken = this.generateUserRefreshToken();
-    this.cacheManager.set(refreshToken, user!.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
+    this.cacheManager.set(refreshToken, user!.id, { ttl: 60 * 60 * 3 });
 
     return {
       accessToken,
@@ -233,7 +242,7 @@ export class AuthService {
         message: '사용 만료되었습니다.',
       });
     }
-    const user = await this.localUsersRepository.findOne({
+    const user = await this.usersRepository.findOne({
       where: {
         id: userId,
       },
@@ -246,6 +255,9 @@ export class AuthService {
     }
 
     const newAccessToken = this.generateUserAccessToken(user);
+    this.cacheManager.set(refreshToken, userId, {
+      ttl: 60 * 60 * 3
+    })
 
     return {
       accessToken: newAccessToken,
