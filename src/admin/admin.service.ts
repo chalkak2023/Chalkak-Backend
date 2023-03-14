@@ -181,26 +181,19 @@ export class AdminService {
 
   // 콜렉션 관리
   async getAdminCollectionsList(search: string, p: number = 1): Promise<any> {
-    const collectionsList = this.adminCollectionsRepository.createQueryBuilder('collection');
+    const collectionsList = this.adminCollectionsRepository.createQueryBuilder('c');
     if (search) {
-      collectionsList.where('collection.title LIKE :search OR collection.description LIKE :search', {
+      collectionsList.where('c.title LIKE :search OR c.description LIKE :search', {
         search: `%${search}%`,
       });
     }
-      collectionsList
-        .select([
-          'collection.id',
-          'collection.userId',
-          'collection.title',
-          'collection.description',
-          'collection.createdAt',
-          'collection_keyword',
-        ])
-        .leftJoin('collection.user', 'user')
-        .leftJoin('collection.photospots', 'photospot')
-        .leftJoin('collection.collection_keywords', 'collection_keyword')
-        .orderBy('collection.id');
-        
+    collectionsList
+      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'ck'])
+      .leftJoin('c.user', 'user')
+      .leftJoin('c.photospots', 'photospot')
+      .leftJoin('c.collection_keywords', 'ck')
+      .orderBy('c.id');
+
     const take = 9;
     const page: number = p > 0 ? p : 1;
     const total = await collectionsList.getCount();
@@ -249,26 +242,26 @@ export class AdminService {
   // 모임 관리
   async getAdminMeetupsList(search: string, p: number = 1): Promise<any> {
     const meetupsList = this.adminMeetupsRepository
-    .createQueryBuilder('m')
-    .select([
-      'm.id',
-      'm.userId',
-      'u.email',
-      'u.username',
-      'm.title',
-      'm.content',
-      'm.place',
-      'm.schedule',
-      'm.headcount',
-      'm.createdAt',
-      'j',
-    ])
-    .leftJoin('m.joins', 'j')
-    .leftJoin('m.user', 'u')
-    .orderBy('m.id');
+      .createQueryBuilder('m')
+      .select([
+        'm.id',
+        'm.userId',
+        'u.email',
+        'u.username',
+        'm.title',
+        'm.content',
+        'm.place',
+        'm.schedule',
+        'm.headcount',
+        'm.createdAt',
+        'j',
+      ])
+      .leftJoin('m.joins', 'j')
+      .leftJoin('m.user', 'u')
+      .orderBy('m.id');
 
     if (search) {
-      meetupsList.where('meetup.title LIKE :search OR meetup.content LIKE :search OR meetup.place LIKE :search', {
+      meetupsList.where('m.title LIKE :search OR m.content LIKE :search OR m.place LIKE :search', {
         search: `%${search}%`,
       });
     }
