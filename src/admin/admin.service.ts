@@ -152,7 +152,7 @@ export class AdminService {
   async getAdminUsersList(search: string, p: number = 1): Promise<any> {
     const usersList = this.adminUsersRepository.createQueryBuilder('user');
     if (search) {
-      usersList.where('user.email LIKE :search', { search: `%${search}%` });
+      usersList.where('user.email LIKE :search OR user.username LIKE :search ', { search: `%${search}%` });
     }
 
     const take = 6;
