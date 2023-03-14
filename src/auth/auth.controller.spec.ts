@@ -52,6 +52,7 @@ describe('AuthController', () => {
 
     it('should be return value returned by service same name method', async () => {
       const body: SignUpBodyDTO = {
+        username: 'testman',
         email: 'testman@gmail.com',
         password: 'qwer1234',
         verifyToken: 123456,
@@ -71,6 +72,7 @@ describe('AuthController', () => {
 
     it('should be return value returned by service same name method', async () => {
       const body: SignUpBodyDTO = {
+        username: 'testman',
         email: 'testman@gmail.com',
         password: 'qwer1234',
         verifyToken: 123456,

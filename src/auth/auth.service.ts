@@ -68,7 +68,7 @@ export class AuthService {
   }
 
   async signUp(body: SignUpBodyDTO) {
-    const { username: _username, email, password, verifyToken } = body;
+    const { username, email, password, verifyToken } = body;
     const cachedVerifyToken = await this.cacheManager.get(email + '_verifyToken');
     if (!cachedVerifyToken) {
       throw new NotFoundException({
@@ -80,15 +80,12 @@ export class AuthService {
         message: '인증번호가 일치하지 않습니다.',
       });
     }
-    if (!_.isNil(_username)) {
-      const user = await this.usersRepository.findOne({ where: { username: _username } });
-      if (!_.isNil(user)) {
-        throw new BadRequestException({
-          message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
-        });
-      }
+    const user = await this.usersRepository.findOne({ where: { username } });
+    if (!_.isNil(user)) {
+      throw new BadRequestException({
+        message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
+      });
     }
-    const username = _username || `${email.split('@')[0]}#${Math.floor(Math.random() * 10000) + 1}`;
     const passwordHash = bcrypt.hashSync(password, 10);
     try {
       await this.localUsersRepository.insert({ username, email, password: passwordHash });
