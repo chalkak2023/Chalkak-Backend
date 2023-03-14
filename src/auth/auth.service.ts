@@ -17,6 +17,7 @@ import {
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
   SocialLoginBodyDTO,
+  decodedAccessTokenDTO,
 } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
@@ -67,7 +68,18 @@ export class AuthService {
   }
 
   async signUp(body: SignUpBodyDTO) {
-    const { username: _username, email, password } = body;
+    const { username: _username, email, password, verifyToken } = body;
+    const cachedVerifyToken = await this.cacheManager.get(email + '_verifyToken');
+    if (!cachedVerifyToken) {
+      throw new NotFoundException({
+        message: '인증번호를 요청하지 않았거나 만료되었습니다.',
+      });
+    }
+    if (verifyToken != cachedVerifyToken) {
+      throw new BadRequestException({
+        message: '인증번호가 일치하지 않습니다.',
+      });
+    }
     if (!_.isNil(_username)) {
       const user = await this.usersRepository.findOne({ where: { username: _username } });
       if (!_.isNil(user)) {
@@ -111,8 +123,8 @@ export class AuthService {
     };
   }
 
-  async signOut(user: any) {
-    await this.cacheManager.del(user.id);
+  async signOut(user: decodedAccessTokenDTO) {
+    await this.cacheManager.del(String(user.id));
     return {
       message: '로그아웃 되었습니다.',
     };
@@ -146,7 +158,7 @@ export class AuthService {
     };
   }
 
-  async changePassword(body: ChangePasswordBodyDTO, user: any) {
+  async changePassword(body: ChangePasswordBodyDTO, user: decodedAccessTokenDTO) {
     const { password } = body;
     const passwordHash = bcrypt.hashSync(password, 10);
     await this.localUsersRepository.update(user.id, { password: passwordHash });

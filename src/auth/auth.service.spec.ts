@@ -187,6 +187,10 @@ describe('AuthService', () => {
         username: '테스트맨',
         email: 'testman@gmail.com',
         password: 'testpassword',
+        verifyToken: 123456,
+      };
+      cache = {
+        [body.email + '_verifyToken']: body.verifyToken,
       };
 
       mockLocalUserRepository.insert.mockResolvedValue({
@@ -223,6 +227,10 @@ describe('AuthService', () => {
         username,
         email: 'test5@gmail.com',
         password: 'qwer1234',
+        verifyToken: 123456,
+      };
+      cache = {
+        [body.email + '_verifyToken']: body.verifyToken,
       };
 
       mockUserRepository.findOne.mockResolvedValue(users[0]);
@@ -236,8 +244,13 @@ describe('AuthService', () => {
 
     it('should be return fail message when error situation', async () => {
       const body: SignUpBodyDTO = {
+        username: 'testman',
         email: 'test@gmail.com',
         password: 'testpassword',
+        verifyToken: 123456,
+      };
+      cache = {
+        [body.email + '_verifyToken']: body.verifyToken,
       };
       mockLocalUserRepository.insert.mockRejectedValue(new Error());
 
@@ -321,7 +334,9 @@ describe('AuthService', () => {
 
     it('should be return success message when success situation', async () => {
       const user = {
-        id: 1,
+        ...users[0],
+        iat: 1000,
+        exp: 1001
       };
 
       expect(service.signOut(user)).resolves.toStrictEqual({
@@ -412,7 +427,9 @@ describe('AuthService', () => {
         password: 'changePW',
       };
       const user = {
-        id: 1,
+        ...users[0],
+        iat: 1000,
+        exp: 1001
       };
       cache = {
         'test@gmail.com_verifyToken': 123456,
@@ -648,8 +665,10 @@ describe('AuthService', () => {
         refreshToken: 1,
       };
       mockUserRepository.findOne.mockResolvedValue({
-        id: 1,
+        ...users[0],
         email: 'test@gmail.com',
+        iat: 1000,
+        exp: 1001
       } as LocalUser);
       mockJwtService.sign.mockReturnValueOnce(newAccessToken);
       mockJwtService.verifyAsync.mockResolvedValue({});

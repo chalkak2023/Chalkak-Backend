@@ -7,6 +7,7 @@ import {
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
   ProviderDTO,
+  decodedAccessTokenDTO,
 } from './dto/auth.dto';
 import { InjectUser, Token, UserGuard } from './auth.decorator';
 import { JwtRefreshGuard } from './guard/jwt-refresh/jwt-refresh.guard';
@@ -35,7 +36,7 @@ export class AuthController {
   @Post('signout')
   @UserGuard
   @HttpCode(200)
-  async signOut(@InjectUser() user: any) {
+  async signOut(@InjectUser() user: decodedAccessTokenDTO) {
     return await this.authService.signOut(user);
   }
 
@@ -51,7 +52,7 @@ export class AuthController {
 
   @Patch('')
   @UserGuard
-  async changePassword(@Body() body: ChangePasswordBodyDTO, @InjectUser() user: any) {
+  async changePassword(@Body() body: ChangePasswordBodyDTO, @InjectUser() user: decodedAccessTokenDTO) {
     return await this.authService.changePassword(body, user);
   }
 

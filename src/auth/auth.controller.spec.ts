@@ -54,6 +54,7 @@ describe('AuthController', () => {
       const body: SignUpBodyDTO = {
         email: 'testman@gmail.com',
         password: 'qwer1234',
+        verifyToken: 123456,
       };
       const mockReturnValue = { message: '회원가입 되었습니다.' };
       service.signUp.mockResolvedValue(mockReturnValue);
@@ -72,6 +73,7 @@ describe('AuthController', () => {
       const body: SignUpBodyDTO = {
         email: 'testman@gmail.com',
         password: 'qwer1234',
+        verifyToken: 123456,
       };
       const mockReturnValue = { message: '회원가입 되었습니다.' };
       service.signUp.mockResolvedValue(mockReturnValue);
@@ -108,6 +110,11 @@ describe('AuthController', () => {
     it('should be return value returned by service same name method', async () => {
       const user = {
         id: 1,
+        username: 'testman',
+        email: 'test@gmail.com',
+        role: 'member',
+        iat: 1000,
+        exp: 1001,
       };
       
       const mockReturnValue = { message: '로그아웃 되었습니다.' };
@@ -164,6 +171,11 @@ describe('AuthController', () => {
       };
       const user = {
         id: 1,
+        username: 'testman',
+        email: 'test@gmail.com',
+        role: 'member',
+        iat: 1000,
+        exp: 1001,
       };
       const mockReturnValue = { message: '비밀번호가 변경되었습니다.' };
       service.changePassword.mockResolvedValue(mockReturnValue);

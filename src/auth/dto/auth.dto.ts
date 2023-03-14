@@ -31,9 +31,6 @@ export class SignUpBodyDTO {
     }
   )
   password: string;
-}
-
-export class VerifyTokenDTO {
   @Type(() => Number)
   @IsInt({
     message: '이메일 인증토큰은 정수여야합니다.',
@@ -45,7 +42,7 @@ export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email', 'password']
 
 export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email'] as const) {}
 
-export class PutEmailVerificationBodyDTO extends IntersectionType(PickType(SignUpBodyDTO, ['email'] as const), VerifyTokenDTO) {}
+export class PutEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email', 'verifyToken'] as const) {}
 
 export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password'] as const) {}
 
