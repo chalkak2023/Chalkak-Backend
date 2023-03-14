@@ -1,16 +1,18 @@
 import { IntersectionType, PickType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
-import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsNumber, IsString, IsStrongPassword, IsIn } from 'class-validator';
+import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsNumber, IsString, IsStrongPassword, IsIn, MaxLength } from 'class-validator';
 
 export class SignUpBodyDTO {
-  @IsOptional()
   @IsNotEmpty({
     message: '유저명은 빈문자열이면 안 됩니다.'
   })
   @IsString({
     message: '유저명은 문자열이어야 합니다.'
   })
-  username?: string;
+  @MaxLength(16, {
+    message: '유저명은 16글자 이내여야합니다.'
+  })
+  username: string;
   @IsEmail(
     {},
     {
@@ -31,9 +33,6 @@ export class SignUpBodyDTO {
     }
   )
   password: string;
-}
-
-export class VerifyTokenDTO {
   @Type(() => Number)
   @IsInt({
     message: '이메일 인증토큰은 정수여야합니다.',
@@ -41,13 +40,13 @@ export class VerifyTokenDTO {
   verifyToken: number;
 }
 
-export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email', 'password']) {}
+export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email', 'password'] as const) {}
 
-export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email']) {}
+export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email'] as const) {}
 
-export class PutEmailVerificationBodyDTO extends IntersectionType(PickType(SignUpBodyDTO, ['email']), VerifyTokenDTO) {}
+export class PutEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email', 'verifyToken'] as const) {}
 
-export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password']) {}
+export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password'] as const) {}
 
 export class ProviderDTO {
   @IsIn(['kakao', 'naver'], {
