@@ -112,7 +112,7 @@ export class AuthService {
     }
     const accessToken = this.generateUserAccessToken(user);
     const refreshToken = this.generateUserRefreshToken();
-    this.cacheManager.set(refreshToken, user.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
+    this.cacheManager.set(refreshToken, user.id, { ttl: 60 * 60 * 3 });
     return {
       message: '로그인 되었습니다.',
       accessToken,
@@ -131,7 +131,7 @@ export class AuthService {
     const { email } = body;
     const verifyToken = this.generateRandomNumber();
     await this.mailerAuthService.sendMailAuthMail(email, verifyToken);
-    this.cacheManager.set(email + '_verifyToken', verifyToken, { ttl: 1000 * 60 * 5 });
+    this.cacheManager.set(email + '_verifyToken', verifyToken, { ttl: 60 * 5 });
     return {
       message: '이메일 인증번호가 요청되었습니다.',
     };
@@ -215,7 +215,7 @@ export class AuthService {
       username: user!.username,
     });
     const refreshToken = this.generateUserRefreshToken();
-    this.cacheManager.set(refreshToken, user!.id, { ttl: 1000 * 60 * 60 * 24 * 7 });
+    this.cacheManager.set(refreshToken, user!.id, { ttl: 60 * 60 * 3 });
 
     return {
       accessToken,
@@ -255,6 +255,9 @@ export class AuthService {
     }
 
     const newAccessToken = this.generateUserAccessToken(user);
+    this.cacheManager.set(refreshToken, userId, {
+      ttl: 60 * 60 * 3
+    })
 
     return {
       accessToken: newAccessToken,
