@@ -40,7 +40,7 @@ export class AdminService {
     }
 
     const take = 6;
-    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const page: number = p > 0 ? p : 1;
     const total = await adminList.getCount();
     adminList.skip((page - 1) * take).take(take);
 
@@ -156,7 +156,7 @@ export class AdminService {
     }
 
     const take = 6;
-    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const page: number = p > 0 ? p : 1;
     const total = await usersList.getCount();
     usersList.skip((page - 1) * take).take(take);
 
@@ -202,7 +202,7 @@ export class AdminService {
         .orderBy('collection.id');
         
     const take = 9;
-    const page: number = p > 0 ? parseInt(p as any) : 1;
+    const page: number = p > 0 ? p : 1;
     const total = await collectionsList.getCount();
     collectionsList.skip((page - 1) * take).take(take);
     return {
@@ -274,7 +274,7 @@ export class AdminService {
     }
 
     const take = 6;
-    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const page: number = p > 0 ? p : 1;
     const total = await meetupsList.getCount();
     meetupsList.skip((page - 1) * take).take(take);
 
@@ -304,7 +304,7 @@ export class AdminService {
     }
 
     const take = 6;
-    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const page: number = p > 0 ? p : 1;
     const total = await faqList.getCount();
     faqList.skip((page - 1) * take).take(take);
 
