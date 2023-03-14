@@ -38,7 +38,6 @@ export class AdminController {
     const accessToken = await this.adminService.issueAccessToken(admin);
     const refreshToken = await this.adminService.issueRefreshToken(admin.id);
     const jwtData = { accessToken, refreshToken };
-    res.cookie('auth-cookie', jwtData, { httpOnly: true });
     return { data: jwtData, message: '로그인에 성공하였습니다.' };
   }
 
@@ -52,8 +51,7 @@ export class AdminController {
     const admin = req.user as SigninAdminDto;
     const accessToken = await this.adminService.issueAccessToken(admin);
     const jwtData = { accessToken, refreshToken };
-    res.cookie('auth-cookie', jwtData, { httpOnly: true });
-    return { message: 'Access 토큰을 정상적으로 재발급하였습니다.' };
+    return { data: jwtData, message: 'Access 토큰을 정상적으로 재발급하였습니다.' };
   }
 
   @Delete('auth/:id')
@@ -63,7 +61,6 @@ export class AdminController {
 
   @Post('auth/signout')
   signoutAdmin(@Req() req: Request, @Res() res: Response): any {
-    res.cookie('auth-cookie', '', { maxAge: 0 });
     return res.send({ message: '정상적으로 로그아웃하였습니다.' });
   }
 
