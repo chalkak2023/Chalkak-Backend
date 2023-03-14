@@ -14,7 +14,7 @@ export class CollectionsController {
   constructor(private readonly collectionsService: CollectionsService) {}
 
   @Get()
-  async getCollectionsList(@Query() getCollectionsListQueryDto: GetCollectionsListQueryDto) {
+  async getCollectionsList(@Query() getCollectionsListQueryDto: GetCollectionsListQueryDto): Promise<Collection[]> {
     return await this.collectionsService.getCollectionsList(getCollectionsListQueryDto);
   }
 
@@ -25,7 +25,7 @@ export class CollectionsController {
 
   @Post()
   @UseGuards(JwtGuard)
-  createCollection(@Body() createCollectionDto: CreateCollectionDto, @InjectUser() userDTO: decodedAccessTokenDTO) {
+  createCollection(@Body() createCollectionDto: CreateCollectionDto, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<Collection> {
     createCollectionDto.userId = userDTO.id;
     return this.collectionsService.createCollection(createCollectionDto);
   }
@@ -36,7 +36,7 @@ export class CollectionsController {
     @Body() updateCollectionDto: UpdateCollectionDto,
     @Param('collectionId') collectionId: number,
     @InjectUser('id') userId: number
-  ) {
+  ): Promise<{} | undefined> {
     return await this.collectionsService.updateCollection(updateCollectionDto, collectionId, userId);
   }
 

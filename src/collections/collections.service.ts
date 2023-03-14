@@ -18,7 +18,7 @@ export class CollectionsService {
     @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>
   ) {}
 
-  async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto) {
+  async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto): Promise<Collection[]> {
     getCollectionsListQueryDto.p = getCollectionsListQueryDto.p || 1;
     return await this.collectionUserKeywordRepository.getCollectionsList(getCollectionsListQueryDto);
   }
@@ -31,7 +31,7 @@ export class CollectionsService {
     return collection;
   }
 
-  createCollection(createCollectionDto: CreateCollectionDto) {
+  createCollection(createCollectionDto: CreateCollectionDto): Promise<Collection> {
     const { userId, title, description, keyword } = createCollectionDto;
     return this.collectionsRepository.save({
       userId,
@@ -68,7 +68,7 @@ export class CollectionsService {
     }
   }
   
-  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number) {
+  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number): Promise<{} | undefined> {
     const { title, description } = updateCollectionDto;
     const collection = await this.getCollection(collectionId);
     if (collection.userId !== userId) {
