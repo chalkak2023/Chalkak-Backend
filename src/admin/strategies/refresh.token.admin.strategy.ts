@@ -29,7 +29,7 @@ export class RefreshTokenAdminStrategy extends PassportStrategy(Strategy, 'jwt-r
         message: 'Access 토큰이 유효하지 않습니다.',
       });
     }
-    let authCookieData = req?.cookies['auth-cookie'];
+    let authCookieData = JSON.parse(req?.cookies['auth-cookie']);
     if (!authCookieData?.refreshToken) {
       throw new BadRequestException({
         message: 'Refresh 토큰이 유효하지 않습니다.',

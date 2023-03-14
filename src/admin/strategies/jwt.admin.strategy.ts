@@ -12,7 +12,7 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
       secretOrKey: 'temporary',
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          let data = request?.cookies['auth-cookie'];
+          let data = JSON.parse(request?.cookies['auth-cookie']);
           if (!data) {
             return new BadRequestException();
           }
