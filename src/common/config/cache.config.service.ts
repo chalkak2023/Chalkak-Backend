@@ -13,7 +13,7 @@ export class CacheConfigService implements CacheOptionsFactory {
       return {
         store: redisStore,
         host: this.configService.get('CACHE_HOST') || 'localhost',
-        port: this.configService.get('CACHE_PORT') || 6379,
+        port: this.configService.get('CACHE_PORT') ? Number(this.configService.get('CACHE_PORT')) : 6379,
         ttl: this.configService.get('CACHE_TTL') ? Number(this.configService.get('CACHE_REDIS_TTL')) : 5,
       }
     } else {
