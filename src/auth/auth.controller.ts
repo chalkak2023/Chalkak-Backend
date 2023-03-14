@@ -7,6 +7,7 @@ import {
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
   ProviderDTO,
+  decodedAccessTokenDTO,
 } from './dto/auth.dto';
 import { InjectUser, Token, UserGuard } from './auth.decorator';
 import { JwtRefreshGuard } from './guard/jwt-refresh/jwt-refresh.guard';
@@ -28,15 +29,15 @@ export class AuthController {
 
   @Post('signin')
   @HttpCode(200)
-  async signIn(@Body() body: SignInBodyDTO, @Res({ passthrough: true }) response: any) {
-    return await this.authService.signIn(body, response);
+  async signIn(@Body() body: SignInBodyDTO) {
+    return await this.authService.signIn(body);
   }
 
   @Post('signout')
   @UserGuard
   @HttpCode(200)
-  async signOut(@InjectUser() user: any, @Res({ passthrough: true }) response: any) {
-    return await this.authService.signOut(user, response);
+  async signOut(@InjectUser() user: decodedAccessTokenDTO) {
+    return await this.authService.signOut(user);
   }
 
   @Post('emailverification')
@@ -51,7 +52,7 @@ export class AuthController {
 
   @Patch('')
   @UserGuard
-  async changePassword(@Body() body: ChangePasswordBodyDTO, @InjectUser() user: any) {
+  async changePassword(@Body() body: ChangePasswordBodyDTO, @InjectUser() user: decodedAccessTokenDTO) {
     return await this.authService.changePassword(body, user);
   }
 

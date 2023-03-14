@@ -29,7 +29,7 @@ export class BlockUserGuard implements CanActivate {
       });
     }
     await this.cacheManager.set<boolean>(`user-${userId}-block`, user.isBlock, {
-      ttl: 1000 * 60 * 5
+      ttl: 60 * 5
     })
     if (user.isBlock) {
       throw new ForbiddenException({
