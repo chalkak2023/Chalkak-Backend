@@ -42,7 +42,10 @@ export class AdminService {
     const take = 6;
     const page: number = p > 0 ? p : 1;
     const total = await adminList.getCount();
-    adminList.skip((page - 1) * take).take(take);
+    adminList
+      .skip((page - 1) * take)
+      .take(take)
+      .orderBy('admin.id', 'DESC');
 
     return {
       data: await adminList.getMany(),
@@ -158,7 +161,10 @@ export class AdminService {
     const take = 6;
     const page: number = p > 0 ? p : 1;
     const total = await usersList.getCount();
-    usersList.skip((page - 1) * take).take(take);
+    usersList
+      .skip((page - 1) * take)
+      .take(take)
+      .orderBy('user.id', 'DESC');
 
     return {
       data: await usersList.getMany(),
@@ -192,7 +198,7 @@ export class AdminService {
       .leftJoin('c.user', 'user')
       .leftJoin('c.photospots', 'photospot')
       .leftJoin('c.collection_keywords', 'ck')
-      .orderBy('c.id');
+      .orderBy('c.id', 'DESC');
 
     const take = 9;
     const page: number = p > 0 ? p : 1;
@@ -258,7 +264,7 @@ export class AdminService {
       ])
       .leftJoin('m.joins', 'j')
       .leftJoin('m.user', 'u')
-      .orderBy('m.id');
+      .orderBy('m.id', 'DESC');
 
     if (search) {
       meetupsList.where('m.title LIKE :search OR m.content LIKE :search OR m.place LIKE :search', {
@@ -299,7 +305,10 @@ export class AdminService {
     const take = 6;
     const page: number = p > 0 ? p : 1;
     const total = await faqList.getCount();
-    faqList.skip((page - 1) * take).take(take);
+    faqList
+      .skip((page - 1) * take)
+      .take(take)
+      .orderBy('faq.id', 'DESC');
 
     return {
       data: await faqList.getMany(),
