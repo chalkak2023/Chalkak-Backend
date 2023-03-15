@@ -12,14 +12,15 @@ export class RefreshTokenAdminStrategy extends PassportStrategy(Strategy, 'jwt-r
     super({
       ignoreExpiration: true,
       passReqToCallback: true,
-      secretOrKey: configService.get('JWT_ADMIN_REFRESH_TOKEN_SECRET'),
+      secretOrKey: configService.get('JWT_ADMIN_ACCESS_TOKEN_SECRET'),
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          let data = request?.cookies['auth-cookie'];
-          if (_.isNil(data)) {
+          const reqCookies = request?.cookies['auth-cookie'];
+          if (_.isNil(reqCookies)) {
             throw new BadRequestException();
           }
-          return data.accessToken;
+          const parsedData = JSON.parse(reqCookies);
+          return parsedData.accessToken;
         },
       ]),
     });
