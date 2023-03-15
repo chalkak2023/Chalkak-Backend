@@ -1,4 +1,11 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -154,6 +161,17 @@ export class AdminService {
     if (admin?.account === 'master') {
       throw new UnauthorizedException('마스터 관리자 계정은 삭제할 수 없습니다.');
     }
+  }
+
+  public async signoutAdmin(id: number) {
+    if (HttpStatus.OK !== 200) {
+      throw new BadRequestException('유효하지 않은 상태 코드입니다.');
+    }
+    const admin = await this.adminRepository.findOne({ where: { id }, select: { id: true, refreshToken: true } });
+    if (_.isNil(admin)) {
+      throw new NotFoundException('해당 관리자 계정을 찾을 수 없습니다.');
+    }
+    return await this.adminRepository.update(admin.id, { refreshToken: null });
   }
 
   // 유저 관리

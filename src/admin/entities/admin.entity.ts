@@ -15,8 +15,8 @@ export class Admin {
   @Column('varchar')
   responsibility: string;
 
-  @Column({ nullable: true, name: 'refreshtoken' })
-  refreshToken: string;
+  @Column({ type: 'varchar', nullable: true, name: 'refreshtoken' })
+  refreshToken: string | null;
 
   @Column({ type: 'datetime', nullable: true, name: 'refreshtokenexp' })
   refreshTokenExp: string;

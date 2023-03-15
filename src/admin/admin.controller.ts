@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AdminService } from 'src/admin/admin.service';
@@ -58,14 +58,15 @@ export class AdminController {
 
   @Delete('auth/:id')
   @UseGuards(AuthGuard('jwt-admin'))
-  async deleteAdmin(@Param('id') id: number) {
+  deleteAdmin(@Param('id') id: number) {
     return this.adminService.deleteAdmin(id);
   }
 
-  @Post('auth/signout')
+  @Patch('auth/signout')
+  @HttpCode(200)
   @UseGuards(AuthGuard('jwt-admin'))
-  signoutAdmin(@Req() req: Request, @Res() res: Response): any {
-    return res.send({ message: '정상적으로 로그아웃하였습니다.' });
+  signoutAdmin(@AdminToken('id') id: number) {
+    return this.adminService.signoutAdmin(id);
   }
 
   // 유저 관리
