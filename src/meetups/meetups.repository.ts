@@ -4,15 +4,19 @@ import { DataSource, Repository } from 'typeorm';
 import { CreateMeetupDTO } from './dto/create-meetup.dto';
 import { Join } from './entities/join.entity';
 import { Meetup } from './entities/meetup.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class MeetupsRepository extends Repository<Meetup> {
-  constructor(private dataSource: DataSource) {
+  constructor(
+    private dataSource: DataSource,
+    private configService: ConfigService
+  ) {
     super(Meetup, dataSource.createEntityManager());
   }
 
   async getMeetups(page: number, keyword: string): Promise<Meetup[]> {
-    const pageLimit = 9;
+    const pageLimit = this.configService.get('MEETUPS_PAGE_LIMIT') || 9;
     return await this.createQueryBuilder('m')
       .select([
         'm.id',
