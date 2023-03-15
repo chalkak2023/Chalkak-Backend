@@ -244,12 +244,8 @@ export class AdminService {
   }
 
   // 포토스팟 관리
-  async getAdminPhotospotList(collectionId: number): Promise<Photospot[]> {
-    const photospots = await this.adminPhotospotsRepository.find({ where: { collectionId } });
-    if (!photospots.length) {
-      throw new NotFoundException('해당 포토스팟 목록을 찾을 수 없습니다.');
-    }
-    return photospots;
+  getAdminPhotospotList(collectionId: number) {
+    return this.adminPhotospotsRepository.find({ where: { collectionId } });
   }
 
   async getAdminPhotospot(photospotId: number): Promise<Photospot> {
