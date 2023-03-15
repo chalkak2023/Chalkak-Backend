@@ -1,5 +1,5 @@
 import { Type } from "class-transformer";
-import { IsNumber, IsOptional, IsString } from "class-validator";
+import { IsDate, IsDateString, IsNumber, IsOptional, IsString, Max, Min } from "class-validator";
 
 export class CreateMeetupDTO {
   @IsNumber()
@@ -15,10 +15,13 @@ export class CreateMeetupDTO {
   @IsString()
   readonly place: string;
 
-  @IsString()
-  readonly schedule: string;
+  @Type(() => Date)
+  @IsDate()
+  readonly schedule: Date;
 
   @Type(() => Number)
   @IsNumber()
+  @Min(2)
+  @Max(8)
   readonly headcount: number;
 }
