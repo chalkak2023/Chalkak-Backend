@@ -18,13 +18,14 @@ import {
   ChangePasswordBodyDTO,
   SocialLoginBodyDTO,
   decodedAccessTokenDTO,
+  PutChangePasswordVerificationBodyDTO,
 } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
 import { Cache } from 'cache-manager';
-import _ from 'lodash';
+import _, { isNil } from 'lodash';
 import { SocialNaverService } from '../social/service/social.naver.service';
 import { SocialKakaoService } from 'src/social/service/social.kakao.service';
 import { ForbiddenException } from '@nestjs/common';
@@ -69,7 +70,7 @@ export class AuthService {
 
   async signUp(body: SignUpBodyDTO) {
     const { username, email, password, verifyToken } = body;
-    const cachedVerifyToken = await this.cacheManager.get(email + '_verifyToken');
+    const cachedVerifyToken = await this.cacheManager.get(email + '_signup');
     if (!cachedVerifyToken) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
@@ -127,19 +128,25 @@ export class AuthService {
     };
   }
 
-  async postEmailVerification(body: PostEmailVerificationBodyDTO) {
+  async postSignupEmailVerification(body: PostEmailVerificationBodyDTO) {
     const { email } = body;
+    const user = await this.localUsersRepository.findOne({where: { email }})
+    if (!_.isNil(user)) {
+      throw new BadRequestException({
+        message: '이미 가입된 이메일입니다.'
+      })
+    }
     const verifyToken = this.generateRandomNumber();
-    await this.mailerAuthService.sendMailAuthMail(email, verifyToken);
-    this.cacheManager.set(email + '_verifyToken', verifyToken, { ttl: 60 * 5 });
+    await this.mailerAuthService.sendSignupAuthMail(email, verifyToken);
+    this.cacheManager.set(email + '_signup', verifyToken, { ttl: 60 * 5 });
     return {
-      message: '이메일 인증번호가 요청되었습니다.',
+      message: '회원가입 이메일 인증번호가 요청되었습니다.',
     };
   }
 
-  async putEmailVerification(body: PutEmailVerificationBodyDTO) {
+  async putSignupEmailVerification(body: PutEmailVerificationBodyDTO) {
     const { email, verifyToken } = body;
-    const cachedVerifyToken = await this.cacheManager.get(email + '_verifyToken');
+    const cachedVerifyToken = await this.cacheManager.get(email + '_signup');
     if (!cachedVerifyToken) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
@@ -151,7 +158,7 @@ export class AuthService {
       });
     }
     return {
-      message: '이메일 인증번호가 확인되었습니다.',
+      message: '회원가입 이메일 인증번호가 확인되었습니다.',
     };
   }
 
@@ -161,6 +168,45 @@ export class AuthService {
     await this.localUsersRepository.update(user.id, { password: passwordHash });
     return {
       message: '비밀번호가 변경되었습니다.',
+    };
+  }
+  
+  async postChangePasswordEmailVerification(user: decodedAccessTokenDTO) {
+    const { email } = user;
+    if (isNil(email)) {
+      throw new BadRequestException({
+        message: '이메일, 패스워드로 가입한 유저가 아닙니다.'
+      })
+    }
+    const verifyToken = this.generateRandomNumber();
+    await this.mailerAuthService.sendChangePasswordAuthMail(email, verifyToken);
+    this.cacheManager.set(email + '_changePassword', verifyToken, { ttl: 60 * 5 });
+    return {
+      message: '패스워드변경 이메일 인증번호가 요청되었습니다.',
+    };
+  }
+
+  async putChangePasswordEmailVerification(body: PutChangePasswordVerificationBodyDTO, user: decodedAccessTokenDTO) {
+    const { verifyToken } = body;
+    const { email } = user;
+    if (isNil(email)) {
+      throw new BadRequestException({
+        message: '이메일, 패스워드로 가입한 유저가 아닙니다.'
+      })
+    }
+    const cachedVerifyToken = await this.cacheManager.get(email + '_changePassword');
+    if (!cachedVerifyToken) {
+      throw new NotFoundException({
+        message: '인증번호를 요청하지 않았거나 만료되었습니다.',
+      });
+    }
+    if (verifyToken != cachedVerifyToken) {
+      throw new UnauthorizedException({
+        message: '인증번호가 일치하지 않습니다.',
+      });
+    }
+    return {
+      message: '패스워드변경 이메일 인증번호가 확인되었습니다.',
     };
   }
 

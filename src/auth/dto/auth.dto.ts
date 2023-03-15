@@ -46,6 +46,8 @@ export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['emai
 
 export class PutEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email', 'verifyToken'] as const) {}
 
+export class PutChangePasswordVerificationBodyDTO extends PickType(SignUpBodyDTO, ['verifyToken'] as const) {}
+
 export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password'] as const) {}
 
 export class ProviderDTO {

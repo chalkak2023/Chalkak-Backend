@@ -347,8 +347,8 @@ describe('AuthService', () => {
 
   describe('postEmailVerification Method', () => {
     it('should be defined', () => {
-      expect(service.postEmailVerification).toBeDefined();
-      expect(typeof service.postEmailVerification).toBe('function');
+      expect(service.postSignupEmailVerification).toBeDefined();
+      expect(typeof service.postSignupEmailVerification).toBe('function');
     });
 
     it('should be return success message when success situation', async () => {
@@ -356,7 +356,7 @@ describe('AuthService', () => {
         email: 'test@gmail.com',
       };
 
-      expect(service.postEmailVerification(body)).resolves.toStrictEqual({
+      expect(service.postSignupEmailVerification(body)).resolves.toStrictEqual({
         message: '이메일 인증번호가 요청되었습니다.',
       });
     });
@@ -364,8 +364,8 @@ describe('AuthService', () => {
 
   describe('putEmailVerification Method', () => {
     it('should be defined', () => {
-      expect(service.putEmailVerification).toBeDefined();
-      expect(typeof service.putEmailVerification).toBe('function');
+      expect(service.putSignupEmailVerification).toBeDefined();
+      expect(typeof service.putSignupEmailVerification).toBe('function');
     });
 
     it('should be return success message when success situation', async () => {
@@ -378,7 +378,7 @@ describe('AuthService', () => {
         [`${body.email}_verifyToken`]: 123456,
       };
 
-      expect(service.putEmailVerification(body)).resolves.toStrictEqual({
+      expect(service.putSignupEmailVerification(body)).resolves.toStrictEqual({
         message: '이메일 인증번호가 확인되었습니다.',
       });
     });
@@ -391,7 +391,7 @@ describe('AuthService', () => {
 
       cache = {};
 
-      expect(service.putEmailVerification(body)).rejects.toThrowError(
+      expect(service.putSignupEmailVerification(body)).rejects.toThrowError(
         new NotFoundException({
           message: '인증번호를 요청하지 않았거나 만료되었습니다.',
         })
@@ -408,7 +408,7 @@ describe('AuthService', () => {
         [`${body.email}_verifyToken`]: 123458,
       };
 
-      expect(service.putEmailVerification(body)).rejects.toThrowError(
+      expect(service.putSignupEmailVerification(body)).rejects.toThrowError(
         new UnauthorizedException({
           message: '인증번호가 일치하지 않습니다.',
         })
