@@ -273,7 +273,7 @@ export class AuthService {
   async refreshAccessToken(accessToken: string, refreshToken: string) {
     try {
       await this.jwtService.verifyAsync(accessToken, {
-        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
+        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
       });
     } catch (err) {
       if (err.name === 'JsonWebTokenError') {
@@ -326,8 +326,8 @@ export class AuthService {
         role: 'user',
       },
       {
-        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET') || 'accessToken',
-        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN') || '1h',
+        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
+        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN'),
       }
     );
   }
@@ -338,8 +338,8 @@ export class AuthService {
         random: Math.floor(Math.random() * 10000) + 1,
       },
       {
-        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET') || 'refreshToken',
-        expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN') || '7d',
+        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
+        expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN'),
       }
     );
   }
