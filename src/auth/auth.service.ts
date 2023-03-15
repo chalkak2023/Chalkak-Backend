@@ -102,7 +102,7 @@ export class AuthService {
 
   async signIn(body: SignInBodyDTO) {
     const { email, password } = body;
-    const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password'] });
+    const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password', 'isBlock'] });
     if (!user || !bcrypt.compareSync(password, user.password)) {
       throw new NotFoundException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' });
     }
