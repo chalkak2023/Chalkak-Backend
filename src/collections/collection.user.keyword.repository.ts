@@ -45,9 +45,10 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
   async getCollection(collectionId: number): Promise<Collection | null> {
     return await this.createQueryBuilder('c')
       .where('c.id = :id', { id: collectionId })
-      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'ck'])
+      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'cp', 'cpt', 'ck'])
       .leftJoin('c.user', 'cu')
       .leftJoin('c.photospots', 'cp')
+      .leftJoin('cp.photos', 'cpt')
       .leftJoin('c.collection_keywords', 'ck')
       .getOne();
     }
