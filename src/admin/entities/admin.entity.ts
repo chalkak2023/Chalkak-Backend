@@ -18,7 +18,7 @@ export class Admin {
   @Column({ nullable: true, name: 'refreshtoken' })
   refreshToken: string;
 
-  @Column({ type: 'date', nullable: true, name: 'refreshtokenexp' })
+  @Column({ type: 'datetime', nullable: true, name: 'refreshtokenexp' })
   refreshTokenExp: string;
 
   @CreateDateColumn()

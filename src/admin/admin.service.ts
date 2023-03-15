@@ -111,7 +111,7 @@ export class AdminService {
     try {
       const refreshTokenData = {
         refreshToken: randomToken.generate(30),
-        refreshTokenExp: moment().day(7).format('YYYY/MM/DD'),
+        refreshTokenExp: moment().day(7).format('YYYY-MM-DD HH:mm:ss'),
       };
       await this.adminRepository.update(id, refreshTokenData);
       return refreshTokenData.refreshToken;
@@ -121,7 +121,7 @@ export class AdminService {
   }
 
   public async verifyRefreshToken(account: string, refreshToken: string): Promise<SigninAdminDto> {
-    const currentDate = moment().day(7).format('YYYY/MM/DD');
+    const currentDate = moment().day(7).format('YYYY-MM-DD HH:mm:ss');
     let admin = await this.adminRepository.findOne({
       where: { account, refreshToken, refreshTokenExp: MoreThanOrEqual(currentDate) },
     });
