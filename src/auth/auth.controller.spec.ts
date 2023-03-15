@@ -128,8 +128,8 @@ describe('AuthController', () => {
 
   describe('POST /api/auth/emailVerification (postEmailVerification)', () => {
     it('should be defined', () => {
-      expect(controller.postEmailVerification).toBeDefined();
-      expect(typeof controller.postEmailVerification).toBe('function');
+      expect(controller.postSignupEmailVerification).toBeDefined();
+      expect(typeof controller.postSignupEmailVerification).toBe('function');
     });
 
     it('should be return value returned by service same name method', async () => {
@@ -137,16 +137,16 @@ describe('AuthController', () => {
         email: 'testman@gmail.com',
       };
       const mockReturnValue = { message: '이메일 인증번호가 요청되었습니다.' };
-      service.postEmailVerification.mockResolvedValue(mockReturnValue);
+      service.postSignupEmailVerification.mockResolvedValue(mockReturnValue);
 
-      expect(controller.postEmailVerification(body)).resolves.toBe(mockReturnValue);
+      expect(controller.postSignupEmailVerification(body)).resolves.toBe(mockReturnValue);
     });
   });
 
   describe('PUT /api/auth/emailVerification (putEmailVerification)', () => {
     it('should be defined', () => {
-      expect(controller.putEmailVerification).toBeDefined();
-      expect(typeof controller.putEmailVerification).toBe('function');
+      expect(controller.putSignupEmailVerification).toBeDefined();
+      expect(typeof controller.putSignupEmailVerification).toBe('function');
     });
 
     it('should be return value returned by service same name method', async () => {
@@ -155,9 +155,9 @@ describe('AuthController', () => {
         verifyToken: 123456,
       };
       const mockReturnValue = { message: '이메일 인증번호가 확인되었습니다.' };
-      service.putEmailVerification.mockResolvedValue(mockReturnValue);
+      service.putSignupEmailVerification.mockResolvedValue(mockReturnValue);
 
-      expect(controller.putEmailVerification(body)).resolves.toBe(mockReturnValue);
+      expect(controller.putSignupEmailVerification(body)).resolves.toBe(mockReturnValue);
     });
   });
 
