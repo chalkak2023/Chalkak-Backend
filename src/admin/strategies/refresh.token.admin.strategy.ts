@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -7,11 +8,11 @@ import { AdminService } from 'src/admin/admin.service';
 
 @Injectable()
 export class RefreshTokenAdminStrategy extends PassportStrategy(Strategy, 'jwt-refresh-admin') {
-  constructor(private adminService: AdminService) {
+  constructor(private adminService: AdminService, private configService: ConfigService) {
     super({
       ignoreExpiration: true,
       passReqToCallback: true,
-      secretOrKey: 'temporary',
+      secretOrKey: configService.get('JWT_ADMIN_REFRESH_TOKEN_SECRET'),
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
           let data = request?.cookies['auth-cookie'];

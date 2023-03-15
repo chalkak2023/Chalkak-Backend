@@ -1,4 +1,5 @@
 import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MoreThanOrEqual, Repository } from 'typeorm';
@@ -27,7 +28,8 @@ export class AdminService {
     @InjectRepository(Photospot) private adminPhotospotsRepository: Repository<Photospot>,
     @InjectRepository(Meetup) private adminMeetupsRepository: Repository<Meetup>,
     @InjectRepository(Faq) private adminFaqRepository: Repository<Faq>,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private configService: ConfigService
   ) {}
 
   // 관리자 관리
@@ -104,7 +106,10 @@ export class AdminService {
   public async issueAccessToken(signinAdminDto: SigninAdminDto): Promise<string> {
     try {
       const payload = { ...signinAdminDto };
-      return this.jwtService.signAsync(payload, { secret: 'temporary', expiresIn: '1h' });
+      return this.jwtService.signAsync(payload, {
+        secret: this.configService.get('JWT_ADMIN_ACCESS_TOKEN_SECRET'),
+        expiresIn: this.configService.get('JWT_ADMIN_ACCESS_TOKEN_EXPIRES_IN'),
+      });
     } catch (error) {
       throw new BadRequestException();
     }
