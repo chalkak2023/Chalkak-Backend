@@ -20,13 +20,8 @@ import { CacheConfigService } from './common/config/cache.config.service';
       envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
     }),
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
-    JwtModule.register({
-      secret: 'test',
-      signOptions: {
-        expiresIn: '1h',
-      },
-    }),
-    CacheModule.registerAsync({ isGlobal: true, useClass: CacheConfigService}),
+    JwtModule,
+    CacheModule.registerAsync({ isGlobal: true, useClass: CacheConfigService }),
     EventEmitterModule.forRoot({
       global: true,
     }),
@@ -39,6 +34,4 @@ import { CacheConfigService } from './common/config/cache.config.service';
   controllers: [AppController],
   providers: [AppService],
 })
-
-
 export class AppModule {}

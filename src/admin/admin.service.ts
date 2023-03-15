@@ -1,4 +1,12 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MoreThanOrEqual, Repository } from 'typeorm';
@@ -27,7 +35,8 @@ export class AdminService {
     @InjectRepository(Photospot) private adminPhotospotsRepository: Repository<Photospot>,
     @InjectRepository(Meetup) private adminMeetupsRepository: Repository<Meetup>,
     @InjectRepository(Faq) private adminFaqRepository: Repository<Faq>,
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private configService: ConfigService
   ) {}
 
   // 관리자 관리
@@ -39,10 +48,13 @@ export class AdminService {
       });
     }
 
-    const take = 6;
-    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const take = this.configService.get('PAGE_TAKE_ADMIN_ADMIN_LIST');
+    const page: number = p > 0 ? p : 1;
     const total = await adminList.getCount();
-    adminList.skip((page - 1) * take).take(take);
+    adminList
+      .skip((page - 1) * take)
+      .take(take)
+      .orderBy('admin.id', 'DESC');
 
     return {
       data: await adminList.getMany(),
@@ -101,7 +113,10 @@ export class AdminService {
   public async issueAccessToken(signinAdminDto: SigninAdminDto): Promise<string> {
     try {
       const payload = { ...signinAdminDto };
-      return this.jwtService.signAsync(payload, { secret: 'temporary', expiresIn: '1h' });
+      return this.jwtService.signAsync(payload, {
+        secret: this.configService.get('JWT_ADMIN_ACCESS_TOKEN_SECRET'),
+        expiresIn: this.configService.get('JWT_ADMIN_ACCESS_TOKEN_EXPIRES_IN'),
+      });
     } catch (error) {
       throw new BadRequestException();
     }
@@ -111,7 +126,7 @@ export class AdminService {
     try {
       const refreshTokenData = {
         refreshToken: randomToken.generate(30),
-        refreshTokenExp: moment().day(7).format('YYYY/MM/DD'),
+        refreshTokenExp: moment().day(7).format('YYYY-MM-DD HH:mm:ss'),
       };
       await this.adminRepository.update(id, refreshTokenData);
       return refreshTokenData.refreshToken;
@@ -121,7 +136,7 @@ export class AdminService {
   }
 
   public async verifyRefreshToken(account: string, refreshToken: string): Promise<SigninAdminDto> {
-    const currentDate = moment().day(7).format('YYYY/MM/DD');
+    const currentDate = moment().day(7).format('YYYY-MM-DD HH:mm:ss');
     let admin = await this.adminRepository.findOne({
       where: { account, refreshToken, refreshTokenExp: MoreThanOrEqual(currentDate) },
     });
@@ -148,17 +163,31 @@ export class AdminService {
     }
   }
 
+  public async signoutAdmin(id: number) {
+    if (HttpStatus.OK !== 200) {
+      throw new BadRequestException('유효하지 않은 상태 코드입니다.');
+    }
+    const admin = await this.adminRepository.findOne({ where: { id }, select: { id: true, refreshToken: true } });
+    if (_.isNil(admin)) {
+      throw new NotFoundException('해당 관리자 계정을 찾을 수 없습니다.');
+    }
+    return await this.adminRepository.update(admin.id, { refreshToken: null });
+  }
+
   // 유저 관리
   async getAdminUsersList(search: string, p: number = 1): Promise<any> {
     const usersList = this.adminUsersRepository.createQueryBuilder('user');
     if (search) {
-      usersList.where('user.email LIKE :search', { search: `%${search}%` });
+      usersList.where('user.email LIKE :search OR user.username LIKE :search ', { search: `%${search}%` });
     }
 
-    const take = 6;
-    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const take = this.configService.get('PAGE_TAKE_ADMIN_USER_LIST');
+    const page: number = p > 0 ? p : 1;
     const total = await usersList.getCount();
-    usersList.skip((page - 1) * take).take(take);
+    usersList
+      .skip((page - 1) * take)
+      .take(take)
+      .orderBy('user.id', 'DESC');
 
     return {
       data: await usersList.getMany(),
@@ -181,28 +210,21 @@ export class AdminService {
 
   // 콜렉션 관리
   async getAdminCollectionsList(search: string, p: number = 1): Promise<any> {
-    const collectionsList = this.adminCollectionsRepository.createQueryBuilder('collection');
+    const collectionsList = this.adminCollectionsRepository.createQueryBuilder('c');
     if (search) {
-      collectionsList.where('collection.title LIKE :search OR collection.description LIKE :search', {
+      collectionsList.where('c.title LIKE :search OR c.description LIKE :search', {
         search: `%${search}%`,
       });
     }
-      collectionsList
-        .select([
-          'collection.id',
-          'collection.userId',
-          'collection.title',
-          'collection.description',
-          'collection.createdAt',
-          'collection_keyword',
-        ])
-        .leftJoin('collection.user', 'user')
-        .leftJoin('collection.photospots', 'photospot')
-        .leftJoin('collection.collection_keywords', 'collection_keyword')
-        .orderBy('collection.id');
-        
-    const take = 9;
-    const page: number = p > 0 ? parseInt(p as any) : 1;
+    collectionsList
+      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'ck'])
+      .leftJoin('c.user', 'user')
+      .leftJoin('c.photospots', 'photospot')
+      .leftJoin('c.collection_keywords', 'ck')
+      .orderBy('c.id', 'DESC');
+
+    const take = this.configService.get('PAGE_TAKE_ADMIN_COLLECTION_LIST');
+    const page: number = p > 0 ? p : 1;
     const total = await collectionsList.getCount();
     collectionsList.skip((page - 1) * take).take(take);
     return {
@@ -222,12 +244,8 @@ export class AdminService {
   }
 
   // 포토스팟 관리
-  async getAdminPhotospotList(collectionId: number): Promise<Photospot[]> {
-    const photospots = await this.adminPhotospotsRepository.find({ where: { collectionId } });
-    if (!photospots.length) {
-      throw new NotFoundException('해당 포토스팟 목록을 찾을 수 없습니다.');
-    }
-    return photospots;
+  getAdminPhotospotList(collectionId: number) {
+    return this.adminPhotospotsRepository.find({ where: { collectionId } });
   }
 
   async getAdminPhotospot(photospotId: number): Promise<Photospot> {
@@ -249,32 +267,32 @@ export class AdminService {
   // 모임 관리
   async getAdminMeetupsList(search: string, p: number = 1): Promise<any> {
     const meetupsList = this.adminMeetupsRepository
-    .createQueryBuilder('m')
-    .select([
-      'm.id',
-      'm.userId',
-      'u.email',
-      'u.username',
-      'm.title',
-      'm.content',
-      'm.place',
-      'm.schedule',
-      'm.headcount',
-      'm.createdAt',
-      'j',
-    ])
-    .leftJoin('m.joins', 'j')
-    .leftJoin('m.user', 'u')
-    .orderBy('m.id');
+      .createQueryBuilder('m')
+      .select([
+        'm.id',
+        'm.userId',
+        'u.email',
+        'u.username',
+        'm.title',
+        'm.content',
+        'm.place',
+        'm.schedule',
+        'm.headcount',
+        'm.createdAt',
+        'j',
+      ])
+      .leftJoin('m.joins', 'j')
+      .leftJoin('m.user', 'u')
+      .orderBy('m.id', 'DESC');
 
     if (search) {
-      meetupsList.where('meetup.title LIKE :search OR meetup.content LIKE :search OR meetup.place LIKE :search', {
+      meetupsList.where('m.title LIKE :search OR m.content LIKE :search OR m.place LIKE :search', {
         search: `%${search}%`,
       });
     }
 
-    const take = 6;
-    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const take = this.configService.get('PAGE_TAKE_ADMIN_MEETUP_LIST');
+    const page: number = p > 0 ? p : 1;
     const total = await meetupsList.getCount();
     meetupsList.skip((page - 1) * take).take(take);
 
@@ -303,10 +321,13 @@ export class AdminService {
       });
     }
 
-    const take = 6;
-    const page: number = (p as any) > 0 ? parseInt(p as any) : 1;
+    const take = this.configService.get('PAGE_TAKE_ADMIN_FAQ_LIST');
+    const page: number = p > 0 ? p : 1;
     const total = await faqList.getCount();
-    faqList.skip((page - 1) * take).take(take);
+    faqList
+      .skip((page - 1) * take)
+      .take(take)
+      .orderBy('faq.id', 'DESC');
 
     return {
       data: await faqList.getMany(),

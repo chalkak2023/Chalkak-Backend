@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request, Response } from 'express';
 import { AdminService } from 'src/admin/admin.service';
@@ -21,11 +21,13 @@ export class AdminController {
 
   // 관리자 관리
   @Get('auth')
+  @UseGuards(AuthGuard('jwt-admin'))
   async getAdminsList(@Query('search') search: string, @Query('p') p: number = 1): Promise<Admin[]> {
     return await this.adminService.getAdminsList(search, p);
   }
 
   @Post('auth/signup')
+  @UseGuards(AuthGuard('jwt-admin'))
   async signupAdmin(@Body() data: SignupAdminReqDto) {
     return await this.adminService.signupAdmin(data);
   }
@@ -38,7 +40,6 @@ export class AdminController {
     const accessToken = await this.adminService.issueAccessToken(admin);
     const refreshToken = await this.adminService.issueRefreshToken(admin.id);
     const jwtData = { accessToken, refreshToken };
-    res.cookie('auth-cookie', jwtData, { httpOnly: true });
     return { data: jwtData, message: '로그인에 성공하였습니다.' };
   }
 
@@ -52,28 +53,31 @@ export class AdminController {
     const admin = req.user as SigninAdminDto;
     const accessToken = await this.adminService.issueAccessToken(admin);
     const jwtData = { accessToken, refreshToken };
-    res.cookie('auth-cookie', jwtData, { httpOnly: true });
-    return { message: 'Access 토큰을 정상적으로 재발급하였습니다.' };
+    return { data: jwtData, message: 'Access 토큰을 정상적으로 재발급하였습니다.' };
   }
 
   @Delete('auth/:id')
-  async deleteAdmin(@Param('id') id: number) {
+  @UseGuards(AuthGuard('jwt-admin'))
+  deleteAdmin(@Param('id') id: number) {
     return this.adminService.deleteAdmin(id);
   }
 
-  @Post('auth/signout')
-  signoutAdmin(@Req() req: Request, @Res() res: Response): any {
-    res.cookie('auth-cookie', '', { maxAge: 0 });
-    return res.send({ message: '정상적으로 로그아웃하였습니다.' });
+  @Patch('auth/signout')
+  @HttpCode(200)
+  @UseGuards(AuthGuard('jwt-admin'))
+  signoutAdmin(@AdminToken('id') id: number) {
+    return this.adminService.signoutAdmin(id);
   }
 
   // 유저 관리
   @Get('users')
+  @UseGuards(AuthGuard('jwt-admin'))
   async getAdminUsersList(@Query('search') search: string, @Query('p') p: number = 1): Promise<User[]> {
     return await this.adminService.getAdminUsersList(search, p);
   }
 
   @Put('users/:id')
+  @UseGuards(AuthGuard('jwt-admin'))
   async blockAdminUser(@Param('id') id: string, @Body() blockUser: BlockAdminUserDto) {
     const { isBlock } = blockUser;
     return await this.adminService.blockAdminUser(id, { isBlock: !isBlock });
@@ -81,64 +85,76 @@ export class AdminController {
 
   // 콜렉션 관리
   @Get('collections')
+  @UseGuards(AuthGuard('jwt-admin'))
   async getAdminCollectionsList(@Query('search') search: string, @Query('p') p: number = 1): Promise<Collection[]> {
     return await this.adminService.getAdminCollectionsList(search, p);
   }
 
   @Delete('collections/:id')
+  @UseGuards(AuthGuard('jwt-admin'))
   async deleteAdminCollection(@Param('id') id: number) {
     return await this.adminService.deleteAdminCollection(id);
   }
 
   // 포토스팟 관리
   @Get(':collectionId/photospots')
+  @UseGuards(AuthGuard('jwt-admin'))
   async getAdminPhotospotList(@Param('collectionId') collectionId: number): Promise<Photospot[]> {
     return this.adminService.getAdminPhotospotList(collectionId);
   }
 
   @Get(':collectionId/photospots/:photospotId')
+  @UseGuards(AuthGuard('jwt-admin'))
   async getAdminPhotospot(@Param('photospotId') photospotId: number): Promise<Photospot> {
     return this.adminService.getAdminPhotospot(photospotId);
   }
 
   @Delete(':collectionId/photospots/:photospotId')
+  @UseGuards(AuthGuard('jwt-admin'))
   async deleteAdminPhotospot(@Param('photospotId') photospotId: number) {
     await this.adminService.deleteAdminPhotospot(photospotId);
   }
 
   // 모임 관리
   @Get('meetups')
+  @UseGuards(AuthGuard('jwt-admin'))
   async getAdminMeetupsList(@Query('search') search: string, @Query('p') p: number = 1): Promise<Meetup[]> {
     return await this.adminService.getAdminMeetupsList(search, p);
   }
 
   @Delete('meetups/:id')
+  @UseGuards(AuthGuard('jwt-admin'))
   async deleteAdminMeetup(@Param('id') id: number) {
     return await this.adminService.deleteAdminMeetup(id);
   }
 
   // 자주찾는질문 관리
   @Get('faq')
+  @UseGuards(AuthGuard('jwt-admin'))
   async getAdminFaqList(@Query('search') search: string, @Query('p') p: number = 1): Promise<Faq[]> {
     return await this.adminService.getAdminFaqList(search, p);
   }
 
   @Get('faq/:id')
+  @UseGuards(AuthGuard('jwt-admin'))
   async getAdminFaq(@Param('id') id: number): Promise<Faq> {
     return this.adminService.getAdminFaq(id);
   }
 
   @Post('faq')
+  @UseGuards(AuthGuard('jwt-admin'))
   async createAdminFaq(@Body() data: CreateAdminFaqDto) {
     return await this.adminService.createAdminFaq(data);
   }
 
   @Put('faq/:id')
+  @UseGuards(AuthGuard('jwt-admin'))
   async updateAdminFaq(@Param('id') id: number, @Body() updateAdminFaqtDto: UpdateAdminFaqDto) {
     await this.adminService.updateAdminFaq(updateAdminFaqtDto, id);
   }
 
   @Delete('faq/:id')
+  @UseGuards(AuthGuard('jwt-admin'))
   async deleteAdminFaq(@Param('id') id: number) {
     return await this.adminService.deleteAdminFaq(id);
   }
