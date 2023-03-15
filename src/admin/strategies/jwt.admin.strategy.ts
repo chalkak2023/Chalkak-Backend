@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Request } from 'express';
@@ -13,11 +13,12 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
       secretOrKey: configService.get('JWT_ADMIN_ACCESS_TOKEN_SECRET'),
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          let data = JSON.parse(request?.cookies['auth-cookie']);
-          if (!data) {
-            return new BadRequestException();
+          const reqCookies = request?.cookies['auth-cookie'];
+          if (_.isNil(reqCookies)) {
+            throw new NotFoundException();
           }
-          return data.accessToken;
+          const parsedData = JSON.parse(reqCookies);
+          return parsedData.accessToken;
         },
       ]),
     });
