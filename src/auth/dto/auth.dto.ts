@@ -23,13 +23,13 @@ export class SignUpBodyDTO {
   @IsStrongPassword(
     {
       minLength: 8,
-      minLowercase: 0,
-      minNumbers: 0,
-      minSymbols: 0,
+      minLowercase: 1,
+      minNumbers: 1,
+      minSymbols: 1,
       minUppercase: 0,
     },
     {
-      message: '비밀번호는 최소 8자리의 문자열이어야합니다.',
+      message: '비밀번호는 최소 8자리의 문자열이며, 소문자, 숫자, 특수문자를 최소 1개씩은 포함해야합니다.',
     }
   )
   password: string;
@@ -40,7 +40,15 @@ export class SignUpBodyDTO {
   verifyToken: number;
 }
 
-export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email', 'password'] as const) {}
+export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email'] as const) {
+  @IsNotEmpty({
+    message: '비밀번호는 비어있으면 안 됩니다.'
+  })
+  @IsString({
+    message: '비밀번호는 문자열이어야 합니다.'
+  })
+  password: string;
+}
 
 export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email'] as const) {}
 
