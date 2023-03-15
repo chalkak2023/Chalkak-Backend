@@ -41,7 +41,7 @@ export class AdminService {
       });
     }
 
-    const take = 6;
+    const take = this.configService.get('PAGE_TAKE_ADMIN_ADMIN_LIST');
     const page: number = p > 0 ? p : 1;
     const total = await adminList.getCount();
     adminList
@@ -163,7 +163,7 @@ export class AdminService {
       usersList.where('user.email LIKE :search OR user.username LIKE :search ', { search: `%${search}%` });
     }
 
-    const take = 6;
+    const take = this.configService.get('PAGE_TAKE_ADMIN_USER_LIST');
     const page: number = p > 0 ? p : 1;
     const total = await usersList.getCount();
     usersList
@@ -205,7 +205,7 @@ export class AdminService {
       .leftJoin('c.collection_keywords', 'ck')
       .orderBy('c.id', 'DESC');
 
-    const take = 9;
+    const take = this.configService.get('PAGE_TAKE_ADMIN_COLLECTION_LIST');
     const page: number = p > 0 ? p : 1;
     const total = await collectionsList.getCount();
     collectionsList.skip((page - 1) * take).take(take);
@@ -277,7 +277,7 @@ export class AdminService {
       });
     }
 
-    const take = 6;
+    const take = this.configService.get('PAGE_TAKE_ADMIN_MEETUP_LIST');
     const page: number = p > 0 ? p : 1;
     const total = await meetupsList.getCount();
     meetupsList.skip((page - 1) * take).take(take);
@@ -307,7 +307,7 @@ export class AdminService {
       });
     }
 
-    const take = 6;
+    const take = this.configService.get('PAGE_TAKE_ADMIN_FAQ_LIST');
     const page: number = p > 0 ? p : 1;
     const total = await faqList.getCount();
     faqList
