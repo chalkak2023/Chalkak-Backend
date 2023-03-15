@@ -190,7 +190,7 @@ describe('AuthService', () => {
         verifyToken: 123456,
       };
       cache = {
-        [body.email + '_verifyToken']: body.verifyToken,
+        [body.email + '_signup']: body.verifyToken,
       };
 
       mockLocalUserRepository.insert.mockResolvedValue({
@@ -230,7 +230,7 @@ describe('AuthService', () => {
         verifyToken: 123456,
       };
       cache = {
-        [body.email + '_verifyToken']: body.verifyToken,
+        [body.email + '_signup']: body.verifyToken,
       };
 
       mockUserRepository.findOne.mockResolvedValue(users[0]);
@@ -250,7 +250,7 @@ describe('AuthService', () => {
         verifyToken: 123456,
       };
       cache = {
-        [body.email + '_verifyToken']: body.verifyToken,
+        [body.email + '_signup']: body.verifyToken,
       };
       mockLocalUserRepository.insert.mockRejectedValue(new Error());
 
@@ -357,7 +357,7 @@ describe('AuthService', () => {
       };
 
       expect(service.postSignupEmailVerification(body)).resolves.toStrictEqual({
-        message: '이메일 인증번호가 요청되었습니다.',
+        message: '회원가입 이메일 인증번호가 요청되었습니다.',
       });
     });
   });
@@ -375,11 +375,11 @@ describe('AuthService', () => {
       };
 
       cache = {
-        [`${body.email}_verifyToken`]: 123456,
+        [`${body.email}_signup`]: 123456,
       };
 
       expect(service.putSignupEmailVerification(body)).resolves.toStrictEqual({
-        message: '이메일 인증번호가 확인되었습니다.',
+        message: '회원가입 이메일 인증번호가 확인되었습니다.',
       });
     });
 
@@ -405,7 +405,7 @@ describe('AuthService', () => {
       };
 
       cache = {
-        [`${body.email}_verifyToken`]: 123458,
+        [`${body.email}_signup`]: 123458,
       };
 
       expect(service.putSignupEmailVerification(body)).rejects.toThrowError(
@@ -432,7 +432,7 @@ describe('AuthService', () => {
         exp: 1001
       };
       cache = {
-        'test@gmail.com_verifyToken': 123456,
+        'test@gmail.com_signup': 123456,
       };
 
       expect(service.changePassword(body, user)).resolves.toStrictEqual({
