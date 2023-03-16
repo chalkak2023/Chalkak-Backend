@@ -51,10 +51,5 @@ export class PhotospotController {
   async deletePhotospot(@Param('photospotId') photospotId: number, @InjectUser('id') userId: number) {
     await this.photospotService.deletePhotospot(photospotId, userId);
   }
-
-  @Delete('/:photospotId/photo/:photoId')
-  @UserGuard
-  async deletePhoto(@Param('photoId') photoId: number, @InjectUser('id') userId: number) {
-    await this.photospotService.deletePhoto(photoId, userId);
-  }
+  
 }
