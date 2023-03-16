@@ -1,7 +1,9 @@
 import {
   BadRequestException,
+  CACHE_MANAGER,
   ConflictException,
   HttpStatus,
+  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -11,6 +13,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { MoreThanOrEqual, Repository } from 'typeorm';
 import bcrypt from 'bcrypt';
+import { Cache } from 'cache-manager';
 import moment from 'moment';
 import randomToken from 'rand-token';
 import _ from 'lodash';
@@ -29,6 +32,7 @@ import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
 @Injectable()
 export class AdminService {
   constructor(
+    @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     @InjectRepository(Admin) private adminRepository: Repository<Admin>,
     @InjectRepository(User) private adminUsersRepository: Repository<User>,
     @InjectRepository(Collection) private adminCollectionsRepository: Repository<Collection>,
@@ -126,7 +130,7 @@ export class AdminService {
     try {
       const refreshTokenData = {
         refreshToken: randomToken.generate(30),
-        refreshTokenExp: moment().day(7).format('YYYY-MM-DD HH:mm:ss'),
+        refreshTokenExp: moment().day(7).toDate(),
       };
       await this.adminRepository.update(id, refreshTokenData);
       return refreshTokenData.refreshToken;
@@ -136,7 +140,7 @@ export class AdminService {
   }
 
   public async verifyRefreshToken(account: string, refreshToken: string): Promise<SigninAdminDto> {
-    const currentDate = moment().day(7).format('YYYY-MM-DD HH:mm:ss');
+    const currentDate = new Date();
     let admin = await this.adminRepository.findOne({
       where: { account, refreshToken, refreshTokenExp: MoreThanOrEqual(currentDate) },
     });
@@ -198,6 +202,9 @@ export class AdminService {
   }
 
   blockAdminUser(id: string, blockUser: any): Promise<any> {
+    this.cacheManager.set<boolean>(`user-${id}-block`, blockUser.isBlock, {
+      ttl: 60 * 5,
+    });
     return this.adminUsersRepository
       .createQueryBuilder()
       .update()

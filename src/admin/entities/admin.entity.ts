@@ -19,7 +19,7 @@ export class Admin {
   refreshToken: string | null;
 
   @Column({ type: 'datetime', nullable: true, name: 'refreshtokenexp' })
-  refreshTokenExp: string;
+  refreshTokenExp: Date;
 
   @CreateDateColumn()
   createdAt: Date;
