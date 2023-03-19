@@ -53,7 +53,7 @@ export class PhotospotController {
     await this.photospotService.deletePhotospot(photospotId, userId);
   }
   
-  @Get('/photospot/random')
+  @Get('/photospots/random')
   async getRandomPhoto(): Promise<Photo[]> {
     return await this.photospotService.getRandomPhoto();
   }
