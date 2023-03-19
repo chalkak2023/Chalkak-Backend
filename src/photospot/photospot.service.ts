@@ -135,4 +135,18 @@ export class PhotospotService {
     this.photospotRepository.softDelete(photospotId);
   }
 
+  async getRandomPhoto(): Promise<Photo[]> {
+    const photos = await this.photoRepository.createQueryBuilder('p')
+    .select([
+      'p.id',
+      'p.image'
+    ])
+    .orderBy('RAND()')
+    .limit(5)
+    .getMany();
+    if (_.isEmpty(photos)) {
+      throw new NotFoundException(`등록된 포토스팟이 없습니다.`);
+    }
+    return photos;
+  }
 }
