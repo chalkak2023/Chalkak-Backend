@@ -36,6 +36,9 @@ export class User {
   @Column('varchar', { nullable: true })
   providerUserId: string | null;
 
+  @Column('varchar')
+  provider: 'local' | 'naver' | 'kakao';
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -2,69 +2,55 @@ import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { DataSource, Repository } from 'typeorm';
 import { Collection } from 'src/collections/entities/collection.entity';
-import { GetCollectionsListDto } from 'src/collections/dto/get.collections.list.dto';
+import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
 
 @Injectable()
 export class CollectionUserKeywordRepository extends Repository<Collection> {
-  constructor(private dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource) {
     super(Collection, dataSource.createEntityManager());
   }
 
-  async getCollectionsList({ search, p, userId }: GetCollectionsListDto) {
-    const collectionsList = this.createQueryBuilder('collection');
-    let myCollectionQuery = 'collection.userId = :userId';
-    let searchCollectionQuery = 'collection.title LIKE :search OR collection.description LIKE :search';
-
-    if (!search && !userId) {
-      collectionsList;
-    } else if (search && !userId) {
-      collectionsList.where(searchCollectionQuery, { search: `%${search}%` });
-    } else if (!search && userId) {
-      collectionsList.where(myCollectionQuery, { userId });
-    } else {
-      collectionsList.where(`${myCollectionQuery} AND (${searchCollectionQuery})`, { userId, search: `%${search}%` });
-    }
-
-    collectionsList
-      .select([
-        'collection.id',
-        'collection.userId',
-        'collection.title',
-        'collection.description',
-        'collection.createdAt',
-        'collection_keyword',
-      ])
-      .leftJoin('collection.user', 'user')
-      .leftJoin('collection.photospots', 'photospot')
-      .leftJoin('collection.collection_keywords', 'collection_keyword')
-      .orderBy('collection.id', 'DESC');
-
+  async getCollectionsList({ p, search, userId }: GetCollectionsListQueryDto) {
     const take = 18;
-    const page: number = p > 0 ? parseInt(p as any) : 1;
-    const total = await collectionsList.getCount();
-    collectionsList.skip((page - 1) * take).take(take);
-    return {
-      data: await collectionsList.getMany(),
-      total,
-      page,
-      lastPage: Math.ceil(total / take),
-    };
+    const whereQuery = this.isThereSearchUserid(search, userId)
+    return await this.createQueryBuilder('c')
+      .where( whereQuery.q1, whereQuery.q2)
+      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'ck'])
+      .leftJoin('c.user', 'cu')
+      .leftJoin('c.photospots', 'cp')
+      .leftJoin('c.collection_keywords', 'ck')
+      .orderBy('c.id', 'DESC')
+      .take(take)
+      .skip((p - 1) * take)
+      .getMany()
+  }
+
+  isThereSearchUserid(search?: string, userId?: number) {
+    const myCollectionQuery = 'c.userId = :userId';
+    const searchCollectionQuery = 'c.title LIKE :search OR c.description LIKE :search';
+    const query = { q1: '', q2: {} };
+
+    if (search && !userId) {
+      query.q1 = searchCollectionQuery
+      query.q2 = { search: `%${search}%` }
+    } else if (!search && userId) {
+      query.q1 = myCollectionQuery
+      query.q2 = { userId }
+    } else if (search && userId) {
+      query.q1 = `${myCollectionQuery} AND (${searchCollectionQuery})`
+      query.q2 = { userId, search: `%${search}%` }
+    } return query
   }
 
   async getCollection(collectionId: number): Promise<Collection | null> {
-    return await this.createQueryBuilder('collection')
-      .select([
-        'collection.id',
-        'collection.userId',
-        'collection.title',
-        'collection.description',
-        'collection.createdAt',
-        'collection_keyword',
-      ])
-      .leftJoin('collection.user', 'user')
-      .leftJoin('collection.photospots', 'photospot')
-      .leftJoin('collection.collection_keywords', 'collection_keyword')
-      .where('collection.id = :id', { id: collectionId })
+    return await this.createQueryBuilder('c')
+      .where('c.id = :id', { id: collectionId })
+      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'cp', 'cpt', 'ck'])
+      .leftJoin('c.user', 'cu')
+      .leftJoin('c.photospots', 'cp')
+      .leftJoin('cp.photos', 'cpt')
+      .leftJoin('c.collection_keywords', 'ck')
       .getOne();
+    }
   }
-}
+

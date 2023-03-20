@@ -77,7 +77,7 @@ describe('MeetupsService', () => {
       title: 'test title',
       content: 'test content',
       place: 'test place',
-      schedule: '2023-02-28 17:20',
+      schedule: new Date('2023-02-28 17:20'),
       headcount: 2,
     };
     it('success', async () => {

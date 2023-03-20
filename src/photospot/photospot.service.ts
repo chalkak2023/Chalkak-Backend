@@ -99,7 +99,7 @@ export class PhotospotService {
     await queryRunner.startTransaction();
 
     try {
-      const { title, description }: ModifyPhotospotDto = modifyPhotospotDto;
+      const { title, description, deletePhotos }: ModifyPhotospotDto = modifyPhotospotDto;
       await queryRunner.manager.getRepository(Photospot).update({ id: photospotId }, { title, description });
       for (const file of files) {
         try {
@@ -110,8 +110,13 @@ export class PhotospotService {
           throw new Error('Photo 입력 실패.');
         }
       }
+      if (!_.isNil(deletePhotos)) {
+        for (const photo of deletePhotos) {
+          await queryRunner.manager.getRepository(Photo).delete({id: photo});
+        }
+      }
       await queryRunner.commitTransaction();
-    } catch {
+    } catch (e) {
       await queryRunner.rollbackTransaction();
       throw new BadRequestException('요청이 올바르지 않습니다.');
     } finally {
@@ -130,23 +135,18 @@ export class PhotospotService {
     this.photospotRepository.softDelete(photospotId);
   }
 
-  async getPhoto(photoId: number): Promise<Photo> {
-    const photo = await this.photoRepository.findOne({ where: { id: photoId } });
-
-    if (_.isNil(photo)) {
-      throw new NotFoundException('해당 사진을 찾을 수 없습니다.');
+  async getRandomPhoto(): Promise<Photo[]> {
+    const photos = await this.photoRepository.createQueryBuilder('p')
+    .select([
+      'p.id',
+      'p.image'
+    ])
+    .orderBy('RAND()')
+    .limit(5)
+    .getMany();
+    if (_.isEmpty(photos)) {
+      throw new NotFoundException(`등록된 포토스팟이 없습니다.`);
     }
-
-    return photo;
-  }
-
-  async deletePhoto(photoId: number, userId: number): Promise<void> {
-    const photo = await this.getPhoto(photoId);
-
-    if (photo.userId !== userId) {
-      throw new NotAcceptableException('해당 사진에 접근 할 수 없습니다');
-    }
-
-    await this.photoRepository.delete({id: photoId});
+    return photos;
   }
 }

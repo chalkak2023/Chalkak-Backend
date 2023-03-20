@@ -5,12 +5,20 @@ import { Meetup } from '../entities/meetup.entity';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Join } from '../entities/join.entity';
 import { CreateMeetupDTO } from '../dto/create-meetup.dto';
+import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
+import { ConfigService } from '@nestjs/config';
+
+const moduleMocker = new ModuleMocker(global);
 
 describe('MeetupsRepsitory', () => {
   let repository: MeetupsRepository;
   const mockDataSource = {
     createEntityManager: jest.fn(),
     createQueryRunner: jest.fn()
+  };
+  let mockConfigService: jest.Mocked<ConfigService>;
+  const mockConfig = {
+    MEETUPS_PAGE_LIMIT: 9
   };
 
   beforeEach(async () => {
@@ -23,9 +31,17 @@ describe('MeetupsRepsitory', () => {
           useValue: mockDataSource
         }
       ]
+    }).useMocker((token) => {
+      if (typeof token === 'function') {
+        const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
+        const Mock = moduleMocker.generateFromMetadata(mockMetadata);
+        return new Mock();
+      }
     }).compile();
 
     repository = module.get(MeetupsRepository);
+    mockConfigService = module.get(ConfigService);
+    mockConfigService.get.mockImplementation((key: keyof typeof mockConfig) => mockConfig[key]);
   });
 
   it('should be defined', () => {
@@ -75,7 +91,7 @@ describe('MeetupsRepsitory', () => {
       title: 'title',
       content: 'content',
       place: 'place',
-      schedule: '2023-03-02 20:00',
+      schedule: new Date('2023-03-02 20:00'),
       headcount: 5,
     };
     const mockInsertMeetupResult = {

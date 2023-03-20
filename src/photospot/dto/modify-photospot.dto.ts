@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsArray, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 export class ModifyPhotospotDto {
   @IsNotEmpty()
   @IsString()
@@ -7,4 +7,8 @@ export class ModifyPhotospotDto {
   @IsNotEmpty()
   @IsString()
   description: string;
+
+  @IsOptional()
+  @IsArray()
+  deletePhotos: [];
 }

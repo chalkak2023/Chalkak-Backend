@@ -11,6 +11,8 @@ import { AdminModule } from './admin/admin.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PhotospotModule } from './photospot/photospot.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CacheConfigService } from './common/config/cache.config.service';
+import { ServiceModule } from './service/service.module';
 
 @Module({
   imports: [
@@ -19,13 +21,8 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
     }),
     TypeOrmModule.forRootAsync({ useClass: TypeOrmConfigService }),
-    JwtModule.register({
-      secret: 'test',
-      signOptions: {
-        expiresIn: '1h',
-      },
-    }),
-    CacheModule.register({ isGlobal: true }),
+    JwtModule,
+    CacheModule.registerAsync({ isGlobal: true, useClass: CacheConfigService }),
     EventEmitterModule.forRoot({
       global: true,
     }),
@@ -34,10 +31,9 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
     MeetupsModule,
     AdminModule,
     PhotospotModule,
+    ServiceModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-
-
 export class AppModule {}

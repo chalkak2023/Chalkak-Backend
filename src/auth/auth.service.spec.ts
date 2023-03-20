@@ -187,6 +187,10 @@ describe('AuthService', () => {
         username: '테스트맨',
         email: 'testman@gmail.com',
         password: 'testpassword',
+        verifyToken: 123456,
+      };
+      cache = {
+        [body.email + '_signup']: body.verifyToken,
       };
 
       mockLocalUserRepository.insert.mockResolvedValue({
@@ -223,6 +227,10 @@ describe('AuthService', () => {
         username,
         email: 'test5@gmail.com',
         password: 'qwer1234',
+        verifyToken: 123456,
+      };
+      cache = {
+        [body.email + '_signup']: body.verifyToken,
       };
 
       mockUserRepository.findOne.mockResolvedValue(users[0]);
@@ -236,8 +244,13 @@ describe('AuthService', () => {
 
     it('should be return fail message when error situation', async () => {
       const body: SignUpBodyDTO = {
+        username: 'testman',
         email: 'test@gmail.com',
         password: 'testpassword',
+        verifyToken: 123456,
+      };
+      cache = {
+        [body.email + '_signup']: body.verifyToken,
       };
       mockLocalUserRepository.insert.mockRejectedValue(new Error());
 
@@ -260,9 +273,6 @@ describe('AuthService', () => {
         email: 'test@gmail.com',
         password: 'testpassword',
       };
-      const response: any = {
-        cookie: jest.fn(() => response),
-      };
       mockLocalUserRepository.findOne.mockResolvedValue(users[0]);
       mockJwtService.sign.mockImplementation((payload: any, options: any) => {
         return `token${options.secret}`;
@@ -270,7 +280,7 @@ describe('AuthService', () => {
       const accessToken = `token${mockConfigService.get('JWT_ACCESS_TOKEN_SECRET')}`;
       const refreshToken = `token${mockConfigService.get('JWT_REFRESH_TOKEN_SECRET')}`;
 
-      expect(service.signIn(body, response)).resolves.toStrictEqual({
+      expect(service.signIn(body)).resolves.toStrictEqual({
         message: '로그인 되었습니다.',
         accessToken,
         refreshToken,
@@ -282,12 +292,9 @@ describe('AuthService', () => {
         email: 'fake' + users[0].email,
         password: 'testpassword',
       };
-      const response: any = {
-        cookie: jest.fn(() => response),
-      };
       mockLocalUserRepository.findOne.mockResolvedValue(null);
 
-      expect(service.signIn(body, response)).rejects.toThrowError(
+      expect(service.signIn(body)).rejects.toThrowError(
         new NotFoundException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' })
       );
     });
@@ -297,12 +304,9 @@ describe('AuthService', () => {
         email: users[0].email,
         password: 'faketestpassword',
       };
-      const response: any = {
-        cookie: jest.fn(() => response),
-      };
       mockLocalUserRepository.findOne.mockResolvedValue(users[0]);
 
-      expect(service.signIn(body, response)).rejects.toThrowError(
+      expect(service.signIn(body)).rejects.toThrowError(
         new NotFoundException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' })
       );
     });
@@ -312,12 +316,9 @@ describe('AuthService', () => {
         email: users[2].email,
         password: 'testpassword',
       };
-      const response: any = {
-        cookie: jest.fn(() => response),
-      };
       mockLocalUserRepository.findOne.mockResolvedValue(users[2]);
 
-      expect(service.signIn(body, response)).rejects.toThrowError(
+      expect(service.signIn(body)).rejects.toThrowError(
         new ForbiddenException({
           message: '블락된 상태여서 로그인할 수 없습니다.',
         })
@@ -333,14 +334,12 @@ describe('AuthService', () => {
 
     it('should be return success message when success situation', async () => {
       const user = {
-        id: 1,
-      };
-      const response: any = {
-        cookie: jest.fn(() => response),
-        clearCookie: jest.fn(() => response),
+        ...users[0],
+        iat: 1000,
+        exp: 1001
       };
 
-      expect(service.signOut(user, response)).resolves.toStrictEqual({
+      expect(service.signOut(user)).resolves.toStrictEqual({
         message: '로그아웃 되었습니다.',
       });
     });
@@ -348,8 +347,8 @@ describe('AuthService', () => {
 
   describe('postEmailVerification Method', () => {
     it('should be defined', () => {
-      expect(service.postEmailVerification).toBeDefined();
-      expect(typeof service.postEmailVerification).toBe('function');
+      expect(service.postSignupEmailVerification).toBeDefined();
+      expect(typeof service.postSignupEmailVerification).toBe('function');
     });
 
     it('should be return success message when success situation', async () => {
@@ -357,16 +356,16 @@ describe('AuthService', () => {
         email: 'test@gmail.com',
       };
 
-      expect(service.postEmailVerification(body)).resolves.toStrictEqual({
-        message: '이메일 인증번호가 요청되었습니다.',
+      expect(service.postSignupEmailVerification(body)).resolves.toStrictEqual({
+        message: '회원가입 이메일 인증번호가 요청되었습니다.',
       });
     });
   });
 
   describe('putEmailVerification Method', () => {
     it('should be defined', () => {
-      expect(service.putEmailVerification).toBeDefined();
-      expect(typeof service.putEmailVerification).toBe('function');
+      expect(service.putSignupEmailVerification).toBeDefined();
+      expect(typeof service.putSignupEmailVerification).toBe('function');
     });
 
     it('should be return success message when success situation', async () => {
@@ -376,11 +375,11 @@ describe('AuthService', () => {
       };
 
       cache = {
-        [`${body.email}_verifyToken`]: 123456,
+        [`${body.email}_signup`]: 123456,
       };
 
-      expect(service.putEmailVerification(body)).resolves.toStrictEqual({
-        message: '이메일 인증번호가 확인되었습니다.',
+      expect(service.putSignupEmailVerification(body)).resolves.toStrictEqual({
+        message: '회원가입 이메일 인증번호가 확인되었습니다.',
       });
     });
 
@@ -392,7 +391,7 @@ describe('AuthService', () => {
 
       cache = {};
 
-      expect(service.putEmailVerification(body)).rejects.toThrowError(
+      expect(service.putSignupEmailVerification(body)).rejects.toThrowError(
         new NotFoundException({
           message: '인증번호를 요청하지 않았거나 만료되었습니다.',
         })
@@ -406,10 +405,10 @@ describe('AuthService', () => {
       };
 
       cache = {
-        [`${body.email}_verifyToken`]: 123458,
+        [`${body.email}_signup`]: 123458,
       };
 
-      expect(service.putEmailVerification(body)).rejects.toThrowError(
+      expect(service.putSignupEmailVerification(body)).rejects.toThrowError(
         new UnauthorizedException({
           message: '인증번호가 일치하지 않습니다.',
         })
@@ -428,10 +427,12 @@ describe('AuthService', () => {
         password: 'changePW',
       };
       const user = {
-        id: 1,
+        ...users[0],
+        iat: 1000,
+        exp: 1001
       };
       cache = {
-        'test@gmail.com_verifyToken': 123456,
+        'test@gmail.com_signup': 123456,
       };
 
       expect(service.changePassword(body, user)).resolves.toStrictEqual({
@@ -663,9 +664,11 @@ describe('AuthService', () => {
       cache = {
         refreshToken: 1,
       };
-      mockLocalUserRepository.findOne.mockResolvedValue({
-        id: 1,
+      mockUserRepository.findOne.mockResolvedValue({
+        ...users[0],
         email: 'test@gmail.com',
+        iat: 1000,
+        exp: 1001
       } as LocalUser);
       mockJwtService.sign.mockReturnValueOnce(newAccessToken);
       mockJwtService.verifyAsync.mockResolvedValue({});
