@@ -1,3 +1,4 @@
+import { PhotoKeyword } from './entities/photokeyword.entity';
 import { Injectable, NotFoundException, BadRequestException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -8,6 +9,7 @@ import { Photospot } from '../photospot/entities/photospot.entity';
 import { Collection } from '../collections/entities/collection.entity';
 import { Photo } from './entities/photo.entity';
 import { S3Service } from './../common/aws/s3.service';
+import { GoogleVisionService } from '../googleVision/GoogleVision.service';
 
 @Injectable()
 export class PhotospotService {
@@ -15,8 +17,10 @@ export class PhotospotService {
     @InjectRepository(Photospot) private photospotRepository: Repository<Photospot>,
     @InjectRepository(Collection) private collectionRepository: Repository<Collection>,
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
+    @InjectRepository(PhotoKeyword) private photoKeyword: Repository<PhotoKeyword>,
     private readonly s3Service: S3Service,
     private readonly dataSource: DataSource,
+    private readonly googleVisionService: GoogleVisionService
   ) {}
 
   async createPhotospot(
@@ -43,7 +47,9 @@ export class PhotospotService {
       for (const file of files) {
         try {
           const image = await this.s3Service.putObject(file);
-          await queryRunner.manager.getRepository(Photo).insert({ image, userId, photospotId: photospot.identifiers[0].id });
+          const photo = await queryRunner.manager.getRepository(Photo).insert({ image, userId, photospotId: photospot.identifiers[0].id });
+          this.createImageKeyword(image, photo.identifiers[0].id);
+
         } catch (error) {
           console.log(error);
           throw new Error('Photo 입력 실패.');
@@ -87,7 +93,6 @@ export class PhotospotService {
     photospotId: number,
     userId: number
   ): Promise<void> {
-    
     const photospot = await this.getPhotospot(photospotId);
 
     if (photospot.userId !== userId) {
@@ -104,8 +109,9 @@ export class PhotospotService {
       for (const file of files) {
         try {
           const image = await this.s3Service.putObject(file);
-          await queryRunner.manager.getRepository(Photo).insert({ image, userId, photospotId });
-          
+          const photo = await queryRunner.manager.getRepository(Photo).insert({ image, userId, photospotId });
+          this.createImageKeyword(image, photo.identifiers[0].id);
+
         } catch {
           throw new Error('Photo 입력 실패.');
         }
@@ -122,7 +128,6 @@ export class PhotospotService {
     } finally {
       await queryRunner.release();
     }
-
   }
 
   async deletePhotospot(photospotId: number, userId: number) {
@@ -148,5 +153,12 @@ export class PhotospotService {
       throw new NotFoundException(`등록된 포토스팟이 없습니다.`);
     }
     return photos;
+  }
+
+  async createImageKeyword(image: string, photoId: number): Promise<void> {
+    const imageKeywords = await this.googleVisionService.image(image);
+    for (const keyword of imageKeywords) {
+      this.photoKeyword.insert({photoId, keyword})
+    }
   }
 }
