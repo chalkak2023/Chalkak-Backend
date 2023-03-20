@@ -1,13 +1,13 @@
 import { IntersectionType, PickType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
-import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsNumber, IsString, IsStrongPassword, IsIn, MaxLength } from 'class-validator';
+import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsNumber, IsString, IsStrongPassword, IsIn, MaxLength, NotContains } from 'class-validator';
 
 export class SignUpBodyDTO {
   @IsNotEmpty({
     message: '유저명은 빈문자열이면 안 됩니다.'
   })
-  @IsString({
-    message: '유저명은 문자열이어야 합니다.'
+  @NotContains(' ', {
+    message: '유저명은 공백이 없는 문자열이어야 합니다.'
   })
   @MaxLength(16, {
     message: '유저명은 16글자 이내여야합니다.'
@@ -20,6 +20,9 @@ export class SignUpBodyDTO {
     }
   )
   email: string;
+  @NotContains(' ', {
+    message: '비밀번호는 공백이 없는 문자열이어야합니다.'
+  })
   @IsStrongPassword(
     {
       minLength: 8,
@@ -44,8 +47,8 @@ export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email'] as const) {
   @IsNotEmpty({
     message: '비밀번호는 비어있으면 안 됩니다.'
   })
-  @IsString({
-    message: '비밀번호는 문자열이어야 합니다.'
+  @NotContains(' ', {
+    message: '비밀번호는 공백이 없는 문자열이어야 합니다.'
   })
   password: string;
 }
