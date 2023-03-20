@@ -18,11 +18,6 @@ import { SocialLoginBodyDTO } from './dto/auth.dto';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post('sample')
-  async createSampleUser() {
-    return await this.authService.createSampleUser();
-  }
-
   @Post('signup')
   async signUp(@Body() body: SignUpBodyDTO) {
     return await this.authService.signUp(body);

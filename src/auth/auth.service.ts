@@ -45,29 +45,6 @@ export class AuthService {
     private socialNaverService: SocialNaverService
   ) {}
 
-  async createSampleUser() {
-    let arr = [];
-    for (let i = 1; i <= 5; i++) {
-      const temp = {
-        email: `test_emai_${i}@gmail.com`,
-        username: `test${i}`,
-        password: bcrypt.hashSync('qwer1234', 10),
-      };
-      arr.push(temp);
-    }
-    try {
-      await this.localUsersRepository.insert(arr);
-    } catch (err) {
-      throw new BadRequestException({
-        message: '중복된 데이터가 이미 있습니다.',
-      });
-    }
-
-    return {
-      message: '유저 샘플 데이터를 생성했습니다.',
-    };
-  }
-
   async signUp(body: SignUpBodyDTO) {
     const { username, email, password, verifyToken } = body;
     const cachedVerifyToken = await this.cacheManager.get(email + '_signup');
