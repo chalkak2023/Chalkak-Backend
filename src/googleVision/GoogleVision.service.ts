@@ -15,12 +15,12 @@ export class GoogleVisionService {
         if (_.isNil(labels)) return []
 
         const result = labels.map((label) => {
-          if (!_.isNil(label.description)) {
+          if (_.isString(label.description)) {
             return label.description
           }
         });
 
-        return result;
+        return [...new Set(result)];
       })
       .catch((err) => {
         console.log('error: ', err);
