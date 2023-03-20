@@ -17,7 +17,7 @@ export class PhotospotService {
     @InjectRepository(Photospot) private photospotRepository: Repository<Photospot>,
     @InjectRepository(Collection) private collectionRepository: Repository<Collection>,
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
-    @InjectRepository(PhotoKeyword) private photoKeyword: Repository<PhotoKeyword>,
+    @InjectRepository(PhotoKeyword) private photoKeywordRepository: Repository<PhotoKeyword>,
     private readonly s3Service: S3Service,
     private readonly dataSource: DataSource,
     private readonly googleVisionService: GoogleVisionService
@@ -47,9 +47,10 @@ export class PhotospotService {
       for (const file of files) {
         try {
           const image = await this.s3Service.putObject(file);
-          const photo = await queryRunner.manager.getRepository(Photo).insert({ image, userId, photospotId: photospot.identifiers[0].id });
-          this.createImageKeyword(image, photo.identifiers[0].id);
-
+          const photo = await queryRunner.manager
+            .getRepository(Photo)
+            .save({ image, userId, photospotId: photospot.identifiers[0].id });
+          this.createImageKeyword(image, photo);
         } catch (error) {
           console.log(error);
           throw new Error('Photo 입력 실패.');
@@ -111,14 +112,13 @@ export class PhotospotService {
           const image = await this.s3Service.putObject(file);
           const photo = await queryRunner.manager.getRepository(Photo).insert({ image, userId, photospotId });
           this.createImageKeyword(image, photo.identifiers[0].id);
-
         } catch {
           throw new Error('Photo 입력 실패.');
         }
       }
       if (!_.isNil(deletePhotos)) {
         for (const photo of deletePhotos) {
-          await queryRunner.manager.getRepository(Photo).delete({id: photo});
+          await queryRunner.manager.getRepository(Photo).delete({ id: photo });
         }
       }
       await queryRunner.commitTransaction();
@@ -141,24 +141,31 @@ export class PhotospotService {
   }
 
   async getRandomPhoto(): Promise<Photo[]> {
-    const photos = await this.photoRepository.createQueryBuilder('p')
-    .select([
-      'p.id',
-      'p.image'
-    ])
-    .orderBy('RAND()')
-    .limit(5)
-    .getMany();
+    const photos = await this.photoRepository
+      .createQueryBuilder('p')
+      .select(['p.id', 'p.image'])
+      .orderBy('RAND()')
+      .limit(5)
+      .getMany();
     if (_.isEmpty(photos)) {
       throw new NotFoundException(`등록된 포토스팟이 없습니다.`);
     }
     return photos;
   }
 
-  async createImageKeyword(image: string, photoId: number): Promise<void> {
-    const imageKeywords = await this.googleVisionService.image(image);
-    for (const keyword of imageKeywords) {
-      this.photoKeyword.insert({photoId, keyword})
+  async createImageKeyword(image: string, photo: Photo): Promise<void> {
+    const photoKeywords = await this.googleVisionService.image(image);
+    for (const photoKeyword of photoKeywords) {
+      if (_.isUndefined(photoKeyword)) {
+        continue;
+      }
+      const preKeyword = await this.photoKeywordRepository.findOne({where: {keyword: photoKeyword}})
+      if (_.isNil(preKeyword)) {
+        const insertKeyword = await this.photoKeywordRepository.save({keyword: photoKeyword});
+        await this.dataSource.query(`INSERT INTO photo_photo_keywords_photo_keyword VALUES (${photo.id}, ${insertKeyword.id})`);
+      } else {
+        await this.dataSource.query(`INSERT INTO photo_photo_keywords_photo_keyword VALUES (${photo.id}, ${preKeyword.id})`);
+      }
     }
   }
 }
