@@ -1,16 +1,17 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
 import { Photospot } from './photospot.entity';
 import { User } from './../../auth/entities/user.entity';
+import { PhotoKeyword } from './photokeyword.entity';
 
 @Entity({schema:'chalkak', name: 'photo'})
 export class Photo {
   @PrimaryGeneratedColumn({type: 'int', name: 'id'})
   id: number;
 
-  @PrimaryColumn('int')
+  @Column('int')
   userId: number;
 
-  @PrimaryColumn('int')
+  @Column('int')
   photospotId: number;
 
   @Column('varchar')
@@ -24,5 +25,8 @@ export class Photo {
 
   @ManyToOne(() => Photospot, (photospot) => photospot.photos)
   photospot: Photospot;
+
+  @OneToMany(() => PhotoKeyword, (photoKeyword) => photoKeyword.photo)
+  photoKeywords: PhotoKeyword[];
   
 }

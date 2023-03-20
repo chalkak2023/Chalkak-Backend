@@ -9,6 +9,8 @@ import { Photospot } from './entities/photospot.entity';
 import { Photo } from './entities/photo.entity';
 import { Collection } from '../collections/entities/collection.entity';
 import { S3Service } from './../common/aws/s3.service';
+import { GoogleVisionService } from 'src/googleVision/GoogleVision.service';
+import { PhotoKeyword } from './entities/photokeyword.entity';
 
 @Module({
   imports: [
@@ -17,9 +19,9 @@ import { S3Service } from './../common/aws/s3.service';
       useFactory: multerOptionsFactory,
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Photospot, Collection, Photo]),
+    TypeOrmModule.forFeature([Photospot, Collection, Photo, PhotoKeyword]),
   ],
   controllers: [PhotospotController],
-  providers: [PhotospotService, S3Service],
+  providers: [PhotospotService, S3Service, GoogleVisionService],
 })
 export class PhotospotModule {}
