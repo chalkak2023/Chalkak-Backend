@@ -1,11 +1,11 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryColumn, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Photospot } from './photospot.entity';
 import { User } from './../../auth/entities/user.entity';
 import { PhotoKeyword } from './photokeyword.entity';
 
-@Entity({schema:'chalkak', name: 'photo'})
+@Entity({ schema: 'chalkak', name: 'photo' })
 export class Photo {
-  @PrimaryGeneratedColumn({type: 'int', name: 'id'})
+  @PrimaryGeneratedColumn({ type: 'int', name: 'id' })
   id: number;
 
   @Column('int')
@@ -26,7 +26,9 @@ export class Photo {
   @ManyToOne(() => Photospot, (photospot) => photospot.photos)
   photospot: Photospot;
 
-  @OneToMany(() => PhotoKeyword, (photoKeyword) => photoKeyword.photo)
+  @ManyToMany(() => PhotoKeyword, (photoKeyword) => photoKeyword.photos, {
+    cascade: true,
+  })
+  @JoinTable()
   photoKeywords: PhotoKeyword[];
-  
 }
