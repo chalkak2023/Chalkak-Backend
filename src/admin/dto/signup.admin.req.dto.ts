@@ -6,10 +6,10 @@ export class SignupAdminReqDto {
   account: string;
 
   @IsNotEmpty()
-  @IsString()
+  @NotContains(' ')
   password: string;
 
   @IsNotEmpty()
-  @IsString()
+  @NotContains(' ')
   responsibility: string;
 }
