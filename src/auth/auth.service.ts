@@ -77,17 +77,15 @@ export class AuthService {
     };
   }
 
-  async signIn(body: SignInBodyDTO) {
-    const { email, password } = body;
+  async validateLocalUser(email: string, password: string) {
     const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password', 'isBlock'] });
-    if (!user || !bcrypt.compareSync(password, user.password)) {
-      throw new NotFoundException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' });
+    if (_.isNil(user) || !bcrypt.compareSync(password, user.password)) {
+      throw new UnauthorizedException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' });
     }
-    if (user.isBlock) {
-      throw new ForbiddenException({
-        message: '블락된 상태여서 로그인할 수 없습니다.',
-      });
-    }
+    return user;
+  }
+
+  async signIn(user: LocalUser) {
     const accessToken = this.generateUserAccessToken(user);
     const refreshToken = this.generateUserRefreshToken();
     this.cacheManager.set(refreshToken, user.id, { ttl: 60 * 60 * 3 });

@@ -13,6 +13,9 @@ import {
 import { InjectUser, Token, UserGuard } from './auth.decorator';
 import { JwtRefreshGuard } from './guard/jwt-refresh/jwt-refresh.guard';
 import { SocialLoginBodyDTO } from './dto/auth.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { BlockUserGuard } from './guard/block-user/block-user.guard';
+import { LocalUser } from './entities/user.entity';
 
 @Controller('api/auth')
 export class AuthController {
@@ -24,9 +27,10 @@ export class AuthController {
   }
 
   @Post('signin')
+  @UseGuards(AuthGuard('local'), BlockUserGuard)
   @HttpCode(200)
-  async signIn(@Body() body: SignInBodyDTO) {
-    return await this.authService.signIn(body);
+  async signIn(@InjectUser() user: LocalUser) {
+    return await this.authService.signIn(user);
   }
 
   @Post('signout')
