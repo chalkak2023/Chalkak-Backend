@@ -18,7 +18,7 @@ import {
 } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
-import _, { isNil } from 'lodash';
+import _ from 'lodash';
 import { ForbiddenException } from '@nestjs/common';
 import { AuthJwtService } from './service/auth.jwt.service';
 import { AuthCacheService } from './service/auth.cache.service';
@@ -40,7 +40,7 @@ export class AuthService {
   async signUp(body: SignUpBodyDTO) {
     const { username, email, password, verifyToken } = body;
     const cachedVerifyToken = await this.authCacheService.getVerifyToken('signup', email);
-    if (!cachedVerifyToken) {
+    if (_.isNil(cachedVerifyToken)) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
       });
@@ -118,7 +118,7 @@ export class AuthService {
     const { email, verifyToken } = body;
     
     const cachedVerifyToken = await this.authCacheService.getVerifyToken('signup', email);
-    if (!cachedVerifyToken) {
+    if (_.isNil(cachedVerifyToken)) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
       });
@@ -144,7 +144,7 @@ export class AuthService {
   
   async postChangePasswordEmailVerification(user: decodedAccessTokenDTO) {
     const { email } = user;
-    if (isNil(email)) {
+    if (_.isNil(email)) {
       throw new BadRequestException({
         message: '이메일, 패스워드로 가입한 유저가 아닙니다.'
       })
@@ -160,13 +160,13 @@ export class AuthService {
   async putChangePasswordEmailVerification(body: PutChangePasswordVerificationBodyDTO, user: decodedAccessTokenDTO) {
     const { verifyToken } = body;
     const { email } = user;
-    if (isNil(email)) {
+    if (_.isNil(email)) {
       throw new BadRequestException({
         message: '이메일, 패스워드로 가입한 유저가 아닙니다.'
       })
     }
     const cachedVerifyToken = await this.authCacheService.getVerifyToken('changePassword', email);
-    if (!cachedVerifyToken) {
+    if (_.isNil(cachedVerifyToken)) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
       });
