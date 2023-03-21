@@ -1,9 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
+import { AuthController } from '../auth.controller';
+import { AuthService } from '../auth.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
-import { PostEmailVerificationBodyDTO, SignInBodyDTO, SignUpBodyDTO, PutEmailVerificationBodyDTO, ChangePasswordBodyDTO, SocialLoginBodyDTO, ProviderDTO } from './dto/auth.dto';
 import { CACHE_MANAGER } from '@nestjs/common';
+import { ChangePasswordBodyDTO, decodedAccessTokenDTO, PostEmailVerificationBodyDTO, ProviderDTO, PutChangePasswordVerificationBodyDTO, PutEmailVerificationBodyDTO, SignInBodyDTO, SignUpBodyDTO, SocialLoginBodyDTO } from '../dto/auth.dto';
+import { LocalUser } from '../entities/user.entity';
 
 const moduleMocker = new ModuleMocker(global);
 
@@ -11,21 +12,16 @@ describe('AuthController', () => {
   let controller: AuthController;
   let service: jest.Mocked<AuthService>;
 
-  let cache: Record<string, any> = {}
-
   beforeEach(async () => {
-    cache = {};
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
     })
       .useMocker((token) => {
         if (token === CACHE_MANAGER) {
           return {
-            get: jest.fn().mockImplementation((key: string) => cache[key]),
-            set: jest.fn().mockImplementation((key: string, value: any, options: any) => (cache[key] = value)),
-            del: jest.fn().mockImplementation((key: string) => {
-              delete cache[key];
-            }),
+            get: jest.fn(),
+            set: jest.fn(),
+            del: jest.fn(),
           };
         }
         if (typeof token === 'function') {
@@ -91,15 +87,17 @@ describe('AuthController', () => {
     });
 
     it('should be return value returned by service same name method', async () => {
-      const body: SignInBodyDTO = {
+      const user: LocalUser = {
+        id: 1,
         email: 'testman@gmail.com',
         password: 'qwer1234',
-      };
+        isBlock : false,
+      } as LocalUser
       
       const mockReturnValue = { message: '로그인 되었습니다.', accessToken: 'accessToken', refreshToken: 'refreshToken' };
       service.signIn.mockResolvedValue(mockReturnValue);
 
-      expect(controller.signIn(body)).resolves.toBe(mockReturnValue);
+      expect(controller.signIn(user)).resolves.toBe(mockReturnValue);
     });
   });
 
@@ -110,19 +108,11 @@ describe('AuthController', () => {
     });
 
     it('should be return value returned by service same name method', async () => {
-      const user = {
-        id: 1,
-        username: 'testman',
-        email: 'test@gmail.com',
-        role: 'member',
-        iat: 1000,
-        exp: 1001,
-      };
-      
+      const refreshToken = 'token';
       const mockReturnValue = { message: '로그아웃 되었습니다.' };
       service.signOut.mockResolvedValue(mockReturnValue);
 
-      expect(controller.signOut(user)).resolves.toBe(mockReturnValue);
+      expect(controller.signOut(refreshToken)).resolves.toBe(mockReturnValue);
     });
   });
 
@@ -136,7 +126,7 @@ describe('AuthController', () => {
       const body: PostEmailVerificationBodyDTO = {
         email: 'testman@gmail.com',
       };
-      const mockReturnValue = { message: '이메일 인증번호가 요청되었습니다.' };
+      const mockReturnValue = { message: '회원가입 이메일 인증번호가 요청되었습니다.' };
       service.postSignupEmailVerification.mockResolvedValue(mockReturnValue);
 
       expect(controller.postSignupEmailVerification(body)).resolves.toBe(mockReturnValue);
@@ -154,7 +144,7 @@ describe('AuthController', () => {
         email: 'testman@gmail.com',
         verifyToken: 123456,
       };
-      const mockReturnValue = { message: '이메일 인증번호가 확인되었습니다.' };
+      const mockReturnValue = { message: '회원가입 이메일 인증번호가 확인되었습니다.' };
       service.putSignupEmailVerification.mockResolvedValue(mockReturnValue);
 
       expect(controller.putSignupEmailVerification(body)).resolves.toBe(mockReturnValue);
@@ -183,6 +173,44 @@ describe('AuthController', () => {
       service.changePassword.mockResolvedValue(mockReturnValue);
 
       expect(controller.changePassword(body, user)).resolves.toBe(mockReturnValue);
+    });
+  });
+
+  describe('POST /api/auth/emailVerification/password (postChangePasswordEmailVerification)', () => {
+    it('should be defined', () => {
+      expect(controller.postChangePasswordEmailVerification).toBeDefined();
+      expect(typeof controller.postChangePasswordEmailVerification).toBe('function');
+    });
+
+    it('should be return value returned by service same name method', async () => {
+      const decodedPayload: decodedAccessTokenDTO = {
+        email: 'testman@gmail.com'
+      } as decodedAccessTokenDTO;
+      const mockReturnValue = { message: '패스워드변경 이메일 인증번호가 요청되었습니다.' };
+      service.postChangePasswordEmailVerification.mockResolvedValue(mockReturnValue);
+
+      expect(controller.postChangePasswordEmailVerification(decodedPayload)).resolves.toBe(mockReturnValue);
+    });
+  });
+
+  describe('PUT /api/auth/emailVerification/password (putChangePasswordEmailVerification)', () => {
+    it('should be defined', () => {
+      expect(controller.putChangePasswordEmailVerification).toBeDefined();
+      expect(typeof controller.putChangePasswordEmailVerification).toBe('function');
+    });
+
+    it('should be return value returned by service same name method', async () => {
+      const body: PutChangePasswordVerificationBodyDTO = {
+        verifyToken: 123456,
+      };
+      const decodedPayload: decodedAccessTokenDTO = {
+        email: 'testman@gmail.com'
+      } as decodedAccessTokenDTO;
+
+      const mockReturnValue = { message: '패스워드변경 이메일 인증번호가 확인되었습니다.' };
+      service.putChangePasswordEmailVerification.mockResolvedValue(mockReturnValue);
+
+      expect(controller.putChangePasswordEmailVerification(body, decodedPayload)).resolves.toBe(mockReturnValue);
     });
   });
 
