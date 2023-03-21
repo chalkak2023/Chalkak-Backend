@@ -5,14 +5,12 @@ import {
   Injectable,
   NotFoundException,
   UnauthorizedException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LocalUser, KakaoUser, NaverUser, User } from './entities/user.entity';
 import {
   PostEmailVerificationBodyDTO,
-  SignInBodyDTO,
   SignUpBodyDTO,
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,

@@ -1,4 +1,4 @@
-import { IntersectionType, PickType } from '@nestjs/mapped-types';
+import { PickType } from '@nestjs/mapped-types';
 import { Type } from 'class-transformer';
 import { IsEmail, IsInt, IsNotEmpty, IsOptional, IsNumber, IsString, IsStrongPassword, IsIn, MaxLength, NotContains } from 'class-validator';
 
