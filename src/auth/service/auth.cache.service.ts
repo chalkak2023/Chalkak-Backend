@@ -12,7 +12,7 @@ export class AuthCacheService {
   }
 
   async storeVerifyToken(type: verifyTokenType, email: string, verifyToken: number) {
-    await this.cacheManager.set(email + `_${type}`, verifyToken);
+    await this.cacheManager.set(email + `_${type}`, verifyToken, { ttl: 60 * 5 });
   }
 
   async getUserIdByRefreshToken(refreshToken: string) {
