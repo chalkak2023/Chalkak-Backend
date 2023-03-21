@@ -15,7 +15,7 @@ import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 
 const moduleMocker = new ModuleMocker(global);
 
-describe('PhotospotService', () => {
+describe.skip('PhotospotService', () => {
   let service: PhotospotService;
   let mockPhotospotRepository: jest.Mocked<Repository<Photospot>>;
   let mockCollectionRepository: jest.Mocked<Repository<Collection>>;

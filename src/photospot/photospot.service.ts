@@ -155,12 +155,12 @@ export class PhotospotService {
 
   async createImageKeyword(image: string, photoId: number): Promise<void> {
     const photoKeywords = await this.googleVisionService.image(image);
-    const keyword = []
+    const keyword = [];
     for (const photoKeyword of photoKeywords) {
       if (_.isUndefined(photoKeyword)) {
         continue;
       }
-  
+
       const preKeyword = await this.photoKeywordRepository.findOne({ where: { keyword: photoKeyword } });
       if (_.isNil(preKeyword)) {
         const insertKeyword = await this.photoKeywordRepository.save({ keyword: photoKeyword });
@@ -169,11 +169,26 @@ export class PhotospotService {
         keyword.push(preKeyword);
       }
     }
-    const photo = await this.photoRepository.findOne({where: {id: photoId}});
+    const photo = await this.photoRepository.findOne({ where: { id: photoId } });
     if (_.isNil(photo)) {
       return;
     }
     photo.photoKeywords = keyword;
     await this.photoRepository.save(photo);
+  }
+
+  async getRecommendPhoto(id: number): Promise<Photo[]> {
+    const userPhoto = await this.photoRepository.findOne({ where: { id }, relations: { photoKeywords: true } });
+    const userPhotoKeywords = userPhoto?.photoKeywords.map((k) => k.id);
+    return await this.photoRepository
+      .createQueryBuilder('photo')
+      .leftJoinAndSelect('photo.photoKeywords', 'keywords')
+      .select(['photo.id', 'photo.image'])
+      .where('keywords.id IN (:...userPhotoKeywords)', { userPhotoKeywords })
+      .andWhere('photo.id != :id', {id})  
+      .groupBy('photo.id')
+      .orderBy('COUNT(photo.id)', 'DESC')
+      .limit(5)
+      .getMany();
   }
 }
