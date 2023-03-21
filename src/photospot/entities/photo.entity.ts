@@ -29,6 +29,6 @@ export class Photo {
   @ManyToMany(() => PhotoKeyword, (photoKeyword) => photoKeyword.photos, {
     cascade: true,
   })
-  @JoinTable()
+  @JoinTable({name: 'photo_keyword_connector'})
   photoKeywords: PhotoKeyword[];
 }
