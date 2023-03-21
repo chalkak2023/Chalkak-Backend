@@ -49,8 +49,8 @@ export class PhotospotService {
           const image = await this.s3Service.putObject(file);
           const photo = await queryRunner.manager
             .getRepository(Photo)
-            .save({ image, userId, photospotId: photospot.identifiers[0].id });
-          this.createImageKeyword(image, photo);
+            .insert({ image, userId, photospotId: photospot.identifiers[0].id });
+          this.createImageKeyword(image, photo.identifiers[0].id);
         } catch (error) {
           console.log(error);
           throw new Error('Photo 입력 실패.');
@@ -153,19 +153,27 @@ export class PhotospotService {
     return photos;
   }
 
-  async createImageKeyword(image: string, photo: Photo): Promise<void> {
+  async createImageKeyword(image: string, photoId: number): Promise<void> {
     const photoKeywords = await this.googleVisionService.image(image);
+    const keyword = []
     for (const photoKeyword of photoKeywords) {
       if (_.isUndefined(photoKeyword)) {
         continue;
       }
-      const preKeyword = await this.photoKeywordRepository.findOne({where: {keyword: photoKeyword}})
+  
+      const preKeyword = await this.photoKeywordRepository.findOne({ where: { keyword: photoKeyword } });
       if (_.isNil(preKeyword)) {
-        const insertKeyword = await this.photoKeywordRepository.save({keyword: photoKeyword});
-        await this.dataSource.query(`INSERT INTO photo_photo_keywords_photo_keyword VALUES (${photo.id}, ${insertKeyword.id})`);
+        const insertKeyword = await this.photoKeywordRepository.save({ keyword: photoKeyword });
+        keyword.push(insertKeyword);
       } else {
-        await this.dataSource.query(`INSERT INTO photo_photo_keywords_photo_keyword VALUES (${photo.id}, ${preKeyword.id})`);
+        keyword.push(preKeyword);
       }
     }
+    const photo = await this.photoRepository.findOne({where: {id: photoId}});
+    if (_.isNil(photo)) {
+      return;
+    }
+    photo.photoKeywords = keyword;
+    await this.photoRepository.save(photo);
   }
 }
