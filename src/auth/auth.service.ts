@@ -82,6 +82,9 @@ export class AuthService {
     if (_.isNil(user) || !bcrypt.compareSync(password, user.password)) {
       throw new UnauthorizedException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' });
     }
+    if (user.isBlock) {
+      throw new ForbiddenException({ message: '블락된 유저는 로그인을 할 수 없습니다.'})
+    }
     return user;
   }
 

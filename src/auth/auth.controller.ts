@@ -27,7 +27,7 @@ export class AuthController {
   }
 
   @Post('signin')
-  @UseGuards(AuthGuard('local'), BlockUserGuard)
+  @UseGuards(AuthGuard('local'))
   @HttpCode(200)
   async signIn(@InjectUser() user: LocalUser) {
     return await this.authService.signIn(user);
