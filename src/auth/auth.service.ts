@@ -114,7 +114,7 @@ export class AuthService {
         message: '이미 가입된 이메일입니다.'
       })
     }
-    const verifyToken = this.generateRandomNumber();
+    const verifyToken = this.createVerifyToken();
     await this.mailerAuthService.sendSignupAuthMail(email, verifyToken);
     this.authCacheService.storeVerifyToken('signup', email, verifyToken);
     return {
@@ -157,7 +157,7 @@ export class AuthService {
         message: '이메일, 패스워드로 가입한 유저가 아닙니다.'
       })
     }
-    const verifyToken = this.generateRandomNumber();
+    const verifyToken = this.createVerifyToken();
     await this.mailerAuthService.sendChangePasswordAuthMail(email, verifyToken);
     this.authCacheService.storeVerifyToken('changePassword', email, verifyToken);
     return {
@@ -274,7 +274,7 @@ export class AuthService {
     };
   }
 
-  private generateRandomNumber(): number {
+  private createVerifyToken(): number {
     var minm = 100000;
     var maxm = 999999;
     return Math.floor(Math.random() * (maxm - minm + 1)) + minm;
