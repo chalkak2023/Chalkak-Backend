@@ -19,11 +19,10 @@ import {
 import * as bcrypt from 'bcrypt';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
 import _, { isNil } from 'lodash';
-import { SocialNaverService } from '../social/service/social.naver.service';
-import { SocialKakaoService } from 'src/social/service/social.kakao.service';
 import { ForbiddenException } from '@nestjs/common';
 import { AuthJwtService } from './service/auth.jwt.service';
 import { AuthCacheService } from './service/auth.cache.service';
+import { SocialService } from 'src/social/service/social.service';
 
 @Injectable()
 export class AuthService {
@@ -35,8 +34,7 @@ export class AuthService {
     private authCacheService: AuthCacheService,
     private authJwtService: AuthJwtService,
     private mailerAuthService: MailerAuthService,
-    private socialKaKaoService: SocialKakaoService,
-    private socialNaverService: SocialNaverService
+    private socialService: SocialService,
   ) {}
 
   async signUp(body: SignUpBodyDTO) {
@@ -184,33 +182,29 @@ export class AuthService {
   }
 
   async oauthSignIn(provider: 'kakao' | 'naver', body: SocialLoginBodyDTO) {
-    const socialService = provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
     const socialUsersRepository = provider === 'kakao' ? this.kakaoUsersRepository : this.naverUsersRepository;
-    const token = await socialService.getOauth2Token(body);
-    const info = await socialService.getUserInfo(token.access_token);
-
-    const id = info.id;
-    let nickname = provider === 'kakao' ? info.kakao_account.profile.nickname : info.nickname;
+    const { accessToken: socialAccessToken, providerUserId, username: _username } = await this.socialService.validateSocialUser(provider, body);
+    let username = _username;
 
     const sameUsernameUser = await this.usersRepository.findOne({
       where: {
-        username: nickname,
+        username,
       },
     });
     if (!_.isNil(sameUsernameUser)) {
-      nickname = `${nickname}#${Math.floor(Math.random() * 10000) + 1}`;
+      username = `${username}#${Math.floor(Math.random() * 10000) + 1}`;
     }
 
     let user = await socialUsersRepository.findOne({
       where: {
-        providerUserId: id,
+        providerUserId,
       },
     });
     if (_.isNil(user)) {
       try {
         await socialUsersRepository.insert({
-          providerUserId: id,
-          username: nickname,
+          providerUserId,
+          username,
         });
       } catch (err) {
         throw new BadRequestException({
@@ -219,7 +213,7 @@ export class AuthService {
       }
       user = await socialUsersRepository.findOne({
         where: {
-          providerUserId: id,
+          providerUserId,
         },
       });
     }
