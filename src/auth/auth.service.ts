@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -40,6 +41,12 @@ export class AuthService {
 
   async signUp(body: SignUpBodyDTO) {
     const { username, email, password, verifyToken } = body;
+    const registeredUser = await this.localUsersRepository.findOne({ where: { email } });
+    if (!_.isNil(registeredUser)) {
+      throw new ConflictException({
+        message: '이미 가입된 이메일입니다.'
+      })
+    }
     const cachedVerifyToken = await this.authCacheService.getVerifyToken('signup', email);
     if (_.isNil(cachedVerifyToken)) {
       throw new NotFoundException({
@@ -47,13 +54,13 @@ export class AuthService {
       });
     }
     if (verifyToken != cachedVerifyToken) {
-      throw new BadRequestException({
+      throw new UnauthorizedException({
         message: '인증번호가 일치하지 않습니다.',
       });
     }
-    const user = await this.usersRepository.findOne({ where: { username } });
-    if (!_.isNil(user)) {
-      throw new BadRequestException({
+    const sameNameUser = await this.usersRepository.findOne({ where: { username } });
+    if (!_.isNil(sameNameUser)) {
+      throw new ConflictException({
         message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
       });
     }
@@ -61,8 +68,8 @@ export class AuthService {
     try {
       await this.localUsersRepository.insert({ username, email, password: passwordHash });
     } catch (e) {
-      throw new BadRequestException({
-        message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.',
+      throw new ConflictException({
+        message: '회원가입하는데 문제가 발생했습니다.',
       });
     }
     return {
@@ -103,7 +110,7 @@ export class AuthService {
     const { email } = body;
     const user = await this.localUsersRepository.findOne({where: { email }})
     if (!_.isNil(user)) {
-      throw new BadRequestException({
+      throw new ConflictException({
         message: '이미 가입된 이메일입니다.'
       })
     }
@@ -208,7 +215,7 @@ export class AuthService {
           username,
         });
       } catch (err) {
-        throw new BadRequestException({
+        throw new ConflictException({
           message: '가입에 실패했습니다.',
         });
       }
@@ -243,7 +250,7 @@ export class AuthService {
     const userId = await this.authCacheService.getUserIdByRefreshToken(refreshToken);
     if (_.isNil(userId)) {
       throw new UnauthorizedException({
-        message: '사용 만료되었습니다.',
+        message: '리프레시 토큰이 사용 만료되었습니다.',
       });
     }
     const user = await this.usersRepository.findOne({
