@@ -16,13 +16,13 @@ import {
   decodedAccessTokenDTO,
   PutChangePasswordVerificationBodyDTO,
 } from './dto/auth.dto';
-import * as bcrypt from 'bcrypt';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
 import _ from 'lodash';
 import { ForbiddenException } from '@nestjs/common';
 import { AuthJwtService } from './service/auth.jwt.service';
 import { AuthCacheService } from './service/auth.cache.service';
 import { SocialService } from 'src/social/service/social.service';
+import { AuthHashService } from './service/auth.hash.service';
 
 @Injectable()
 export class AuthService {
@@ -32,6 +32,7 @@ export class AuthService {
     @InjectRepository(KakaoUser) private kakaoUsersRepository: Repository<KakaoUser>,
     @InjectRepository(NaverUser) private naverUsersRepository: Repository<NaverUser>,
     private authCacheService: AuthCacheService,
+    private authHashService: AuthHashService,
     private authJwtService: AuthJwtService,
     private mailerAuthService: MailerAuthService,
     private socialService: SocialService,
@@ -56,7 +57,7 @@ export class AuthService {
         message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
       });
     }
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const passwordHash = this.authHashService.hashPassword(password);
     try {
       await this.localUsersRepository.insert({ username, email, password: passwordHash });
     } catch (e) {
@@ -71,7 +72,7 @@ export class AuthService {
 
   async validateLocalUser(email: string, password: string) {
     const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password', 'isBlock'] });
-    if (_.isNil(user) || !bcrypt.compareSync(password, user.password)) {
+    if (_.isNil(user) || !this.authHashService.comparePassword(password, user.password)) {
       throw new UnauthorizedException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' });
     }
     if (user.isBlock) {
@@ -135,7 +136,7 @@ export class AuthService {
 
   async changePassword(body: ChangePasswordBodyDTO, user: decodedAccessTokenDTO) {
     const { password } = body;
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const passwordHash = this.authHashService.hashPassword(password);
     await this.localUsersRepository.update(user.id, { password: passwordHash });
     return {
       message: '비밀번호가 변경되었습니다.',
