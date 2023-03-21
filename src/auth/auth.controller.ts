@@ -34,8 +34,8 @@ export class AuthController {
   @Post('signout')
   @UserGuard
   @HttpCode(200)
-  async signOut(@InjectUser() user: decodedAccessTokenDTO) {
-    return await this.authService.signOut(user);
+  async signOut(@Token('refreshToken') refreshToken: string) {
+    return await this.authService.signOut(refreshToken);
   }
 
   @Post('emailverification/signup')

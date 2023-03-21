@@ -1,7 +1,5 @@
 import {
   BadRequestException,
-  CACHE_MANAGER,
-  Inject,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -20,12 +18,12 @@ import {
 } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
-import { Cache } from 'cache-manager';
 import _, { isNil } from 'lodash';
 import { SocialNaverService } from '../social/service/social.naver.service';
 import { SocialKakaoService } from 'src/social/service/social.kakao.service';
 import { ForbiddenException } from '@nestjs/common';
 import { AuthJwtService } from './service/auth.jwt.service';
+import { AuthCacheService } from './service/auth.cache.service';
 
 @Injectable()
 export class AuthService {
@@ -34,7 +32,7 @@ export class AuthService {
     @InjectRepository(LocalUser) private localUsersRepository: Repository<LocalUser>,
     @InjectRepository(KakaoUser) private kakaoUsersRepository: Repository<KakaoUser>,
     @InjectRepository(NaverUser) private naverUsersRepository: Repository<NaverUser>,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+    private authCacheService: AuthCacheService,
     private authJwtService: AuthJwtService,
     private mailerAuthService: MailerAuthService,
     private socialKaKaoService: SocialKakaoService,
@@ -43,7 +41,7 @@ export class AuthService {
 
   async signUp(body: SignUpBodyDTO) {
     const { username, email, password, verifyToken } = body;
-    const cachedVerifyToken = await this.cacheManager.get(email + '_signup');
+    const cachedVerifyToken = await this.authCacheService.getVerifyToken('signup', email);
     if (!cachedVerifyToken) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
@@ -87,7 +85,7 @@ export class AuthService {
   async signIn(user: LocalUser) {
     const accessToken = this.authJwtService.generateUserAccessToken(user);
     const refreshToken = this.authJwtService.generateUserRefreshToken();
-    this.cacheManager.set(refreshToken, user.id, { ttl: 60 * 60 * 3 });
+    this.authCacheService.storeRefreshToken(refreshToken, user.id);
     return {
       message: '로그인 되었습니다.',
       accessToken,
@@ -95,8 +93,8 @@ export class AuthService {
     };
   }
 
-  async signOut(user: decodedAccessTokenDTO) {
-    await this.cacheManager.del(String(user.id));
+  async signOut(refreshToken: string) {
+    await this.authCacheService.deleteRefreshToken(refreshToken);
     return {
       message: '로그아웃 되었습니다.',
     };
@@ -112,7 +110,7 @@ export class AuthService {
     }
     const verifyToken = this.generateRandomNumber();
     await this.mailerAuthService.sendSignupAuthMail(email, verifyToken);
-    this.cacheManager.set(email + '_signup', verifyToken, { ttl: 60 * 5 });
+    this.authCacheService.storeVerifyToken('signup', email, verifyToken);
     return {
       message: '회원가입 이메일 인증번호가 요청되었습니다.',
     };
@@ -120,7 +118,8 @@ export class AuthService {
 
   async putSignupEmailVerification(body: PutEmailVerificationBodyDTO) {
     const { email, verifyToken } = body;
-    const cachedVerifyToken = await this.cacheManager.get(email + '_signup');
+    
+    const cachedVerifyToken = await this.authCacheService.getVerifyToken('signup', email);
     if (!cachedVerifyToken) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
@@ -154,7 +153,7 @@ export class AuthService {
     }
     const verifyToken = this.generateRandomNumber();
     await this.mailerAuthService.sendChangePasswordAuthMail(email, verifyToken);
-    this.cacheManager.set(email + '_changePassword', verifyToken, { ttl: 60 * 5 });
+    this.authCacheService.storeVerifyToken('changePassword', email, verifyToken);
     return {
       message: '패스워드변경 이메일 인증번호가 요청되었습니다.',
     };
@@ -168,7 +167,7 @@ export class AuthService {
         message: '이메일, 패스워드로 가입한 유저가 아닙니다.'
       })
     }
-    const cachedVerifyToken = await this.cacheManager.get(email + '_changePassword');
+    const cachedVerifyToken = await this.authCacheService.getVerifyToken('changePassword', email);
     if (!cachedVerifyToken) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
@@ -235,7 +234,7 @@ export class AuthService {
 
     const accessToken = this.authJwtService.generateUserAccessToken(user);
     const refreshToken = this.authJwtService.generateUserRefreshToken();
-    this.cacheManager.set(refreshToken, user!.id, { ttl: 60 * 60 * 3 });
+    this.authCacheService.storeRefreshToken(refreshToken, user.id);
 
     return {
       accessToken,
@@ -246,7 +245,7 @@ export class AuthService {
 
   async refreshAccessToken(accessToken: string, refreshToken: string) {
     await this.authJwtService.verifyUserAccessTokenWithoutExpiresIn(accessToken);
-    const userId = await this.cacheManager.get<number>(refreshToken);
+    const userId = await this.authCacheService.getUserIdByRefreshToken(refreshToken);
     if (_.isNil(userId)) {
       throw new UnauthorizedException({
         message: '사용 만료되었습니다.',
@@ -265,9 +264,7 @@ export class AuthService {
     }
 
     const newAccessToken = this.authJwtService.generateUserAccessToken(user);
-    this.cacheManager.set(refreshToken, userId, {
-      ttl: 60 * 60 * 3
-    })
+    this.authCacheService.storeRefreshToken(refreshToken, userId);
 
     return {
       accessToken: newAccessToken,
