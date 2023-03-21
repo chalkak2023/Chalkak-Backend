@@ -226,16 +226,16 @@ export class AuthService {
         },
       });
     }
-    if (user!.isBlock) {
+    if (_.isNil(user)) {
+      return ;
+    }
+    if (user.isBlock) {
       throw new ForbiddenException({
         message: '블락된 상태여서 로그인할 수 없습니다.',
       });
     }
 
-    const accessToken = this.generateUserAccessToken({
-      id: user!.id,
-      username: user!.username,
-    });
+    const accessToken = this.generateUserAccessToken(user);
     const refreshToken = this.generateUserRefreshToken();
     this.cacheManager.set(refreshToken, user!.id, { ttl: 60 * 60 * 3 });
 
@@ -293,7 +293,7 @@ export class AuthService {
     return Math.floor(Math.random() * (maxm - minm + 1)) + minm;
   }
 
-  private generateUserAccessToken(user: { id: number; username: string; email?: string }) {
+  private generateUserAccessToken(user: User) {
     return this.jwtService.sign(
       {
         id: user.id,
