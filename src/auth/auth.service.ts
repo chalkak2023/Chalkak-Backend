@@ -19,14 +19,13 @@ import {
   PutChangePasswordVerificationBodyDTO,
 } from './dto/auth.dto';
 import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
 import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
 import { Cache } from 'cache-manager';
 import _, { isNil } from 'lodash';
 import { SocialNaverService } from '../social/service/social.naver.service';
 import { SocialKakaoService } from 'src/social/service/social.kakao.service';
 import { ForbiddenException } from '@nestjs/common';
+import { AuthJwtService } from './service/auth.jwt.service';
 
 @Injectable()
 export class AuthService {
@@ -36,8 +35,7 @@ export class AuthService {
     @InjectRepository(KakaoUser) private kakaoUsersRepository: Repository<KakaoUser>,
     @InjectRepository(NaverUser) private naverUsersRepository: Repository<NaverUser>,
     @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
-    private jwtService: JwtService,
-    private configService: ConfigService,
+    private authJwtService: AuthJwtService,
     private mailerAuthService: MailerAuthService,
     private socialKaKaoService: SocialKakaoService,
     private socialNaverService: SocialNaverService
@@ -87,8 +85,8 @@ export class AuthService {
   }
 
   async signIn(user: LocalUser) {
-    const accessToken = this.generateUserAccessToken(user);
-    const refreshToken = this.generateUserRefreshToken();
+    const accessToken = this.authJwtService.generateUserAccessToken(user);
+    const refreshToken = this.authJwtService.generateUserRefreshToken();
     this.cacheManager.set(refreshToken, user.id, { ttl: 60 * 60 * 3 });
     return {
       message: '로그인 되었습니다.',
@@ -235,8 +233,8 @@ export class AuthService {
       });
     }
 
-    const accessToken = this.generateUserAccessToken(user);
-    const refreshToken = this.generateUserRefreshToken();
+    const accessToken = this.authJwtService.generateUserAccessToken(user);
+    const refreshToken = this.authJwtService.generateUserRefreshToken();
     this.cacheManager.set(refreshToken, user!.id, { ttl: 60 * 60 * 3 });
 
     return {
@@ -247,17 +245,7 @@ export class AuthService {
   }
 
   async refreshAccessToken(accessToken: string, refreshToken: string) {
-    try {
-      await this.jwtService.verifyAsync(accessToken, {
-        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-      });
-    } catch (err) {
-      if (err.name === 'JsonWebTokenError') {
-        throw new BadRequestException({
-          message: '정상 발급된 액세스 토큰이 아닙니다.',
-        });
-      }
-    }
+    await this.authJwtService.verifyUserAccessTokenWithoutExpiresIn(accessToken);
     const userId = await this.cacheManager.get<number>(refreshToken);
     if (_.isNil(userId)) {
       throw new UnauthorizedException({
@@ -276,7 +264,7 @@ export class AuthService {
       });
     }
 
-    const newAccessToken = this.generateUserAccessToken(user);
+    const newAccessToken = this.authJwtService.generateUserAccessToken(user);
     this.cacheManager.set(refreshToken, userId, {
       ttl: 60 * 60 * 3
     })
@@ -291,32 +279,5 @@ export class AuthService {
     var minm = 100000;
     var maxm = 999999;
     return Math.floor(Math.random() * (maxm - minm + 1)) + minm;
-  }
-
-  private generateUserAccessToken(user: User) {
-    return this.jwtService.sign(
-      {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: 'user',
-      },
-      {
-        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN'),
-      }
-    );
-  }
-
-  private generateUserRefreshToken() {
-    return this.jwtService.sign(
-      {
-        random: Math.floor(Math.random() * 10000) + 1,
-      },
-      {
-        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-        expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN'),
-      }
-    );
   }
 }

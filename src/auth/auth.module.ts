@@ -9,10 +9,11 @@ import { JwtRefreshStrategy } from './guard/jwt-refresh/jwt-refresh.strategy';
 import { JwtStrategy } from './guard/jwt/jwt.strategy';
 import { SocialModule } from 'src/social/social.module';
 import { LocalStrategy } from './guard/local/local.strategy';
+import { AuthJwtService } from './service/auth.jwt.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, LocalUser, NaverUser, KakaoUser]), JwtModule, MailerProviderModule, SocialModule],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtRefreshStrategy, LocalStrategy],
+  providers: [AuthService, AuthJwtService, JwtStrategy, JwtRefreshStrategy, LocalStrategy],
 })
 export class AuthModule {}
