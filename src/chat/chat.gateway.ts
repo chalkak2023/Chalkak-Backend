@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
 import { ChatDTO, JoinLeaveChatDTO } from './dto/chat.dto';
@@ -29,6 +30,7 @@ export class ChatGateway
       );
 
       // console.log(`"Room:${roomId}"이 삭제되었습니다.`);
+      // console.log(createdRooms);
     });
 
     console.log('웹소켓 서버 초기화 ✅');
@@ -67,17 +69,14 @@ export class ChatGateway
     @MessageBody() chatObj: JoinLeaveChatDTO,
   ) {
     const exists = createdRooms.find((createdRoom) => createdRoom === chatObj.roomId);
-    if (exists) {
-      // 이미 방이 존재할 경우 입장
-      socket.join(chatObj.roomId); 
-      const alert = { message: `${chatObj.username}님이 들어왔습니다.` };
-      socket.broadcast
-        .to(chatObj.roomId)
-        .emit('alert', { alert });
-      return { success: true, payload: chatObj.roomId };
+    if (!exists) {
+      createdRooms.push(chatObj.roomId);
     }
-    socket.join(chatObj.roomId);
-    createdRooms.push(chatObj.roomId);
+    socket.join(chatObj.roomId); 
+    const alert = { message: `${chatObj.username}님이 들어왔습니다.` };
+    socket.broadcast
+      .to(chatObj.roomId)
+      .emit('alert', { alert }, this.countNumberOfRoom(chatObj.roomId));
     return { success: true, payload: chatObj.roomId };
   }
 
@@ -90,7 +89,15 @@ export class ChatGateway
     const alert = { message: `${chatObj.username}님이 나갔습니다.` };
     socket.broadcast
       .to(chatObj.roomId)
-      .emit('alert', { alert });
+      .emit('alert', { alert }, this.countNumberOfRoom(chatObj.roomId));
     return { success: true };
+  }
+
+  countNumberOfRoom(roomId: string) {
+    let num = this.nsp.adapter.rooms.get(roomId)?.size;
+    if (_.isNil(num)) {
+      num = 0;
+    }
+    return num;
   }
 }
