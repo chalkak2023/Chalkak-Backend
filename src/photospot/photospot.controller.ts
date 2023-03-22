@@ -62,4 +62,8 @@ export class PhotospotController {
   async getRecommendPhoto(@Param('photoId') id: number): Promise<Photo[]> {
     return await this.photospotService.getRecommendPhoto(id);
   }
+  @Get('/photospots/photos')
+  async getAllPhoto() {
+    return await this.photospotService.getAllPhoto();
+  }
 }

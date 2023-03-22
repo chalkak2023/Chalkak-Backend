@@ -191,4 +191,8 @@ export class PhotospotService {
       .limit(5)
       .getMany();
   }
+
+  async getAllPhoto() {
+    return this.photoRepository.find();
+  }
 }
