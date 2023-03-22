@@ -11,7 +11,7 @@ import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.
 
 @Controller('/api/collections')
 export class CollectionsController {
-  constructor(private readonly collectionsService: CollectionsService) {}
+  constructor(private readonly collectionsService: CollectionsService) { }
 
   @Get()
   async getCollectionsList(@Query() getCollectionsListQueryDto: GetCollectionsListQueryDto): Promise<Collection[]> {
@@ -21,7 +21,7 @@ export class CollectionsController {
   @Get(':collectionId')
   async getCollection(@Param() { collectionId }: GetCollectionIdDto): Promise<Collection> {
     return await this.collectionsService.getCollection(collectionId);
-  } 
+  }
 
   @Post()
   @UseGuards(JwtGuard)
@@ -36,7 +36,7 @@ export class CollectionsController {
     @Body() updateCollectionDto: UpdateCollectionDto,
     @Param('collectionId') collectionId: number,
     @InjectUser('id') userId: number
-  ): Promise<void> {
+  ): Promise<Collection> {
     return await this.collectionsService.updateCollection(updateCollectionDto, collectionId, userId);
   }
 

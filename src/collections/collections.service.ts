@@ -16,7 +16,7 @@ export class CollectionsService {
     private readonly collectionUserKeywordRepository: CollectionUserKeywordRepository,
     @InjectRepository(Collection) private readonly collectionsRepository: Repository<Collection>,
     @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>
-  ) {}
+  ) { }
 
   async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto): Promise<Collection[]> {
     getCollectionsListQueryDto.p = getCollectionsListQueryDto.p || 1;
@@ -31,47 +31,41 @@ export class CollectionsService {
     return collection;
   }
 
-  createCollection(createCollectionDto: CreateCollectionDto): Promise<Collection> {
-    const { userId, title, description, keyword } = createCollectionDto;
-    return this.collectionsRepository.save({
-      userId,
-      title,
-      description,
-      collection_keywords: keyword.map((keyword) => ({
-        userId,
-        keyword,
-      })),
-    });
+  async createCollection(createCollectionDto: CreateCollectionDto): Promise<Collection> {
+    const { userId, title, description, keywords } = createCollectionDto;
+    const collection = this.collectionsRepository.create({ userId, title, description })
+    const keywordsArray = await this.createCollectionKeyword(keywords)
+    collection.collection_keywords = keywordsArray
+    return await this.collectionsRepository.save(collection)
+  };
+
+  async createCollectionKeyword(keywords: string[]): Promise<CollectionKeyword[]> {
+    return Promise.all(
+      keywords.map(async (keyword) => {
+        let collectionKeyword = await this.collectionKeywordsRepository.findOne({ where: { keyword } });
+        if (_.isNil(collectionKeyword)) {
+          collectionKeyword = new CollectionKeyword();
+          collectionKeyword.keyword = keyword;
+          await this.collectionKeywordsRepository.save(collectionKeyword);
+        }
+        return collectionKeyword;
+      }),
+    );
   }
 
-  async getCollectionKeyword(collectionId: number): Promise<CollectionKeyword[]> {
-    const collectionKeyword = await this.collectionKeywordsRepository.find({ where: { collectionId } });
-    return collectionKeyword;
-  }
-
-  async updateCollectionKeywords({ keyword }: UpdateCollectionDto, collectionId: number, userId: number) {
-    if (keyword) {
-      const prevKeywordObj = await this.getCollectionKeyword(collectionId)
-      const prevKeyword = prevKeywordObj.map((obj) => obj.keyword);
-      const newKeywords = _.difference(keyword, prevKeyword);
-      const delKeywords = _.difference(prevKeyword, keyword);
-      for (let keywordText of newKeywords) {
-        await this.collectionKeywordsRepository.insert({ keyword: keywordText, collectionId, userId });
-      }
-      for (let keywordText of delKeywords) {
-        await this.collectionKeywordsRepository.delete({ keyword: keywordText, collectionId, userId });
-      }
-    }
-  }
-  
-  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number):Promise<void> {
-    const { title, description } = updateCollectionDto;
+  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number): Promise<Collection> {
+    const { title, description, keywords } = updateCollectionDto;
     const collection = await this.getCollection(collectionId);
     if (collection.userId !== userId) {
       throw new ForbiddenException('해당 콜렉션 내용의 수정 권한이 없습니다.');
     }
     await this.collectionsRepository.update({ id: collectionId }, { title, description });
-    return await this.updateCollectionKeywords(updateCollectionDto, collectionId, userId)
+    if (_.isNil(keywords)) {
+      throw new NotFoundException('해당 콜렉션의 키워드를 찾을 수 없습니다.');
+    }
+    const keywordsArray = await this.createCollectionKeyword(keywords)
+    collection.collection_keywords = keywordsArray
+    return await this.collectionsRepository.save(collection)
   }
 
   async deleteCollection(collectionId: number, userId: number) {
