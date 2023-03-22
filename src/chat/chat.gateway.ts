@@ -1,5 +1,6 @@
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
+import { ChatDTO } from './dto/chat.dto';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -40,29 +41,24 @@ export class ChatGateway
   handleConnection(@ConnectedSocket() socket: Socket) {
     console.log(`${socket.id} 소켓 연결`);
 
-    socket.broadcast.emit('message', {
-      message: `${socket.id}가 들어왔습니다.`,
-    });
+    const alert = { message: `${socket.id}가 들어왔습니다.` };
+    socket.broadcast.emit('alert', { alert });
   }
 
   // 소켓 연결이 끊기면 실행
   handleDisconnect(@ConnectedSocket() socket: Socket) {
     console.log(`${socket.id} 소켓 연결 해제 ❌`);
+
+    const alert = { message: `${socket.id}가 퇴장하셨습니다.` };
+    socket.broadcast.emit('alert', { alert });
   }
 
   @SubscribeMessage('message')
   handleMessage(
     @ConnectedSocket() socket: Socket,
-    @MessageBody() message: string,
+    @MessageBody() msgObj: ChatDTO,
   ) {
-    console.log(`test: ${message}`);
-    socket.broadcast.emit('message', { username: socket.id, message });
-    return { username: socket.id, message };
+    socket.broadcast.emit('message', { msgObj });
+    return { msgObj };
   }
 }
-// export class ChatGateway {
-//   @SubscribeMessage('message')
-//   handleMessage(client: any, payload: any): string {
-//     return 'Hello world!';
-//   }
-// }
