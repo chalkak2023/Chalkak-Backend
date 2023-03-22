@@ -21,6 +21,7 @@ export class ChatRepository extends Repository<Meetup> {
         'm.schedule',
         'm.headcount',
         'm.createdAt',
+        'm.deletedAt',
         'j',
       ])
       .leftJoin('m.joins', 'j')
@@ -30,7 +31,7 @@ export class ChatRepository extends Repository<Meetup> {
       .andWhere('j.userId = :userId', {
         userId: `${userId}`
       })
-      .orderBy('m.id', 'DESC')
+      .orderBy('m.deletedAt', 'DESC')
       .getMany();
   }
 }
