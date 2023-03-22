@@ -43,7 +43,7 @@ export class SignUpBodyDTO {
   verifyToken: number;
 }
 
-export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email'] as const) {
+export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email']) {
   @IsNotEmpty({
     message: '비밀번호는 비어있으면 안 됩니다.'
   })
@@ -53,13 +53,13 @@ export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email'] as const) {
   password: string;
 }
 
-export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email'] as const) {}
+export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email']) {}
 
-export class PutEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email', 'verifyToken'] as const) {}
+export class PutEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email', 'verifyToken']) {}
 
-export class PutChangePasswordVerificationBodyDTO extends PickType(SignUpBodyDTO, ['verifyToken'] as const) {}
+export class PutChangePasswordVerificationBodyDTO extends PickType(SignUpBodyDTO, ['verifyToken']) {}
 
-export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password'] as const) {}
+export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password']) {}
 
 export class ProviderDTO {
   @IsIn(['kakao', 'naver'], {
