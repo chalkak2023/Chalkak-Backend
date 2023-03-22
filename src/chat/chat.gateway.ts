@@ -74,7 +74,7 @@ export class ChatGateway
     }
     socket.join(chatObj.roomId); 
     const alert = { message: `${chatObj.username}님이 들어왔습니다.` };
-    socket.broadcast
+    this.nsp
       .to(chatObj.roomId)
       .emit('alert', { alert }, this.countNumberOfRoom(chatObj.roomId));
     return { success: true, payload: chatObj.roomId };
