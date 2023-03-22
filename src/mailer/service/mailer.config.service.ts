@@ -14,7 +14,7 @@ export class MailerConfigService {
 
   constructor(private configService: ConfigService) {
     this.host = this.configService.get('MAILER_HOST')!;
-    this.port = parseInt(this.configService.get('MAILER_HOST')!, 10);
+    this.port = parseInt(this.configService.get('MAILER_PORT')!, 10);
     this.user =  this.configService.get('MAILER_USER')!;
     this.pass =  this.configService.get('MAILER_PASS')!;
     this.secure = this.configService.get('MAILER_SECURE')! === true ? true : false
