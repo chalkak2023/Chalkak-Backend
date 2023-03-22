@@ -51,9 +51,6 @@ export class User {
   @OneToMany((type) => Collection, (collection) => collection.user)
   collections: Collection[];
 
-  @OneToMany((type) => CollectionKeyword, (collection_keyword) => collection_keyword.user)
-  collection_keywords: Collection[];
-
   @OneToMany((type) => Photospot, (photospot) => photospot.user)
   photospots: Photospot[];
 

@@ -4,6 +4,8 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -41,8 +43,9 @@ export class Collection {
   @OneToMany((type) => Photospot, (photospot) => photospot.collection)
   photospots: Photospot[];
 
-  @OneToMany((type) => CollectionKeyword, (collection_keyword) => collection_keyword.collection, {
+  @ManyToMany(() => CollectionKeyword, (collection_keyword) => collection_keyword.collections, {
     cascade: true,
   })
+  @JoinTable({ name: 'collection_keyword_connector' })
   collection_keywords: CollectionKeyword[];
 }
