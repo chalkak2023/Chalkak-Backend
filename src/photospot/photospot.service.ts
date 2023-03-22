@@ -180,10 +180,12 @@ export class PhotospotService {
   async getRecommendPhoto(id: number): Promise<Photo[]> {
     const userPhoto = await this.photoRepository.findOne({ where: { id }, relations: { photoKeywords: true } });
     const userPhotoKeywords = userPhoto?.photoKeywords.map((k) => k.id);
-    return await this.photoRepository
+    return this.photoRepository
       .createQueryBuilder('photo')
       .leftJoinAndSelect('photo.photoKeywords', 'keywords')
-      .select(['photo.id', 'photo.image'])
+      .leftJoinAndSelect('photo.photospot', 'photospot')
+      .leftJoinAndSelect('photospot.collection', 'collection')
+      .select(['photo.id', 'photo.image', 'photospot.id', 'collection.id'])
       .where('keywords.id IN (:...userPhotoKeywords)', { userPhotoKeywords })
       .andWhere('photo.id != :id', {id})  
       .groupBy('photo.id')
@@ -192,7 +194,15 @@ export class PhotospotService {
       .getMany();
   }
 
-  async getAllPhoto() {
-    return this.photoRepository.find();
+  async getAllPhoto(page: number) {
+    const take = 9;
+    return this.photoRepository
+    .createQueryBuilder('photo')
+    .leftJoinAndSelect('photo.photospot', 'photospot')
+    .leftJoinAndSelect('photospot.collection', 'collection')
+    .select(['photo.id', 'photo.image', 'photospot.id', 'collection.id'])
+    .take(take)
+    .skip((page - 1) * take)
+    .getMany();
   }
 }

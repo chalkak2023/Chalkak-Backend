@@ -63,7 +63,7 @@ export class PhotospotController {
     return await this.photospotService.getRecommendPhoto(id);
   }
   @Get('/photospots/photos')
-  async getAllPhoto() {
-    return await this.photospotService.getAllPhoto();
+  async getAllPhoto(@Query('p') page: number) {
+    return await this.photospotService.getAllPhoto(page);
   }
 }
