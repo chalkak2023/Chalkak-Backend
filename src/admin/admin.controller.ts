@@ -1,6 +1,5 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { Request, Response } from 'express';
 import { AdminService } from 'src/admin/admin.service';
 import { Admin } from 'src/admin/entities/admin.entity';
 import { User } from 'src/auth/entities/user.entity';
@@ -9,15 +8,14 @@ import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
 import { Faq } from 'src/admin/entities/faq.entity';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
-import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
 import { CreateAdminFaqDto } from 'src/admin/dto/create.admin.faq.dto';
 import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
-import { AdminToken } from './decorators/auth.admin.decorator';
+import { AdminToken, InjectAdmin } from './decorators/auth.admin.decorator';
 
 @Controller('admin')
 export class AdminController {
-  constructor(private adminService: AdminService) {}
+  constructor(private adminService: AdminService) { }
 
   // 관리자 관리
   @Get('auth')
@@ -35,25 +33,14 @@ export class AdminController {
   @Post('auth/signin')
   @UseGuards(AuthGuard('local-admin'))
   @HttpCode(200)
-  async signinAdmin(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const admin = req.user as SigninAdminDto;
-    const accessToken = await this.adminService.issueAccessToken(admin);
-    const refreshToken = await this.adminService.issueRefreshToken(admin.id);
-    const jwtData = { accessToken, refreshToken };
-    return { data: jwtData, message: '로그인에 성공하였습니다.' };
+  async signinAdmin(@InjectAdmin() user: Admin) {
+    return await this.adminService.signinAdmin(user);
   }
 
   @Get('auth/signin')
   @UseGuards(AuthGuard('jwt-refresh-admin'))
-  async reissueTokens(
-    @Req() req: any,
-    @Res({ passthrough: true }) res: Response,
-    @AdminToken('refreshToken') refreshToken: string
-  ) {
-    const admin = req.user as SigninAdminDto;
-    const accessToken = await this.adminService.issueAccessToken(admin);
-    const jwtData = { accessToken, refreshToken };
-    return { data: jwtData, message: 'Access 토큰을 정상적으로 재발급하였습니다.' };
+  async reissueAdminAccessToken(@AdminToken('refreshToken') refreshToken: string, @InjectAdmin() user: Admin) {
+    return await this.adminService.reissueAdminAccessToken(refreshToken, user);
   }
 
   @Delete('auth/:id')

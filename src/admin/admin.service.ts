@@ -41,7 +41,7 @@ export class AdminService {
     @InjectRepository(Faq) private adminFaqRepository: Repository<Faq>,
     private jwtService: JwtService,
     private configService: ConfigService
-  ) {}
+  ) { }
 
   // 관리자 관리
   async getAdminsList(search: string, p: number = 1): Promise<any> {
@@ -92,16 +92,22 @@ export class AdminService {
     return signupResult;
   }
 
-  public async signinAdmin(account: string, hashpassword: string): Promise<SigninAdminDto> {
-    let admin = await this.adminRepository.findOne({ where: { account }, select: { id: true, account: true, password: true } });
+  async signinAdmin(user: Admin) {
+    const accessToken = await this.issueAccessToken(user);
+    const refreshToken = await this.issueRefreshToken(user.id);
+    const jwtData = { accessToken, refreshToken };
+    return { jwtData, message: '로그인에 성공하였습니다.' };
+  }
+
+  public async verifyAdmin(account: string, password: string): Promise<SigninAdminDto> {
+    const admin = await this.adminRepository.findOne({ where: { account }, select: { id: true, account: true, password: true } });
     if (_.isNil(admin)) {
-      throw new NotFoundException({ message: '아이디가 존재하지 않습니다.' });
+      throw new UnauthorizedException({ message: '아이디가 존재하지 않습니다.' });
     }
-    await this.verifyPassword(hashpassword, admin.password);
+    await this.verifyPassword(password, admin.password);
     let signinAdminDto = new SigninAdminDto();
     signinAdminDto.id = admin.id;
     signinAdminDto.account = admin.account;
-
     return signinAdminDto;
   }
 
@@ -137,6 +143,12 @@ export class AdminService {
     } catch (error) {
       throw new BadRequestException();
     }
+  }
+
+  public async reissueAdminAccessToken(refreshToken: string, user: Admin) {
+    const accessToken = await this.issueAccessToken(user);
+    const jwtData = { accessToken, refreshToken };
+    return { jwtData, message: 'Access 토큰을 정상적으로 재발급하였습니다.' };
   }
 
   public async verifyRefreshToken(account: string, refreshToken: string): Promise<SigninAdminDto> {
