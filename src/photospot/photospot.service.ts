@@ -137,9 +137,13 @@ export class PhotospotService {
 
   async getRandomPhoto(): Promise<Photo[]> {
     const photos = await this.photoRepository.createQueryBuilder('p')
+    .leftJoinAndSelect('p.photospot', 'photospot')
+    .leftJoinAndSelect('photospot.collection', 'collection')
     .select([
       'p.id',
-      'p.image'
+      'p.image',
+      'photospot.id',
+      'collection.id'
     ])
     .orderBy('RAND()')
     .limit(5)
