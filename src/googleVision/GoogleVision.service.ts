@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 
 export class GoogleVisionService {
   client = new vision.ImageAnnotatorClient({
-    keyFilename: '../visionApiKey.json',
+    keyFilename: './visionApiKey.json',
   });
 
   async imageLabeling(image: string) {
