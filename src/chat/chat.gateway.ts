@@ -59,8 +59,8 @@ export class ChatGateway
   ) {
     socket.broadcast
       .to(chatObj.roomId)
-      .emit('message', { chatObj: chatObj });
-    return { chatObj };
+      .emit('message', chatObj);
+    return chatObj;
   }
 
   @SubscribeMessage('join-room')
@@ -73,10 +73,17 @@ export class ChatGateway
       createdRooms.push(chatObj.roomId);
     }
     socket.join(chatObj.roomId); 
-    const alert = { message: `${chatObj.username}님이 들어왔습니다.` };
+
+    const alertObj: ChatDTO = {
+      roomId: chatObj.roomId,
+      userId: 0,
+      username: '[system]',
+      message: `${chatObj.username}님이 들어왔습니다.`,
+      createdAt: new Date()
+    }
     this.nsp
       .to(chatObj.roomId)
-      .emit('alert', { alert }, this.countNumberOfRoom(chatObj.roomId));
+      .emit('alert', alertObj, this.countNumberOfRoom(chatObj.roomId));
     return { success: true, payload: chatObj.roomId };
   }
 
@@ -86,10 +93,17 @@ export class ChatGateway
     @MessageBody() chatObj: JoinLeaveChatDTO,
     ) {
     socket.leave(chatObj.roomId);
-    const alert = { message: `${chatObj.username}님이 나갔습니다.` };
+
+    const alertObj: ChatDTO = {
+      roomId: chatObj.roomId,
+      userId: 0,
+      username: '[system]',
+      message: `${chatObj.username}님이 나갔습니다.`,
+      createdAt: new Date()
+    }
     socket.broadcast
       .to(chatObj.roomId)
-      .emit('alert', { alert }, this.countNumberOfRoom(chatObj.roomId));
+      .emit('alert', alertObj, this.countNumberOfRoom(chatObj.roomId));
     return { success: true };
   }
 
