@@ -8,11 +8,11 @@ export class AuthCacheService {
   constructor(@Inject(CACHE_MANAGER) protected readonly cacheManager: Cache) {}
 
   async getVerifyToken(type: verifyTokenType, email: string) {
-    return await this.cacheManager.get<number>(email + `_${type}`);
+    return await this.cacheManager.get<number>(`${email}_${type}`);
   }
 
   async storeVerifyToken(type: verifyTokenType, email: string, verifyToken: number) {
-    await this.cacheManager.set(email + `_${type}`, verifyToken, { ttl: 60 * 5 });
+    await this.cacheManager.set(`${email}_${type}`, verifyToken, { ttl: 60 * 5 });
   }
 
   async getUserIdByRefreshToken(refreshToken: string) {
