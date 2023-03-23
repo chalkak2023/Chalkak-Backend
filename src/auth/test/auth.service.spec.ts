@@ -3,6 +3,7 @@ import {
   CACHE_MANAGER,
   ConflictException,
   ForbiddenException,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -70,7 +71,7 @@ describe('AuthService', () => {
     {
       id: 3,
       username: '카카오 유저',
-      providerUserId: 1234,
+      providerUserId: String(1234),
       provider: 'kakao',
       isBlock: false,
       createdAt: new Date('2023-02-28T13:50:22.225Z'),
@@ -125,7 +126,7 @@ describe('AuthService', () => {
       {
         id: 3,
         username: '카카오 유저',
-        providerUserId: 1234,
+        providerUserId: String(1234),
         provider: 'kakao',
         isBlock: false,
         createdAt: new Date('2023-02-28T13:50:22.225Z'),
@@ -316,7 +317,7 @@ describe('AuthService', () => {
       mockLocalUsersRepository.insert.mockRejectedValue(new Error());
 
       expect(service.signUp(body)).rejects.toThrowError(
-        new ConflictException({
+        new InternalServerErrorException({
           message: '회원가입하는데 문제가 발생했습니다.',
         })
       );
@@ -640,7 +641,7 @@ describe('AuthService', () => {
       const userInfo = {
         accessToken: 'social',
         refreshToken: 'social2',
-        providerUserId: 1,
+        providerUserId: 'testId',
         username: 'social-nickname',
       };
       const accessToken = 'accessToken';
@@ -668,7 +669,7 @@ describe('AuthService', () => {
       const userInfo = {
         accessToken: 'social',
         refreshToken: 'social2',
-        providerUserId: 1,
+        providerUserId: 'testId',
         username: 'social-nickname',
       };
       const accessToken = 'accessToken';
@@ -697,7 +698,7 @@ describe('AuthService', () => {
       const userInfo = {
         accessToken: 'social',
         refreshToken: 'social2',
-        providerUserId: 1,
+        providerUserId: 'testId',
         username: 'social-nickname',
       };
       const accessToken = 'accessToken';
@@ -726,7 +727,7 @@ describe('AuthService', () => {
       const userInfo = {
         accessToken: 'social',
         refreshToken: 'social2',
-        providerUserId: 1,
+        providerUserId: 'testId',
         username: 'social-nickname',
       };
       const accessToken = 'accessToken';
@@ -741,7 +742,7 @@ describe('AuthService', () => {
       mockAuthJwtService.generateUserRefreshToken.mockReturnValueOnce(refreshToken);
 
       expect(service.oauthSignIn(provider, body)).rejects.toThrowError(
-        new ConflictException({
+        new InternalServerErrorException({
           message: '가입에 실패했습니다.',
         })
       );
@@ -756,7 +757,7 @@ describe('AuthService', () => {
       const userInfo = {
         accessToken: 'social',
         refreshToken: 'social2',
-        providerUserId: 1,
+        providerUserId: 'testId',
         username: 'social-nickname',
       };
       const accessToken = 'accessToken';
