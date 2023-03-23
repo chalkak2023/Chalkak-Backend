@@ -13,11 +13,11 @@ export class ChatService {
     @InjectRepository(Join) private joinRepository: Repository<Join>,
   ) {}
 
-  async getChats(userId: number): Promise<Meetup[]> {
-    return await this.chatRepository.getChats(userId);
+  async getChatRooms(userId: number): Promise<Meetup[]> {
+    return await this.chatRepository.getChatRooms(userId);
   }
 
-  async exitChat(meetupId: number, userId: number): Promise<void> {
-    await this.chatRepository.exitChat(meetupId, userId);
+  async exitChatRoom(meetupId: number, userId: number): Promise<void> {
+    await this.chatRepository.exitChatRoom(meetupId, userId);
   }
 }

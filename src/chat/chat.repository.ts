@@ -10,7 +10,7 @@ export class ChatRepository extends Repository<Meetup> {
     super(Meetup, dataSource.createEntityManager());
   }
 
-  async getChats(userId: number): Promise<Meetup[]> {
+  async getChatRooms(userId: number): Promise<Meetup[]> {
     return await this.createQueryBuilder('m')
       .select([
         'm.id',
@@ -37,7 +37,7 @@ export class ChatRepository extends Repository<Meetup> {
       .getMany();
   }
 
-  async exitChat(meetupId: number, userId: number) {
+  async exitChatRoom(meetupId: number, userId: number) {
     const queryRunner = this.dataSource.createQueryRunner();
     
     const findJoinArr = await queryRunner.manager.getRepository(Join).find({

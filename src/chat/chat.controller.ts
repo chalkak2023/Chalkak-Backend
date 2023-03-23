@@ -10,16 +10,16 @@ export class ChatController {
 
   @Get()
   @UserGuard
-  async getChats(@InjectUser() userDTO: decodedAccessTokenDTO): Promise<Meetup[]> {
-    return await this.chatService.getChats(userDTO.id);
+  async getChatRooms(@InjectUser() userDTO: decodedAccessTokenDTO): Promise<Meetup[]> {
+    return await this.chatService.getChatRooms(userDTO.id);
   }
 
   @Delete(':chatId')  // chatId === meetupId
   @UserGuard
-  async exitChat(
+  async exitChatRoom(
     @Param('chatId') chatId: number,
     @InjectUser() userDTO: decodedAccessTokenDTO
   ): Promise<void> {
-    return await this.chatService.exitChat(chatId, userDTO.id);
+    return await this.chatService.exitChatRoom(chatId, userDTO.id);
   }
 }
