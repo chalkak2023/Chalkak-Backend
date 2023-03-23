@@ -38,7 +38,7 @@ export class SocialService {
     return {
       accessToken: oauth2Token.access_token,
       refreshToken: oauth2Token.refresh_token,
-      providerUserId: userInfo.id,
+      providerUserId: String(userInfo.id),
       username: userInfo.username,
     };
   }

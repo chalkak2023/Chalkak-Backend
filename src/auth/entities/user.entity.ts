@@ -34,7 +34,7 @@ export class User {
   isBlock: boolean;
 
   @Column('varchar', { nullable: true })
-  providerUserId: string | number | null;
+  providerUserId: string | null;
 
   @Column('varchar')
   provider: 'local' | 'naver' | 'kakao';
