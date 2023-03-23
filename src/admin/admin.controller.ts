@@ -49,7 +49,7 @@ export class AdminController {
     return this.adminService.deleteAdmin(id);
   }
 
-  @Patch('auth/signout')
+  @Post('auth/signout')
   @HttpCode(200)
   @UseGuards(AuthGuard('jwt-admin'))
   signoutAdmin(@AdminToken('id') id: number) {
