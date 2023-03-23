@@ -202,9 +202,14 @@ export class AdminService {
   }
 
   blockAdminUser(id: string, blockUser: any): Promise<any> {
-    this.cacheManager.set<boolean>(`user-${id}-block`, blockUser.isBlock, {
-      ttl: 60 * 5,
-    });
+    if (blockUser.isBlock) {
+      this.cacheManager.set<boolean>(`user-${id}-block`, true, {
+        ttl: 60 * 60,
+      });
+    } else {
+      this.cacheManager.del(`user-${id}-block`);
+    }
+   
     return this.adminUsersRepository
       .createQueryBuilder()
       .update()
