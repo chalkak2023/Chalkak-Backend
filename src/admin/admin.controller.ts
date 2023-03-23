@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Put, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AdminService } from 'src/admin/admin.service';
 import { Admin } from 'src/admin/entities/admin.entity';
@@ -11,7 +11,7 @@ import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
 import { CreateAdminFaqDto } from 'src/admin/dto/create.admin.faq.dto';
 import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
-import { AdminToken, InjectAdmin } from './decorators/auth.admin.decorator';
+import { AdminToken, InjectAdmin, isMasterAdmin } from './decorators/auth.admin.decorator';
 
 @Controller('admin')
 export class AdminController {
@@ -45,8 +45,8 @@ export class AdminController {
 
   @Delete('auth/:id')
   @UseGuards(AuthGuard('jwt-admin'))
-  deleteAdmin(@Param('id') id: number) {
-    return this.adminService.deleteAdmin(id);
+  deleteAdmin(@Param('id') id: number, @isMasterAdmin() isMaster: boolean) {
+    return this.adminService.deleteAdmin(id, isMaster);
   }
 
   @Post('auth/signout')

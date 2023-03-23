@@ -1,5 +1,6 @@
-import { createParamDecorator, ExecutionContext, NotFoundException } from '@nestjs/common';
+import { createParamDecorator, ExecutionContext, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import _ from 'lodash';
+import { Admin } from '../entities/admin.entity';
 
 export const InjectAdmin = createParamDecorator((data: string, ctx: ExecutionContext) => {
   const { user } = ctx.switchToHttp().getRequest();
@@ -15,3 +16,13 @@ export const AdminToken = createParamDecorator((data: string, ctx: ExecutionCont
   const parsedData = JSON.parse(cookiesData);
   return data ? parsedData?.[data] : parsedData;
 });
+
+export const isMasterAdmin = createParamDecorator(async (data: string, ctx: ExecutionContext) => {
+    const request = ctx.switchToHttp().getRequest();
+    const admin: Admin = request.user;
+    if (admin.account !== 'master') {
+      throw new UnauthorizedException('마스터 관리자만 접근할 수 있습니다.');
+    }
+    return true;
+  },
+);

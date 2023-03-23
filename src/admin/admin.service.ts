@@ -167,16 +167,8 @@ export class AdminService {
     return signinAdminDto;
   }
 
-  async deleteAdmin(id: number) {
-    await this.isMasterAdmin(id);
+  async deleteAdmin(id: number, isMaster: boolean) {
     return this.adminRepository.delete(id);
-  }
-
-  private async isMasterAdmin(id: number) {
-    const admin = await this.adminRepository.findOne({ where: { id }, select: { account: true } });
-    if (admin?.account === 'master') {
-      throw new UnauthorizedException('마스터 관리자 계정은 삭제할 수 없습니다.');
-    }
   }
 
   public async signoutAdmin(id: number) {
