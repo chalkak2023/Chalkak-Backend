@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -53,7 +54,7 @@ export class AuthService {
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
       });
     }
-    if (verifyToken != cachedVerifyToken) {
+    if (verifyToken !== cachedVerifyToken) {
       throw new UnauthorizedException({
         message: '인증번호가 일치하지 않습니다.',
       });
@@ -68,7 +69,7 @@ export class AuthService {
     try {
       await this.localUsersRepository.insert({ username, email, password: passwordHash });
     } catch (e) {
-      throw new ConflictException({
+      throw new InternalServerErrorException({
         message: '회원가입하는데 문제가 발생했습니다.',
       });
     }
@@ -191,8 +192,7 @@ export class AuthService {
 
   async oauthSignIn(provider: 'kakao' | 'naver', body: SocialLoginBodyDTO) {
     const socialUsersRepository = provider === 'kakao' ? this.kakaoUsersRepository : this.naverUsersRepository;
-    const { accessToken: socialAccessToken, providerUserId, username: _username } = await this.socialService.validateSocialUser(provider, body);
-    let username = _username;
+    let { accessToken: socialAccessToken, providerUserId, username } = await this.socialService.validateSocialUser(provider, body);
 
     const sameUsernameUser = await this.usersRepository.findOne({
       where: {
@@ -215,7 +215,7 @@ export class AuthService {
           username,
         });
       } catch (err) {
-        throw new ConflictException({
+        throw new InternalServerErrorException({
           message: '가입에 실패했습니다.',
         });
       }
@@ -224,9 +224,9 @@ export class AuthService {
           providerUserId,
         },
       });
-    }
-    if (_.isNil(user)) {
-      return ;
+      if (_.isNil(user)) {
+        return ;
+      }
     }
     if (user.isBlock) {
       throw new ForbiddenException({
