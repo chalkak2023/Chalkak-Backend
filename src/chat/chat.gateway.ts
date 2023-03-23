@@ -84,7 +84,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
       createdAt: new Date()
     }
     await this.chatService.addChat(alertObj);
-    socket.broadcast
+    this.nsp
       .to(chatObj.roomId)
       .emit('alert', alertObj, this.countNumberOfRoom(chatObj.roomId));
     return { success: true, payload: chatObj.roomId };
