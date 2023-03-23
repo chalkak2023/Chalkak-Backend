@@ -3,15 +3,20 @@ import { BadRequestException, Injectable, InternalServerErrorException } from '@
 import { Join } from 'src/meetups/entities/join.entity';
 import { DataSource, Repository } from 'typeorm';
 import { Meetup } from '../meetups/entities/meetup.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Chat } from './entities/chat.entity';
 
 @Injectable()
-export class ChatRepository extends Repository<Meetup> {
-  constructor(private dataSource: DataSource) {
-    super(Meetup, dataSource.createEntityManager());
+export class ChatRepository extends Repository<Chat> {
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(Meetup) private meetupRepository: Repository<Meetup>,
+  ) {
+    super(Chat, dataSource.createEntityManager());
   }
 
   async getChatRooms(userId: number): Promise<Meetup[]> {
-    return await this.createQueryBuilder('m')
+    return await this.meetupRepository.createQueryBuilder('m')
       .select([
         'm.id',
         'm.userId',

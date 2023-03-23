@@ -2,6 +2,7 @@ import _ from 'lodash';
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Namespace, Socket } from 'socket.io';
 import { ChatDTO, JoinLeaveChatDTO } from './dto/chat.dto';
+import { ChatService } from './chat.service';
 
 let createdRooms: string[] = [];
 
@@ -10,9 +11,9 @@ let createdRooms: string[] = [];
   cors: true
   // cors: { origin: ['http://localhost:3000'] },
 })
-export class ChatGateway
-  implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect
-{
+export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private readonly chatService: ChatService) {}
+
   @WebSocketServer() nsp: Namespace;
 
   // 초기화 이후에 실행
@@ -53,10 +54,11 @@ export class ChatGateway
   }
 
   @SubscribeMessage('message')
-  handleMessage(
+  async handleMessage(
     @ConnectedSocket() socket: Socket,
     @MessageBody() chatObj: ChatDTO,
   ) {
+    await this.chatService.addChat(chatObj);
     socket.broadcast
       .to(chatObj.roomId)
       .emit('message', chatObj);
@@ -64,7 +66,7 @@ export class ChatGateway
   }
 
   @SubscribeMessage('join-room')
-  handleJoinRoom(
+  async handleJoinRoom(
     @ConnectedSocket() socket: Socket,
     @MessageBody() chatObj: JoinLeaveChatDTO,
   ) {
@@ -81,14 +83,15 @@ export class ChatGateway
       message: `${chatObj.username}님이 들어왔습니다.`,
       createdAt: new Date()
     }
-    this.nsp
+    await this.chatService.addChat(alertObj);
+    socket.broadcast
       .to(chatObj.roomId)
       .emit('alert', alertObj, this.countNumberOfRoom(chatObj.roomId));
     return { success: true, payload: chatObj.roomId };
   }
 
   @SubscribeMessage('leave-room')
-  handleLeaveRoom(
+  async handleLeaveRoom(
     @ConnectedSocket() socket: Socket,
     @MessageBody() chatObj: JoinLeaveChatDTO,
     ) {
@@ -101,6 +104,7 @@ export class ChatGateway
       message: `${chatObj.username}님이 나갔습니다.`,
       createdAt: new Date()
     }
+    await this.chatService.addChat(alertObj);
     socket.broadcast
       .to(chatObj.roomId)
       .emit('alert', alertObj, this.countNumberOfRoom(chatObj.roomId));
