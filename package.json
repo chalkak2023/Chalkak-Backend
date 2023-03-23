@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.279.0",
+    "@google-cloud/vision": "^3.1.2",
     "@nestjs-modules/mailer": "^1.8.1",
     "@nestjs/axios": "^2.0.0",
     "@nestjs/bull": "^0.6.3",
