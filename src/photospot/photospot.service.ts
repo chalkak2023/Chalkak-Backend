@@ -154,7 +154,7 @@ export class PhotospotService {
   }
 
   async createImageKeyword(image: string, photoId: number): Promise<void> {
-    const photoKeywords = await this.googleVisionService.image(image);
+    const photoKeywords = await this.googleVisionService.imageLabeling(image);
     const keyword = [];
     for (const photoKeyword of photoKeywords) {
       if (_.isUndefined(photoKeyword)) {

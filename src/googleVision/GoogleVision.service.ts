@@ -6,7 +6,7 @@ export class GoogleVisionService {
     keyFilename: '../visionApiKey.json',
   });
 
-  async image(image: string) {
+  async imageLabeling(image: string) {
 
     return this.client
       .labelDetection(image)
