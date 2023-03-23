@@ -1,11 +1,11 @@
 import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
-import { Cache as CacheManager } from 'cache-manager';
+import { Cache } from 'cache-manager';
 import _ from 'lodash';
 import { verifyTokenType } from '../auth.interface';
 
 @Injectable()
 export class AuthCacheService {
-  constructor(@Inject(CACHE_MANAGER) protected readonly cacheManager: CacheManager) {}
+  constructor(@Inject(CACHE_MANAGER) protected readonly cacheManager: Cache) {}
 
   async getVerifyToken(type: verifyTokenType, email: string) {
     return await this.cacheManager.get<number>(email + `_${type}`);

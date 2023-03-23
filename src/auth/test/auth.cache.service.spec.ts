@@ -1,6 +1,6 @@
 import { CACHE_MANAGER } from '@nestjs/common';
 import { TestingModule, Test } from '@nestjs/testing';
-import { Cache as CacheManager } from 'cache-manager';
+import { Cache } from 'cache-manager';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { verifyTokenType } from '../auth.interface';
 import { AuthCacheService } from '../service/auth.cache.service';
@@ -9,7 +9,7 @@ const moduleMocker = new ModuleMocker(global);
 
 describe('AuthCacheService', () => {
   let service: AuthCacheService;
-  let mockCacheManager: jest.Mocked<CacheManager>;
+  let mockCacheManager: jest.Mocked<Cache>;
 
   // 캐시(레디스 등) 모킹
   let cache: Record<string, any> = {};
