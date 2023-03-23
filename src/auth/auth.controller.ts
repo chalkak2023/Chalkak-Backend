@@ -75,8 +75,8 @@ export class AuthController {
 
   @Get('refresh')
   @UseGuards(JwtRefreshGuard)
-  async refreshAccessToken(@Token('accessToken') accessToken: string, @Token('refreshToken') refreshToken: string) {
-    return await this.authService.refreshAccessToken(accessToken, refreshToken);
+  async renewAccessToken(@Token('accessToken') accessToken: string, @Token('refreshToken') refreshToken: string) {
+    return await this.authService.renewAccessToken(accessToken, refreshToken);
   }
 
   @Get('islogin')

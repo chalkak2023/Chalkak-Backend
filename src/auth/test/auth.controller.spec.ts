@@ -236,10 +236,10 @@ describe('AuthController', () => {
   });
 
 
-  describe('GET /api/auth/refresh (refreshAccessToken)', () => {
+  describe('GET /api/auth/refresh (renewAccessToken)', () => {
     it('should be defined', () => {
-      expect(controller.refreshAccessToken).toBeDefined();
-      expect(typeof controller.refreshAccessToken).toBe('function');
+      expect(controller.renewAccessToken).toBeDefined();
+      expect(typeof controller.renewAccessToken).toBe('function');
     });
 
     it('should be return value returned by service same name method', async () => {
@@ -251,9 +251,9 @@ describe('AuthController', () => {
         accessToken: newAccessToken,
         message: '액세스 토큰을 재발급받았습니다.',
       };
-      service.refreshAccessToken.mockResolvedValue(mockReturnValue);
+      service.renewAccessToken.mockResolvedValue(mockReturnValue);
 
-      expect(controller.refreshAccessToken(accessToken, refreshToken)).resolves.toBe(mockReturnValue);
+      expect(controller.renewAccessToken(accessToken, refreshToken)).resolves.toBe(mockReturnValue);
     });
   });
 });

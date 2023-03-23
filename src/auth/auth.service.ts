@@ -245,7 +245,7 @@ export class AuthService {
     };
   }
 
-  async refreshAccessToken(accessToken: string, refreshToken: string) {
+  async renewAccessToken(accessToken: string, refreshToken: string) {
     await this.authJwtService.verifyUserAccessTokenWithoutExpiresIn(accessToken);
     const userId = await this.authCacheService.getUserIdByRefreshToken(refreshToken);
     if (_.isNil(userId)) {

@@ -777,10 +777,10 @@ describe('AuthService', () => {
     });
   });
 
-  describe('refreshAccessToken', () => {
+  describe('renewAccessToken', () => {
     it('should be defined', () => {
-      expect(service.refreshAccessToken).toBeDefined();
-      expect(typeof service.refreshAccessToken).toBe('function');
+      expect(service.renewAccessToken).toBeDefined();
+      expect(typeof service.renewAccessToken).toBe('function');
     });
 
     it('정상 작동', () => {
@@ -795,7 +795,7 @@ describe('AuthService', () => {
       mockAuthCacheService.getUserIdByRefreshToken.mockResolvedValueOnce(users[0].id);
       mockAuthJwtService.generateUserAccessToken.mockReturnValueOnce(newAccessToken);
 
-      expect(service.refreshAccessToken(accessToken, refreshToken)).resolves.toStrictEqual({
+      expect(service.renewAccessToken(accessToken, refreshToken)).resolves.toStrictEqual({
         accessToken: newAccessToken,
         message: '액세스 토큰을 재발급받았습니다.',
       });
@@ -807,7 +807,7 @@ describe('AuthService', () => {
       cache = {};
       mockAuthCacheService.getUserIdByRefreshToken.mockResolvedValueOnce(undefined);
 
-      expect(service.refreshAccessToken(accessToken, refreshToken)).rejects.toThrowError(
+      expect(service.renewAccessToken(accessToken, refreshToken)).rejects.toThrowError(
         new UnauthorizedException({
           message: '리프레시 토큰이 사용 만료되었습니다.',
         })
@@ -823,7 +823,7 @@ describe('AuthService', () => {
       mockAuthCacheService.getUserIdByRefreshToken.mockResolvedValueOnce(users[0].id);
       mockUsersRepository.findOne.mockResolvedValueOnce(null);
 
-      expect(service.refreshAccessToken(accessToken, refreshToken)).rejects.toThrowError(
+      expect(service.renewAccessToken(accessToken, refreshToken)).rejects.toThrowError(
         new NotFoundException({
           message: '탈퇴한 유저입니다.',
         })
