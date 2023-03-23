@@ -35,9 +35,7 @@ export class ChatRepository extends Repository<Chat> {
       .leftJoin('m.user', 'u')
       .withDeleted()
       .where('m.deletedAt IS NOT NULL')
-      .andWhere('j.userId = :userId', {
-        userId: `${userId}`
-      })
+      .andWhere('j.userId = :userId', { userId })
       .orderBy('m.deletedAt', 'DESC')
       .getMany();
   }
