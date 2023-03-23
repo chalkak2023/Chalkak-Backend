@@ -1,18 +1,16 @@
 import {
   BadRequestException,
-  CACHE_MANAGER,
-  Inject,
+  ConflictException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
-  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LocalUser, KakaoUser, NaverUser, User } from './entities/user.entity';
 import {
   PostEmailVerificationBodyDTO,
-  SignInBodyDTO,
   SignUpBodyDTO,
   PutEmailVerificationBodyDTO,
   ChangePasswordBodyDTO,
@@ -20,15 +18,13 @@ import {
   decodedAccessTokenDTO,
   PutChangePasswordVerificationBodyDTO,
 } from './dto/auth.dto';
-import * as bcrypt from 'bcrypt';
-import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
-import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
-import { Cache } from 'cache-manager';
-import _, { isNil } from 'lodash';
-import { SocialNaverService } from '../social/service/social.naver.service';
-import { SocialKakaoService } from 'src/social/service/social.kakao.service';
+import { MailerAuthService } from 'src/mailer/services/mailer.auth.service';
+import _ from 'lodash';
 import { ForbiddenException } from '@nestjs/common';
+import { AuthJwtService } from './services/auth.jwt.service';
+import { AuthCacheService } from './services/auth.cache.service';
+import { SocialService } from 'src/social/services/social.service';
+import { AuthHashService } from './services/auth.hash.service';
 
 @Injectable()
 export class AuthService {
@@ -37,62 +33,44 @@ export class AuthService {
     @InjectRepository(LocalUser) private localUsersRepository: Repository<LocalUser>,
     @InjectRepository(KakaoUser) private kakaoUsersRepository: Repository<KakaoUser>,
     @InjectRepository(NaverUser) private naverUsersRepository: Repository<NaverUser>,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
-    private jwtService: JwtService,
-    private configService: ConfigService,
+    private authCacheService: AuthCacheService,
+    private authHashService: AuthHashService,
+    private authJwtService: AuthJwtService,
     private mailerAuthService: MailerAuthService,
-    private socialKaKaoService: SocialKakaoService,
-    private socialNaverService: SocialNaverService
+    private socialService: SocialService,
   ) {}
-
-  async createSampleUser() {
-    let arr = [];
-    for (let i = 1; i <= 5; i++) {
-      const temp = {
-        email: `test_emai_${i}@gmail.com`,
-        username: `test${i}`,
-        password: bcrypt.hashSync('qwer1234', 10),
-      };
-      arr.push(temp);
-    }
-    try {
-      await this.localUsersRepository.insert(arr);
-    } catch (err) {
-      throw new BadRequestException({
-        message: '중복된 데이터가 이미 있습니다.',
-      });
-    }
-
-    return {
-      message: '유저 샘플 데이터를 생성했습니다.',
-    };
-  }
 
   async signUp(body: SignUpBodyDTO) {
     const { username, email, password, verifyToken } = body;
-    const cachedVerifyToken = await this.cacheManager.get(email + '_signup');
-    if (!cachedVerifyToken) {
+    const registeredUser = await this.localUsersRepository.findOne({ where: { email } });
+    if (!_.isNil(registeredUser)) {
+      throw new ConflictException({
+        message: '이미 가입된 이메일입니다.'
+      })
+    }
+    const cachedVerifyToken = await this.authCacheService.getVerifyToken('signup', email);
+    if (_.isNil(cachedVerifyToken)) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
       });
     }
-    if (verifyToken != cachedVerifyToken) {
-      throw new BadRequestException({
+    if (verifyToken !== cachedVerifyToken) {
+      throw new UnauthorizedException({
         message: '인증번호가 일치하지 않습니다.',
       });
     }
-    const user = await this.usersRepository.findOne({ where: { username } });
-    if (!_.isNil(user)) {
-      throw new BadRequestException({
+    const sameNameUser = await this.usersRepository.findOne({ where: { username } });
+    if (!_.isNil(sameNameUser)) {
+      throw new ConflictException({
         message: '해당 닉네임으로 이미 가입한 유저가 존재합니다.',
       });
     }
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const passwordHash = this.authHashService.hashPassword(password);
     try {
       await this.localUsersRepository.insert({ username, email, password: passwordHash });
     } catch (e) {
-      throw new BadRequestException({
-        message: '회원가입에 적절하지 않은 이메일과 패스워드입니다.',
+      throw new InternalServerErrorException({
+        message: '회원가입하는데 문제가 발생했습니다.',
       });
     }
     return {
@@ -100,20 +78,21 @@ export class AuthService {
     };
   }
 
-  async signIn(body: SignInBodyDTO) {
-    const { email, password } = body;
+  async validateLocalUser(email: string, password: string) {
     const user = await this.localUsersRepository.findOne({ where: { email }, select: ['id', 'email', 'username', 'password', 'isBlock'] });
-    if (!user || !bcrypt.compareSync(password, user.password)) {
-      throw new NotFoundException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' });
+    if (_.isNil(user) || !this.authHashService.comparePassword(password, user.password)) {
+      throw new UnauthorizedException({ message: '이메일이나 비밀번호가 일치하지 않습니다.' });
     }
     if (user.isBlock) {
-      throw new ForbiddenException({
-        message: '블락된 상태여서 로그인할 수 없습니다.',
-      });
+      throw new ForbiddenException({ message: '블락된 유저는 로그인을 할 수 없습니다.'})
     }
-    const accessToken = this.generateUserAccessToken(user);
-    const refreshToken = this.generateUserRefreshToken();
-    this.cacheManager.set(refreshToken, user.id, { ttl: 60 * 60 * 3 });
+    return user;
+  }
+
+  async signIn(user: LocalUser) {
+    const accessToken = this.authJwtService.generateUserAccessToken(user);
+    const refreshToken = this.authJwtService.generateUserRefreshToken();
+    this.authCacheService.storeRefreshToken(refreshToken, user.id);
     return {
       message: '로그인 되었습니다.',
       accessToken,
@@ -121,8 +100,8 @@ export class AuthService {
     };
   }
 
-  async signOut(user: decodedAccessTokenDTO) {
-    await this.cacheManager.del(String(user.id));
+  async signOut(refreshToken: string) {
+    await this.authCacheService.deleteRefreshToken(refreshToken);
     return {
       message: '로그아웃 되었습니다.',
     };
@@ -132,13 +111,13 @@ export class AuthService {
     const { email } = body;
     const user = await this.localUsersRepository.findOne({where: { email }})
     if (!_.isNil(user)) {
-      throw new BadRequestException({
+      throw new ConflictException({
         message: '이미 가입된 이메일입니다.'
       })
     }
-    const verifyToken = this.generateRandomNumber();
+    const verifyToken = this.createVerifyToken();
     await this.mailerAuthService.sendSignupAuthMail(email, verifyToken);
-    this.cacheManager.set(email + '_signup', verifyToken, { ttl: 60 * 5 });
+    this.authCacheService.storeVerifyToken('signup', email, verifyToken);
     return {
       message: '회원가입 이메일 인증번호가 요청되었습니다.',
     };
@@ -146,8 +125,9 @@ export class AuthService {
 
   async putSignupEmailVerification(body: PutEmailVerificationBodyDTO) {
     const { email, verifyToken } = body;
-    const cachedVerifyToken = await this.cacheManager.get(email + '_signup');
-    if (!cachedVerifyToken) {
+    
+    const cachedVerifyToken = await this.authCacheService.getVerifyToken('signup', email);
+    if (_.isNil(cachedVerifyToken)) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
       });
@@ -164,7 +144,7 @@ export class AuthService {
 
   async changePassword(body: ChangePasswordBodyDTO, user: decodedAccessTokenDTO) {
     const { password } = body;
-    const passwordHash = bcrypt.hashSync(password, 10);
+    const passwordHash = this.authHashService.hashPassword(password);
     await this.localUsersRepository.update(user.id, { password: passwordHash });
     return {
       message: '비밀번호가 변경되었습니다.',
@@ -173,14 +153,14 @@ export class AuthService {
   
   async postChangePasswordEmailVerification(user: decodedAccessTokenDTO) {
     const { email } = user;
-    if (isNil(email)) {
+    if (_.isNil(email)) {
       throw new BadRequestException({
         message: '이메일, 패스워드로 가입한 유저가 아닙니다.'
       })
     }
-    const verifyToken = this.generateRandomNumber();
+    const verifyToken = this.createVerifyToken();
     await this.mailerAuthService.sendChangePasswordAuthMail(email, verifyToken);
-    this.cacheManager.set(email + '_changePassword', verifyToken, { ttl: 60 * 5 });
+    this.authCacheService.storeVerifyToken('changePassword', email, verifyToken);
     return {
       message: '패스워드변경 이메일 인증번호가 요청되었습니다.',
     };
@@ -189,13 +169,13 @@ export class AuthService {
   async putChangePasswordEmailVerification(body: PutChangePasswordVerificationBodyDTO, user: decodedAccessTokenDTO) {
     const { verifyToken } = body;
     const { email } = user;
-    if (isNil(email)) {
+    if (_.isNil(email)) {
       throw new BadRequestException({
         message: '이메일, 패스워드로 가입한 유저가 아닙니다.'
       })
     }
-    const cachedVerifyToken = await this.cacheManager.get(email + '_changePassword');
-    if (!cachedVerifyToken) {
+    const cachedVerifyToken = await this.authCacheService.getVerifyToken('changePassword', email);
+    if (_.isNil(cachedVerifyToken)) {
       throw new NotFoundException({
         message: '인증번호를 요청하지 않았거나 만료되었습니다.',
       });
@@ -211,57 +191,52 @@ export class AuthService {
   }
 
   async oauthSignIn(provider: 'kakao' | 'naver', body: SocialLoginBodyDTO) {
-    const socialService = provider === 'kakao' ? this.socialKaKaoService : this.socialNaverService;
     const socialUsersRepository = provider === 'kakao' ? this.kakaoUsersRepository : this.naverUsersRepository;
-    const token = await socialService.getOauth2Token(body);
-    const info = await socialService.getUserInfo(token.access_token);
-
-    const id = info.id;
-    let nickname = provider === 'kakao' ? info.kakao_account.profile.nickname : info.nickname;
+    let { accessToken: socialAccessToken, providerUserId, username } = await this.socialService.validateSocialUser(provider, body);
 
     const sameUsernameUser = await this.usersRepository.findOne({
       where: {
-        username: nickname,
+        username,
       },
     });
     if (!_.isNil(sameUsernameUser)) {
-      nickname = `${nickname}#${Math.floor(Math.random() * 10000) + 1}`;
+      username = `${username}#${Math.floor(Math.random() * 10000) + 1}`;
     }
 
     let user = await socialUsersRepository.findOne({
       where: {
-        providerUserId: id,
+        providerUserId,
       },
     });
     if (_.isNil(user)) {
       try {
         await socialUsersRepository.insert({
-          providerUserId: id,
-          username: nickname,
+          providerUserId,
+          username,
         });
       } catch (err) {
-        throw new BadRequestException({
+        throw new InternalServerErrorException({
           message: '가입에 실패했습니다.',
         });
       }
       user = await socialUsersRepository.findOne({
         where: {
-          providerUserId: id,
+          providerUserId,
         },
       });
+      if (_.isNil(user)) {
+        return ;
+      }
     }
-    if (user!.isBlock) {
+    if (user.isBlock) {
       throw new ForbiddenException({
         message: '블락된 상태여서 로그인할 수 없습니다.',
       });
     }
 
-    const accessToken = this.generateUserAccessToken({
-      id: user!.id,
-      username: user!.username,
-    });
-    const refreshToken = this.generateUserRefreshToken();
-    this.cacheManager.set(refreshToken, user!.id, { ttl: 60 * 60 * 3 });
+    const accessToken = this.authJwtService.generateUserAccessToken(user);
+    const refreshToken = this.authJwtService.generateUserRefreshToken();
+    this.authCacheService.storeRefreshToken(refreshToken, user.id);
 
     return {
       accessToken,
@@ -270,22 +245,12 @@ export class AuthService {
     };
   }
 
-  async refreshAccessToken(accessToken: string, refreshToken: string) {
-    try {
-      await this.jwtService.verifyAsync(accessToken, {
-        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-      });
-    } catch (err) {
-      if (err.name === 'JsonWebTokenError') {
-        throw new BadRequestException({
-          message: '정상 발급된 액세스 토큰이 아닙니다.',
-        });
-      }
-    }
-    const userId = await this.cacheManager.get<number>(refreshToken);
+  async renewAccessToken(accessToken: string, refreshToken: string) {
+    await this.authJwtService.verifyUserAccessTokenWithoutExpiresIn(accessToken);
+    const userId = await this.authCacheService.getUserIdByRefreshToken(refreshToken);
     if (_.isNil(userId)) {
       throw new UnauthorizedException({
-        message: '사용 만료되었습니다.',
+        message: '리프레시 토큰이 사용 만료되었습니다.',
       });
     }
     const user = await this.usersRepository.findOne({
@@ -300,10 +265,8 @@ export class AuthService {
       });
     }
 
-    const newAccessToken = this.generateUserAccessToken(user);
-    this.cacheManager.set(refreshToken, userId, {
-      ttl: 60 * 60 * 3
-    })
+    const newAccessToken = this.authJwtService.generateUserAccessToken(user);
+    this.authCacheService.storeRefreshToken(refreshToken, userId);
 
     return {
       accessToken: newAccessToken,
@@ -311,36 +274,9 @@ export class AuthService {
     };
   }
 
-  private generateRandomNumber(): number {
+  private createVerifyToken(): number {
     var minm = 100000;
     var maxm = 999999;
     return Math.floor(Math.random() * (maxm - minm + 1)) + minm;
-  }
-
-  private generateUserAccessToken(user: { id: number; username: string; email?: string }) {
-    return this.jwtService.sign(
-      {
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        role: 'user',
-      },
-      {
-        secret: this.configService.get('JWT_ACCESS_TOKEN_SECRET'),
-        expiresIn: this.configService.get('JWT_ACCESS_TOKEN_EXPIRES_IN'),
-      }
-    );
-  }
-
-  private generateUserRefreshToken() {
-    return this.jwtService.sign(
-      {
-        random: Math.floor(Math.random() * 10000) + 1,
-      },
-      {
-        secret: this.configService.get('JWT_REFRESH_TOKEN_SECRET'),
-        expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRES_IN'),
-      }
-    );
   }
 }
