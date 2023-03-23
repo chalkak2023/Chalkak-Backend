@@ -1,8 +1,8 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
-import { SocialNaverService } from './service/social.naver.service';
-import { SocialKakaoService } from "./service/social.kakao.service";
-import { SocialService } from "./service/social.service";
+import { SocialNaverService } from './services/social.naver.service';
+import { SocialKakaoService } from "./services/social.kakao.service";
+import { SocialService } from "./services/social.service";
 
 @Module({
   imports: [HttpModule],

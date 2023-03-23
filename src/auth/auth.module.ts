@@ -9,9 +9,9 @@ import { JwtRefreshStrategy } from './guard/jwt-refresh/jwt-refresh.strategy';
 import { JwtStrategy } from './guard/jwt/jwt.strategy';
 import { SocialModule } from 'src/social/social.module';
 import { LocalStrategy } from './guard/local/local.strategy';
-import { AuthJwtService } from './service/auth.jwt.service';
-import { AuthCacheService } from './service/auth.cache.service';
-import { AuthHashService } from './service/auth.hash.service';
+import { AuthJwtService } from './services/auth.jwt.service';
+import { AuthCacheService } from './services/auth.cache.service';
+import { AuthHashService } from './services/auth.hash.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, LocalUser, NaverUser, KakaoUser]), JwtModule, MailerProviderModule, SocialModule],

@@ -17,13 +17,13 @@ import {
   decodedAccessTokenDTO,
   PutChangePasswordVerificationBodyDTO,
 } from './dto/auth.dto';
-import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
+import { MailerAuthService } from 'src/mailer/services/mailer.auth.service';
 import _ from 'lodash';
 import { ForbiddenException } from '@nestjs/common';
-import { AuthJwtService } from './service/auth.jwt.service';
-import { AuthCacheService } from './service/auth.cache.service';
-import { SocialService } from 'src/social/service/social.service';
-import { AuthHashService } from './service/auth.hash.service';
+import { AuthJwtService } from './services/auth.jwt.service';
+import { AuthCacheService } from './services/auth.cache.service';
+import { SocialService } from 'src/social/services/social.service';
+import { AuthHashService } from './services/auth.hash.service';
 
 @Injectable()
 export class AuthService {

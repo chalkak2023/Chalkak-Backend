@@ -10,8 +10,8 @@ import { ConfigService } from '@nestjs/config';
 import { TestingModule, Test } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
-import { MailerAuthService } from 'src/mailer/service/mailer.auth.service';
-import { SocialService } from 'src/social/service/social.service';
+import { MailerAuthService } from 'src/mailer/services/mailer.auth.service';
+import { SocialService } from 'src/social/services/social.service';
 import { ISocialProvider, ISocialUserInfo } from 'src/social/social.interface';
 import { FindOneOptions, FindOptionsWhere, InsertResult, Repository } from 'typeorm';
 import { AuthService } from '../auth.service';
@@ -25,9 +25,9 @@ import {
   SocialLoginBodyDTO,
 } from '../dto/auth.dto';
 import { User, LocalUser, KakaoUser, NaverUser } from '../entities/user.entity';
-import { AuthCacheService } from '../service/auth.cache.service';
-import { AuthHashService } from '../service/auth.hash.service';
-import { AuthJwtService } from '../service/auth.jwt.service';
+import { AuthCacheService } from '../services/auth.cache.service';
+import { AuthHashService } from '../services/auth.hash.service';
+import { AuthJwtService } from '../services/auth.jwt.service';
 
 const moduleMocker = new ModuleMocker(global);
 

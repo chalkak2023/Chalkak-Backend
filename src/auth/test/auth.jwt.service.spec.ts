@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { TestingModule, Test } from '@nestjs/testing';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { User } from '../entities/user.entity';
-import { AuthJwtService } from '../service/auth.jwt.service';
+import { AuthJwtService } from '../services/auth.jwt.service';
 
 const moduleMocker = new ModuleMocker(global);
 

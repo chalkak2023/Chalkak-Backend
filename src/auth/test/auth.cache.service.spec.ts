@@ -3,7 +3,7 @@ import { TestingModule, Test } from '@nestjs/testing';
 import { Cache } from 'cache-manager';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { verifyTokenType } from '../auth.interface';
-import { AuthCacheService } from '../service/auth.cache.service';
+import { AuthCacheService } from '../services/auth.cache.service';
 
 const moduleMocker = new ModuleMocker(global);
 
