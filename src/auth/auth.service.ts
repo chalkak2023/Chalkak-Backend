@@ -146,6 +146,12 @@ export class AuthService {
 
   async changePassword(body: ChangePasswordBodyDTO, user: decodedAccessTokenDTO) {
     const { password } = body;
+    const userInfo = await this.localUsersRepository.findOne({where: {id: user.id}, select: ['id', 'password']});
+    if (this.authHashService.comparePassword(password, userInfo!.password)) {
+      throw new ConflictException({
+        message: '기존의 비밀번호로는 변경이 불가능합니다.'
+      })
+    }
     const passwordHash = this.authHashService.hashPassword(password);
     await this.localUsersRepository.update(user.id, { password: passwordHash });
     return {

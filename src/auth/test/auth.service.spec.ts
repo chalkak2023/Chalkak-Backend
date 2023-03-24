@@ -491,6 +491,29 @@ describe('AuthService', () => {
 
     it('정상 작동', () => {
       const body: ChangePasswordBodyDTO = {
+        password: 'test1235!'
+      }
+
+      const decodedPayload: decodedAccessTokenDTO = {
+        id: 1,
+        username: 'testman',
+        email: 'test@gmail.com',
+        role: 'user',
+      } as decodedAccessTokenDTO;
+
+      mockLocalUsersRepository.findOne.mockResolvedValueOnce({
+        id: 1,
+        password: 'test1234!|10'
+      } as LocalUser);
+      mockAuthHashService.comparePassword.mockImplementationOnce((password, hash) => hash.split('|')[0] === password);
+
+      expect(service.changePassword(body, decodedPayload)).resolves.toStrictEqual({
+        message: '비밀번호가 변경되었습니다.',
+      });
+    });
+    
+    it('기존 비밀번호와 같은 경우 실패', () => {
+      const body: ChangePasswordBodyDTO = {
         password: 'test1234!'
       }
 
@@ -501,9 +524,17 @@ describe('AuthService', () => {
         role: 'user',
       } as decodedAccessTokenDTO;
 
-      expect(service.changePassword(body, decodedPayload)).resolves.toStrictEqual({
-        message: '비밀번호가 변경되었습니다.',
-      });
+      mockLocalUsersRepository.findOne.mockResolvedValueOnce({
+        id: 1,
+        password: 'test1234!|10'
+      } as LocalUser);
+      mockAuthHashService.comparePassword.mockImplementationOnce((password, hash) => hash.split('|')[0] === password);
+
+      expect(service.changePassword(body, decodedPayload)).rejects.toThrowError(
+        new ConflictException({
+          message: '기존의 비밀번호로는 변경이 불가능합니다.'
+        })
+      );
     });
   });
 
