@@ -281,13 +281,33 @@ describe('MeetupsService', () => {
     });
   });
 
-  // describe('waitFinish Method', () => {
-  //   const eventName = 'eventName';
-  //   const sec = 2;
-  //   it('Success', async () => {
-  //     const mockRemoveAllListenersReturnValue = new EventEmitter2();
-  //     mockEventEmitter.removeAllListeners.mockReturnValue(mockRemoveAllListenersReturnValue);
+  describe('addChat Method', () => {
+    const meetupId = 1;
+    const userId = 1;
+    it(`Fail - not user's meetup`, async () => {
+      const mockReturnValue = new Meetup();
+      mockReturnValue.userId = 2;
+      mockMeetupRepository.getMeetup.mockResolvedValue(mockReturnValue);
 
-  //   });
-  // });
+      try {
+        await service.addChat(meetupId, userId);
+      } catch (err) {
+        expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
+        expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
+        expect(err).toBeInstanceOf(ForbiddenException);
+      }
+    });
+    it(`Success`, async () => {
+      const mockReturnValue = new Meetup();
+      mockReturnValue.userId = 1;
+      mockMeetupRepository.getMeetup.mockResolvedValue(mockReturnValue);
+      mockMeetupRepository.softDelete.mockResolvedValue({ raw: [], generatedMaps: [] });
+      await service.addChat(meetupId, userId);
+      
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalled();
+      expect(mockMeetupRepository.getMeetup).toHaveBeenCalledWith(meetupId);
+      expect(mockMeetupRepository.softDelete).toHaveBeenCalled();
+      expect(mockMeetupRepository.softDelete).toHaveBeenCalledWith(meetupId);
+    });
+  });
 });
