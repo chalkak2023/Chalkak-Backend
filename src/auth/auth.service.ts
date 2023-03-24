@@ -317,6 +317,11 @@ export class AuthService {
         message: '탈퇴한 유저입니다.',
       });
     }
+    if (this.authHashService.comparePassword(password, user.password)) {
+      throw new ConflictException({
+        message: '기존의 비밀번호로는 변경이 불가능합니다.'
+      })
+    }
     user.password = this.authHashService.hashPassword(password);
     await this.localUsersRepository.save(user);
     return {
