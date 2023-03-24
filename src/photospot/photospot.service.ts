@@ -1,3 +1,4 @@
+import { PhotoKeyword } from './entities/photokeyword.entity';
 import { Injectable, NotFoundException, BadRequestException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
@@ -8,6 +9,7 @@ import { Photospot } from '../photospot/entities/photospot.entity';
 import { Collection } from '../collections/entities/collection.entity';
 import { Photo } from './entities/photo.entity';
 import { S3Service } from './../common/aws/s3.service';
+import { GoogleVisionService } from '../googleVision/GoogleVision.service';
 
 @Injectable()
 export class PhotospotService {
@@ -15,8 +17,10 @@ export class PhotospotService {
     @InjectRepository(Photospot) private photospotRepository: Repository<Photospot>,
     @InjectRepository(Collection) private collectionRepository: Repository<Collection>,
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
+    @InjectRepository(PhotoKeyword) private photoKeywordRepository: Repository<PhotoKeyword>,
     private readonly s3Service: S3Service,
     private readonly dataSource: DataSource,
+    private readonly googleVisionService: GoogleVisionService
   ) {}
 
   async createPhotospot(
@@ -43,7 +47,10 @@ export class PhotospotService {
       for (const file of files) {
         try {
           const image = await this.s3Service.putObject(file);
-          await queryRunner.manager.getRepository(Photo).insert({ image, userId, photospotId: photospot.identifiers[0].id });
+          const photo = await queryRunner.manager
+            .getRepository(Photo)
+            .insert({ image, userId, photospotId: photospot.identifiers[0].id });
+          this.createImageKeyword(image, photo.identifiers[0].id);
         } catch (error) {
           console.log(error);
           throw new Error('Photo 입력 실패.');
@@ -87,7 +94,6 @@ export class PhotospotService {
     photospotId: number,
     userId: number
   ): Promise<void> {
-    
     const photospot = await this.getPhotospot(photospotId);
 
     if (photospot.userId !== userId) {
@@ -104,15 +110,15 @@ export class PhotospotService {
       for (const file of files) {
         try {
           const image = await this.s3Service.putObject(file);
-          await queryRunner.manager.getRepository(Photo).insert({ image, userId, photospotId });
-          
+          const photo = await queryRunner.manager.getRepository(Photo).insert({ image, userId, photospotId });
+          this.createImageKeyword(image, photo.identifiers[0].id);
         } catch {
           throw new Error('Photo 입력 실패.');
         }
       }
       if (!_.isNil(deletePhotos)) {
         for (const photo of deletePhotos) {
-          await queryRunner.manager.getRepository(Photo).delete({id: photo});
+          await queryRunner.manager.getRepository(Photo).delete({ id: photo });
         }
       }
       await queryRunner.commitTransaction();
@@ -122,7 +128,6 @@ export class PhotospotService {
     } finally {
       await queryRunner.release();
     }
-
   }
 
   async deletePhotospot(photospotId: number, userId: number) {
@@ -136,21 +141,72 @@ export class PhotospotService {
   }
 
   async getRandomPhoto(): Promise<Photo[]> {
-    const photos = await this.photoRepository.createQueryBuilder('p')
+    const photos = await this.photoRepository
+      .createQueryBuilder('p')
     .leftJoinAndSelect('p.photospot', 'photospot')
     .leftJoinAndSelect('photospot.collection', 'collection')
-    .select([
-      'p.id',
-      'p.image',
+      .select(['p.id', 'p.image',
       'photospot.id',
-      'collection.id'
-    ])
-    .orderBy('RAND()')
-    .limit(5)
-    .getMany();
+      'collection.id'])
+      .orderBy('RAND()')
+      .limit(5)
+      .getMany();
     if (_.isEmpty(photos)) {
       throw new NotFoundException(`등록된 포토스팟이 없습니다.`);
     }
     return photos;
+  }
+
+  async createImageKeyword(image: string, photoId: number): Promise<void> {
+    const photoKeywords = await this.googleVisionService.imageLabeling(image);
+    const keyword = [];
+    for (const photoKeyword of photoKeywords) {
+      if (_.isUndefined(photoKeyword)) {
+        continue;
+      }
+
+      const preKeyword = await this.photoKeywordRepository.findOne({ where: { keyword: photoKeyword } });
+      if (_.isNil(preKeyword)) {
+        const insertKeyword = await this.photoKeywordRepository.save({ keyword: photoKeyword });
+        keyword.push(insertKeyword);
+      } else {
+        keyword.push(preKeyword);
+      }
+    }
+    const photo = await this.photoRepository.findOne({ where: { id: photoId } });
+    if (_.isNil(photo)) {
+      return;
+    }
+    photo.photoKeywords = keyword;
+    await this.photoRepository.save(photo);
+  }
+
+  async getRecommendPhoto(id: number): Promise<Photo[]> {
+    const userPhoto = await this.photoRepository.findOne({ where: { id }, relations: { photoKeywords: true } });
+    const userPhotoKeywords = userPhoto?.photoKeywords.map((k) => k.id);
+    return this.photoRepository
+      .createQueryBuilder('photo')
+      .leftJoinAndSelect('photo.photoKeywords', 'keywords')
+      .leftJoinAndSelect('photo.photospot', 'photospot')
+      .leftJoinAndSelect('photospot.collection', 'collection')
+      .select(['photo.id', 'photo.image', 'photospot.id', 'collection.id'])
+      .where('keywords.id IN (:...userPhotoKeywords)', { userPhotoKeywords })
+      .andWhere('photo.id != :id', {id})  
+      .groupBy('photo.id')
+      .orderBy('COUNT(photo.id)', 'DESC')
+      .limit(5)
+      .getMany();
+  }
+
+  async getAllPhoto(page: number) {
+    const take = 9;
+    return this.photoRepository
+    .createQueryBuilder('photo')
+    .leftJoinAndSelect('photo.photospot', 'photospot')
+    .leftJoinAndSelect('photospot.collection', 'collection')
+    .select(['photo.id', 'photo.image', 'photospot.id', 'collection.id'])
+    .take(take)
+    .skip((page - 1) * take)
+    .getMany();
   }
 }

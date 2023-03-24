@@ -5,6 +5,7 @@ import { AxiosError } from 'axios';
 import { response } from 'express';
 import { lastValueFrom } from 'rxjs';
 import { SocialLoginBodyDTO } from 'src/auth/dto/auth.dto';
+import { INaverUserInfo, IOauthToken, ISocialUserInfo } from '../social.interface';
 
 @Injectable()
 export class SocialNaverService {
@@ -14,7 +15,7 @@ export class SocialNaverService {
 
   constructor(private configService: ConfigService, private httpService: HttpService) {}
 
-  async getOauth2Token({code, state}: SocialLoginBodyDTO) {
+  async getOauth2Token({ code, state }: SocialLoginBodyDTO): Promise<IOauthToken> {
     const response = await lastValueFrom(
       this.httpService.get('https://nid.naver.com/oauth2.0/token', {
         params: {
@@ -34,9 +35,9 @@ export class SocialNaverService {
     return response.data;
   }
 
-  async getUserInfo(accessToken: string) {
+  async getUserInfo(accessToken: string): Promise<ISocialUserInfo> {
     const response = await lastValueFrom(
-      this.httpService.get('https://openapi.naver.com/v1/nid/me', {
+      this.httpService.get<INaverUserInfo>('https://openapi.naver.com/v1/nid/me', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -47,6 +48,9 @@ export class SocialNaverService {
       });
     });
 
-    return response.data.response
+    return {
+      id: response.data.response.id,
+      username: response.data.response.nickname,
+    };
   }
 }
