@@ -17,6 +17,8 @@ import {
   SocialLoginBodyDTO,
   decodedAccessTokenDTO,
   PutChangePasswordVerificationBodyDTO,
+  PostResetPasswordEmailVerificationBodyDTO,
+  PutResetPasswordEmailVerificationBodyDTO,
 } from './dto/auth.dto';
 import { MailerAuthService } from 'src/mailer/services/mailer.auth.service';
 import _ from 'lodash';
@@ -272,6 +274,48 @@ export class AuthService {
       accessToken: newAccessToken,
       message: '액세스 토큰을 재발급받았습니다.',
     };
+  }
+
+  async postResetPasswordEmailVerification(body: PostResetPasswordEmailVerificationBodyDTO) {
+    const { email, url } = body;
+    const user = await this.localUsersRepository.findOne({where: { email }})
+    if (_.isNil(user)) {
+      throw new BadRequestException({
+        message: '가입되지 않은 이메일입니다.'
+      })
+    }
+    const verifyToken = this.createVerifyToken();
+    await this.mailerAuthService.sendResetPasswordAuthMail(url, email, user.username, verifyToken);
+    this.authCacheService.storeVerifyToken('resetPassword', email, verifyToken, 60 * 10);
+    return {
+      message: '비밀번호 재설정 이메일이 발송되었습니다.',
+    };
+  }
+
+  async putResetPasswordEmailVerification(body: PutResetPasswordEmailVerificationBodyDTO) {
+    const { email, verifyToken, password } = body;
+    const cachedVerifyToken = await this.authCacheService.getVerifyToken('resetPassword', email);
+    if (_.isNil(cachedVerifyToken)) {
+      throw new NotFoundException({
+        message: '인증번호를 요청하지 않았거나 만료되었습니다.',
+      });
+    }
+    if (verifyToken != cachedVerifyToken) {
+      throw new UnauthorizedException({
+        message: '인증번호가 일치하지 않습니다.',
+      });
+    }
+    const user = await this.localUsersRepository.findOne({where: {email}, select: ['id', 'email', 'password']});
+    if (_.isNil(user)) {
+      throw new NotFoundException({
+        message: '탈퇴한 유저입니다.',
+      });
+    }
+    user.password = this.authHashService.hashPassword(password);
+    await this.localUsersRepository.save(user);
+    return {
+      message: '비밀번호가 재설정되었습니다.'
+    }
   }
 
   private createVerifyToken(): number {

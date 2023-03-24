@@ -8,6 +8,8 @@ import {
   ProviderDTO,
   decodedAccessTokenDTO,
   PutChangePasswordVerificationBodyDTO,
+  PostResetPasswordEmailVerificationBodyDTO,
+  PutResetPasswordEmailVerificationBodyDTO,
 } from './dto/auth.dto';
 import { InjectUser, Token, UserGuard } from './auth.decorator';
 import { JwtRefreshGuard } from './guard/jwt-refresh/jwt-refresh.guard';
@@ -77,6 +79,16 @@ export class AuthController {
   @UseGuards(JwtRefreshGuard)
   async renewAccessToken(@Token('accessToken') accessToken: string, @Token('refreshToken') refreshToken: string) {
     return await this.authService.renewAccessToken(accessToken, refreshToken);
+  }
+
+  @Post('emailverification/reset-password')
+  async postResetPasswordEmailVerification(@Body() body: PostResetPasswordEmailVerificationBodyDTO) {
+    return await this.authService.postResetPasswordEmailVerification(body);
+  }
+
+  @Put('emailverification/reset-password')
+  async putResetPasswordEmailVerification(@Body() body: PutResetPasswordEmailVerificationBodyDTO) {
+    return await this.authService.putResetPasswordEmailVerification(body);
   }
 
   @Get('islogin')

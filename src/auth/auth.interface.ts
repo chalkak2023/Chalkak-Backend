@@ -1,1 +1,1 @@
-export type verifyTokenType = 'signup' | 'changePassword'
+export type verifyTokenType = 'signup' | 'changePassword' | 'resetPassword'
