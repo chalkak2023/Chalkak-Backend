@@ -75,6 +75,7 @@ export class AuthService {
         message: '회원가입하는데 문제가 발생했습니다.',
       });
     }
+    this.authCacheService.deleteVerifyToken('signup', email);
     return {
       message: '회원가입 되었습니다.',
     };
@@ -193,6 +194,7 @@ export class AuthService {
         message: '인증번호가 일치하지 않습니다.',
       });
     }
+    this.authCacheService.deleteVerifyToken('changePassword', email);
     return {
       message: '패스워드변경 이메일 인증번호가 확인되었습니다.',
     };
@@ -324,6 +326,7 @@ export class AuthService {
     }
     user.password = this.authHashService.hashPassword(password);
     await this.localUsersRepository.save(user);
+    this.authCacheService.deleteVerifyToken('resetPassword', email);
     return {
       message: '비밀번호가 재설정되었습니다.'
     }
