@@ -4,6 +4,7 @@ import { AxiosError } from 'axios';
 import { lastValueFrom } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
 import { SocialLoginBodyDTO } from '../../auth/dto/auth.dto';
+import { IKakaoUserInfo, IOauthToken, ISocialUserInfo } from '../social.interface';
 
 @Injectable()
 export class SocialKakaoService {
@@ -15,7 +16,7 @@ export class SocialKakaoService {
 
   constructor(private configService: ConfigService, private httpService: HttpService) {}
 
-  async getOauth2Token({code}: SocialLoginBodyDTO) {
+  async getOauth2Token({code}: SocialLoginBodyDTO): Promise<IOauthToken> {
     const response = await lastValueFrom(
       this.httpService.get('https://kauth.kakao.com/oauth/token', {
         params: {
@@ -35,9 +36,9 @@ export class SocialKakaoService {
     return response.data;
   }
 
-  async getUserInfo(accessToken: string) {
+  async getUserInfo(accessToken: string): Promise<ISocialUserInfo> {
     const response = await lastValueFrom(
-      this.httpService.get('https://kapi.kakao.com/v2/user/me', {
+      this.httpService.get<IKakaoUserInfo>('https://kapi.kakao.com/v2/user/me', {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -48,6 +49,9 @@ export class SocialKakaoService {
       });
     });
 
-    return response.data
+    return {
+      id: response.data.id,
+      username: response.data.properties.nickname 
+    }
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Put, Delete, Body, Param, UseInterceptors, UploadedFiles } from '@nestjs/common';
+import { Controller, Post, Get, Put, Delete, Body, Param, UseInterceptors, UploadedFiles, Query } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
@@ -56,5 +56,14 @@ export class PhotospotController {
   @Get('/photospots/random')
   async getRandomPhoto(): Promise<Photo[]> {
     return await this.photospotService.getRandomPhoto();
+  }
+
+  @Get('/photospots/photos/:photoId')
+  async getRecommendPhoto(@Param('photoId') id: number): Promise<Photo[]> {
+    return await this.photospotService.getRecommendPhoto(id);
+  }
+  @Get('/photospots/photos')
+  async getAllPhoto(@Query('p') page: number) {
+    return await this.photospotService.getAllPhoto(page);
   }
 }
