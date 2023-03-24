@@ -107,4 +107,12 @@ export class MeetupsService {
       meetupId, userId,
     });
   }
+
+  async addChat(meetupId: number, userId: number) {
+    const meetup = await this.getMeetup(meetupId);
+    if (userId !== meetup.userId) {
+      throw new ForbiddenException(`모임을 만든 사람만 삭제할 수 있습니다.`);
+    }
+    await this.meetupsRepository.softDelete(meetupId);
+  }
 }
