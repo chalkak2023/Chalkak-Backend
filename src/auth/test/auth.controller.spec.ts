@@ -3,7 +3,7 @@ import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { CACHE_MANAGER } from '@nestjs/common';
-import { ChangePasswordBodyDTO, decodedAccessTokenDTO, PostEmailVerificationBodyDTO, ProviderDTO, PutChangePasswordVerificationBodyDTO, PutEmailVerificationBodyDTO, SignInBodyDTO, SignUpBodyDTO, SocialLoginBodyDTO } from '../dto/auth.dto';
+import { ChangePasswordBodyDTO, decodedAccessTokenDTO, SendEmailForSignupBodyDTO, ProviderDTO, VerifyEmailForChangePasswordBodyDTO, VerifyEmailForSignupBodyDTO, SignInBodyDTO, SignUpBodyDTO, SocialLoginBodyDTO } from '../dto/auth.dto';
 import { LocalUser } from '../entities/user.entity';
 
 const moduleMocker = new ModuleMocker(global);
@@ -118,36 +118,36 @@ describe('AuthController', () => {
 
   describe('POST /api/auth/emailVerification (postEmailVerification)', () => {
     it('should be defined', () => {
-      expect(controller.postSignupEmailVerification).toBeDefined();
-      expect(typeof controller.postSignupEmailVerification).toBe('function');
+      expect(controller.SendEmailForSignup).toBeDefined();
+      expect(typeof controller.SendEmailForSignup).toBe('function');
     });
 
     it('should be return value returned by service same name method', async () => {
-      const body: PostEmailVerificationBodyDTO = {
+      const body: SendEmailForSignupBodyDTO = {
         email: 'testman@gmail.com',
       };
       const mockReturnValue = { message: '회원가입 이메일 인증번호가 요청되었습니다.' };
-      service.postSignupEmailVerification.mockResolvedValue(mockReturnValue);
+      service.SendEmailForSignup.mockResolvedValue(mockReturnValue);
 
-      expect(controller.postSignupEmailVerification(body)).resolves.toBe(mockReturnValue);
+      expect(controller.SendEmailForSignup(body)).resolves.toBe(mockReturnValue);
     });
   });
 
   describe('PUT /api/auth/emailVerification (putEmailVerification)', () => {
     it('should be defined', () => {
-      expect(controller.putSignupEmailVerification).toBeDefined();
-      expect(typeof controller.putSignupEmailVerification).toBe('function');
+      expect(controller.VerifyEmailForSignup).toBeDefined();
+      expect(typeof controller.VerifyEmailForSignup).toBe('function');
     });
 
     it('should be return value returned by service same name method', async () => {
-      const body: PutEmailVerificationBodyDTO = {
+      const body: VerifyEmailForSignupBodyDTO = {
         email: 'testman@gmail.com',
         verifyToken: 123456,
       };
       const mockReturnValue = { message: '회원가입 이메일 인증번호가 확인되었습니다.' };
-      service.putSignupEmailVerification.mockResolvedValue(mockReturnValue);
+      service.VerifyEmailForSignup.mockResolvedValue(mockReturnValue);
 
-      expect(controller.putSignupEmailVerification(body)).resolves.toBe(mockReturnValue);
+      expect(controller.VerifyEmailForSignup(body)).resolves.toBe(mockReturnValue);
     });
   });
 
@@ -193,14 +193,14 @@ describe('AuthController', () => {
     });
   });
 
-  describe('PUT /api/auth/emailVerification/password (putChangePasswordEmailVerification)', () => {
+  describe('PUT /api/auth/emailVerification/password (verifyEmailForChangePassword)', () => {
     it('should be defined', () => {
-      expect(controller.putChangePasswordEmailVerification).toBeDefined();
-      expect(typeof controller.putChangePasswordEmailVerification).toBe('function');
+      expect(controller.verifyEmailForChangePassword).toBeDefined();
+      expect(typeof controller.verifyEmailForChangePassword).toBe('function');
     });
 
     it('should be return value returned by service same name method', async () => {
-      const body: PutChangePasswordVerificationBodyDTO = {
+      const body: VerifyEmailForChangePasswordBodyDTO = {
         verifyToken: 123456,
       };
       const decodedPayload: decodedAccessTokenDTO = {
@@ -208,9 +208,9 @@ describe('AuthController', () => {
       } as decodedAccessTokenDTO;
 
       const mockReturnValue = { message: '패스워드변경 이메일 인증번호가 확인되었습니다.' };
-      service.putChangePasswordEmailVerification.mockResolvedValue(mockReturnValue);
+      service.verifyEmailForChangePassword.mockResolvedValue(mockReturnValue);
 
-      expect(controller.putChangePasswordEmailVerification(body, decodedPayload)).resolves.toBe(mockReturnValue);
+      expect(controller.verifyEmailForChangePassword(body, decodedPayload)).resolves.toBe(mockReturnValue);
     });
   });
 

@@ -1,15 +1,15 @@
 import { Body, Controller, Get, HttpCode, Param, Patch, Post, Put, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
-  PostEmailVerificationBodyDTO as PostSignupEmailVerificationBodyDTO,
+  SendEmailForSignupBodyDTO,
   SignUpBodyDTO,
-  PutEmailVerificationBodyDTO as PutSignupEmailVerificationBodyDTO,
+  VerifyEmailForSignupBodyDTO,
   ChangePasswordBodyDTO,
   ProviderDTO,
   decodedAccessTokenDTO,
-  PutChangePasswordVerificationBodyDTO,
-  PostResetPasswordEmailVerificationBodyDTO,
-  PutResetPasswordEmailVerificationBodyDTO,
+  VerifyEmailForChangePasswordBodyDTO,
+  SendEmailForResetPasswordBodyDTO,
+  ResetPasswordWithEmailVerificationBodyDTO,
 } from './dto/auth.dto';
 import { InjectUser, Token, UserGuard } from './auth.decorator';
 import { JwtRefreshGuard } from './guard/jwt-refresh/jwt-refresh.guard';
@@ -41,13 +41,13 @@ export class AuthController {
   }
 
   @Post('emailverification/signup')
-  async postSignupEmailVerification(@Body() body: PostSignupEmailVerificationBodyDTO) {
-    return await this.authService.postSignupEmailVerification(body);
+  async SendEmailForSignup(@Body() body: SendEmailForSignupBodyDTO) {
+    return await this.authService.SendEmailForSignup(body);
   }
 
   @Put('emailverification/signup')
-  async putSignupEmailVerification(@Body() body: PutSignupEmailVerificationBodyDTO) {
-    return await this.authService.putSignupEmailVerification(body);
+  async VerifyEmailForSignup(@Body() body: VerifyEmailForSignupBodyDTO) {
+    return await this.authService.VerifyEmailForSignup(body);
   }
 
   @Patch('')
@@ -64,8 +64,8 @@ export class AuthController {
 
   @Put('emailverification/password')
   @UserGuard
-  async putChangePasswordEmailVerification(@Body() body: PutChangePasswordVerificationBodyDTO, @InjectUser() user: decodedAccessTokenDTO) {
-    return await this.authService.putChangePasswordEmailVerification(body, user);
+  async verifyEmailForChangePassword(@Body() body: VerifyEmailForChangePasswordBodyDTO, @InjectUser() user: decodedAccessTokenDTO) {
+    return await this.authService.verifyEmailForChangePassword(body, user);
   }
 
   @Post('oauth/signin/:provider')
@@ -82,13 +82,13 @@ export class AuthController {
   }
 
   @Post('emailverification/reset-password')
-  async postResetPasswordEmailVerification(@Body() body: PostResetPasswordEmailVerificationBodyDTO) {
-    return await this.authService.postResetPasswordEmailVerification(body);
+  async sendEmailForResetPassword(@Body() body: SendEmailForResetPasswordBodyDTO) {
+    return await this.authService.sendEmailForResetPassword(body);
   }
 
   @Put('emailverification/reset-password')
-  async putResetPasswordEmailVerification(@Body() body: PutResetPasswordEmailVerificationBodyDTO) {
-    return await this.authService.putResetPasswordEmailVerification(body);
+  async resetPasswordWithEmailVerification(@Body() body: ResetPasswordWithEmailVerificationBodyDTO) {
+    return await this.authService.resetPasswordWithEmailVerification(body);
   }
 
   @Get('islogin')

@@ -10,15 +10,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LocalUser, KakaoUser, NaverUser, User } from './entities/user.entity';
 import {
-  PostEmailVerificationBodyDTO,
+  SendEmailForSignupBodyDTO,
   SignUpBodyDTO,
-  PutEmailVerificationBodyDTO,
+  VerifyEmailForSignupBodyDTO,
   ChangePasswordBodyDTO,
   SocialLoginBodyDTO,
   decodedAccessTokenDTO,
-  PutChangePasswordVerificationBodyDTO,
-  PostResetPasswordEmailVerificationBodyDTO,
-  PutResetPasswordEmailVerificationBodyDTO,
+  VerifyEmailForChangePasswordBodyDTO,
+  SendEmailForResetPasswordBodyDTO,
+  ResetPasswordWithEmailVerificationBodyDTO,
 } from './dto/auth.dto';
 import { MailerAuthService } from 'src/mailer/services/mailer.auth.service';
 import _ from 'lodash';
@@ -110,7 +110,7 @@ export class AuthService {
     };
   }
 
-  async postSignupEmailVerification(body: PostEmailVerificationBodyDTO) {
+  async SendEmailForSignup(body: SendEmailForSignupBodyDTO) {
     const { email } = body;
     const user = await this.localUsersRepository.findOne({where: { email }})
     if (!_.isNil(user)) {
@@ -126,7 +126,7 @@ export class AuthService {
     };
   }
 
-  async putSignupEmailVerification(body: PutEmailVerificationBodyDTO) {
+  async VerifyEmailForSignup(body: VerifyEmailForSignupBodyDTO) {
     const { email, verifyToken } = body;
     
     const cachedVerifyToken = await this.authCacheService.getVerifyToken('signup', email);
@@ -175,7 +175,7 @@ export class AuthService {
     };
   }
 
-  async putChangePasswordEmailVerification(body: PutChangePasswordVerificationBodyDTO, user: decodedAccessTokenDTO) {
+  async verifyEmailForChangePassword(body: VerifyEmailForChangePasswordBodyDTO, user: decodedAccessTokenDTO) {
     const { verifyToken } = body;
     const { email } = user;
     if (_.isNil(email)) {
@@ -284,7 +284,7 @@ export class AuthService {
     };
   }
 
-  async postResetPasswordEmailVerification(body: PostResetPasswordEmailVerificationBodyDTO) {
+  async sendEmailForResetPassword(body: SendEmailForResetPasswordBodyDTO) {
     const { email, url } = body;
     const user = await this.localUsersRepository.findOne({where: { email }})
     if (_.isNil(user)) {
@@ -300,7 +300,7 @@ export class AuthService {
     };
   }
 
-  async putResetPasswordEmailVerification(body: PutResetPasswordEmailVerificationBodyDTO) {
+  async resetPasswordWithEmailVerification(body: ResetPasswordWithEmailVerificationBodyDTO) {
     const { email, verifyToken, password } = body;
     const cachedVerifyToken = await this.authCacheService.getVerifyToken('resetPassword', email);
     if (_.isNil(cachedVerifyToken)) {

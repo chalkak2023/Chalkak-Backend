@@ -53,22 +53,22 @@ export class SignInBodyDTO extends PickType(SignUpBodyDTO, ['email']) {
   password: string;
 }
 
-export class PostEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email']) {}
+export class SendEmailForSignupBodyDTO extends PickType(SignUpBodyDTO, ['email']) {}
 
-export class PutEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email', 'verifyToken']) {}
+export class VerifyEmailForSignupBodyDTO extends PickType(SignUpBodyDTO, ['email', 'verifyToken']) {}
 
-export class PutChangePasswordVerificationBodyDTO extends PickType(SignUpBodyDTO, ['verifyToken']) {}
+export class VerifyEmailForChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['verifyToken']) {}
 
 export class ChangePasswordBodyDTO extends PickType(SignUpBodyDTO, ['password']) {}
 
-export class PostResetPasswordEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email']) {
+export class SendEmailForResetPasswordBodyDTO extends PickType(SignUpBodyDTO, ['email']) {
   @IsString({
     message: 'url은 문자열이어야 합니다.'
   })
   url: string;
 }
 
-export class PutResetPasswordEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email', 'verifyToken', 'password']) {}
+export class ResetPasswordWithEmailVerificationBodyDTO extends PickType(SignUpBodyDTO, ['email', 'verifyToken', 'password']) {}
 
 export class ProviderDTO {
   @IsIn(['kakao', 'naver'], {
