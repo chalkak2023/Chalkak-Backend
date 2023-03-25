@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { PhotoKeyword } from './entities/photokeyword.entity';
 import { Injectable, NotFoundException, BadRequestException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,6 +19,7 @@ export class PhotospotService {
     @InjectRepository(Collection) private collectionRepository: Repository<Collection>,
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
     @InjectRepository(PhotoKeyword) private photoKeywordRepository: Repository<PhotoKeyword>,
+    private readonly configService: ConfigService,
     private readonly s3Service: S3Service,
     private readonly dataSource: DataSource,
     private readonly googleVisionService: GoogleVisionService
@@ -200,7 +202,7 @@ export class PhotospotService {
   }
 
   async getAllPhoto(page: number) {
-    const take = 9;
+    const take = this.configService.get('PHOTOS_PAGE_LIMIT') || 18;
     return this.photoRepository
     .createQueryBuilder('photo')
     .leftJoinAndSelect('photo.photospot', 'photospot')
