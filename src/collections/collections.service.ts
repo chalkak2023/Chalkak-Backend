@@ -9,13 +9,15 @@ import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { UpdateCollectionDto } from 'src/collections/dto/update.collection.dto';
 import { GetCollectionIdDto } from 'src/collections/dto/get.collection.id.dto';
 import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
+import { Photo } from 'src/photospot/entities/photo.entity';
 
 @Injectable()
 export class CollectionsService {
   constructor(
     private readonly collectionUserKeywordRepository: CollectionUserKeywordRepository,
     @InjectRepository(Collection) private readonly collectionsRepository: Repository<Collection>,
-    @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>
+    @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>,
+    @InjectRepository(Photo) private readonly photoRepository: Repository<Photo>
   ) {}
 
   async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto): Promise<Collection[]> {
@@ -79,6 +81,10 @@ export class CollectionsService {
     if (userId !== collection.userId) {
       throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
     }
-    this.collectionsRepository.softDelete(collectionId);
+
+    this.collectionsRepository.softRemove(collection);
+    for (const photospot of collection.photospots) {
+      this.photoRepository.delete({photospotId: photospot.id})
+    }
   }
 }

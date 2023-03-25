@@ -137,7 +137,8 @@ export class PhotospotService {
       throw new NotAcceptableException('해당 포토스팟에 접근 할 수 없습니다');
     }
 
-    this.photospotRepository.softDelete(photospotId);
+    this.photospotRepository.softRemove(photospot);
+    this.photoRepository.delete({photospotId: photospot.id});
   }
 
   async getRandomPhoto(): Promise<Photo[]> {
