@@ -59,6 +59,7 @@ export class PhotospotService {
         }
       }
       await queryRunner.commitTransaction();
+      this.isSafePhoto(photospot.identifiers[0].id);
     } catch (error) {
       console.log(error);
       await queryRunner.rollbackTransaction();
@@ -81,7 +82,7 @@ export class PhotospotService {
   }
 
   async getPhotospot(photospotId: number): Promise<Photospot> {
-    const photospot = await this.photospotRepository.findOne({ where: { id: photospotId } });
+    const photospot = await this.photospotRepository.findOne({ where: { id: photospotId }, relations: { photos: true } });
 
     if (_.isNil(photospot)) {
       throw new NotFoundException('해당 포토스팟을 찾을 수 없습니다.');
@@ -140,17 +141,15 @@ export class PhotospotService {
     }
 
     this.photospotRepository.softRemove(photospot);
-    this.photoRepository.delete({photospotId: photospot.id});
+    this.photoRepository.delete({ photospotId: photospot.id });
   }
 
   async getRandomPhoto(): Promise<Photo[]> {
     const photos = await this.photoRepository
       .createQueryBuilder('p')
-    .leftJoinAndSelect('p.photospot', 'photospot')
-    .leftJoinAndSelect('photospot.collection', 'collection')
-      .select(['p.id', 'p.image',
-      'photospot.id',
-      'collection.id'])
+      .leftJoinAndSelect('p.photospot', 'photospot')
+      .leftJoinAndSelect('photospot.collection', 'collection')
+      .select(['p.id', 'p.image', 'photospot.id', 'collection.id'])
       .orderBy('RAND()')
       .limit(5)
       .getMany();
@@ -194,7 +193,7 @@ export class PhotospotService {
       .leftJoinAndSelect('photospot.collection', 'collection')
       .select(['photo.id', 'photo.image', 'photospot.id', 'collection.id'])
       .where('keywords.id IN (:...userPhotoKeywords)', { userPhotoKeywords })
-      .andWhere('photo.id != :id', {id})  
+      .andWhere('photo.id != :id', { id })
       .groupBy('photo.id')
       .orderBy('COUNT(photo.id)', 'DESC')
       .limit(5)
@@ -204,12 +203,29 @@ export class PhotospotService {
   async getAllPhoto(page: number) {
     const take = this.configService.get('PHOTOS_PAGE_LIMIT') || 18;
     return this.photoRepository
-    .createQueryBuilder('photo')
-    .leftJoinAndSelect('photo.photospot', 'photospot')
-    .leftJoinAndSelect('photospot.collection', 'collection')
-    .select(['photo.id', 'photo.image', 'photospot.id', 'collection.id'])
-    .take(take)
-    .skip((page - 1) * take)
-    .getMany();
+      .createQueryBuilder('photo')
+      .leftJoinAndSelect('photo.photospot', 'photospot')
+      .leftJoinAndSelect('photospot.collection', 'collection')
+      .select(['photo.id', 'photo.image', 'photospot.id', 'collection.id'])
+      .take(take)
+      .skip((page - 1) * take)
+      .getMany();
+  }
+
+  async isSafePhoto(photospotId: number): Promise<void> {
+    const photospot = await this.getPhotospot(photospotId);
+    const photoCount = photospot.photos.length;
+
+    photospot.photos.forEach(async (photo) => {
+      const isSafe = await this.googleVisionService.imageSafeGuard(photo.image);
+      if (!isSafe) {
+        if (photoCount === 1) {
+          this.photospotRepository.softRemove(photospot);
+          this.photoRepository.delete(photo.id);
+        } else {
+          this.photoRepository.delete(photo.id);
+        }
+      }
+    });
   }
 }

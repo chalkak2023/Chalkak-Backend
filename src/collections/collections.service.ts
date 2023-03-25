@@ -84,7 +84,7 @@ export class CollectionsService {
 
     this.collectionsRepository.softRemove(collection);
     for (const photospot of collection.photospots) {
-      this.photoRepository.delete({photospotId: photospot.id})
+      this.photoRepository.delete({photospotId: photospot.id});
     }
   }
 }
