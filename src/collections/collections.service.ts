@@ -25,8 +25,9 @@ export class CollectionsService {
     getCollectionsListQueryDto.p = getCollectionsListQueryDto.p || 1;
     const collections = await this.collectionUserKeywordRepository.getCollectionsList(getCollectionsListQueryDto);
     const collectionsLikesData = collections.map((collection) => ({
-      ...collection, isCollectionLiked: user ?
-        collection.collectionLikes.some(like => like.userId === user.id) : false, likes: collection.collectionLikes.length
+      ...collection,
+      isCollectionLiked: user ? collection.collectionLikes.some(like => like.userId === user.id) : false,
+      likes: collection.collectionLikes.length
     }))
     return collectionsLikesData
   }
