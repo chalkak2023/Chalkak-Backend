@@ -30,6 +30,17 @@ export class MeetupsController {
     return await this.meetupsService.getMeetupsWithJoined(userDTO.id, page, keyword);
   }
 
+  @Get('mine')
+  @UserGuard
+  async getMeetupsWithMine(
+    @Query('p', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('keyword', new DefaultValuePipe('')) keyword: string,
+    @InjectUser() userDTO: decodedAccessTokenDTO
+  ): Promise<Meetup[]> {
+    if (page < 1) { page = 1; }
+    return await this.meetupsService.getMeetupsWithMine(userDTO.id, page, keyword);
+  }
+
   @Post()
   @UserGuard
   async createMeetup(@Body() meetupDTO: CreateMeetupDTO, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {

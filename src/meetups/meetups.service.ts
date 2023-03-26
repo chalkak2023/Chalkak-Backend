@@ -27,6 +27,10 @@ export class MeetupsService {
     return await this.meetupsRepository.getMeetupsWithJoined(userId, page, keyword);
   }
 
+  async getMeetupsWithMine(userId: number, page: number, keyword: string): Promise<Meetup[]> {
+    return await this.meetupsRepository.getMeetupsWithMine(userId, page, keyword);
+  }
+
   async createMeetup(meetupDto: CreateMeetupDTO): Promise<void> {
     await this.meetupsRepository.createMeetup(meetupDto);
   }

@@ -9,6 +9,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class MeetupsRepository extends Repository<Meetup> {
+  private pageLimit = this.configService.get('MEETUPS_PAGE_LIMIT') || 18;
+
   constructor(
     private dataSource: DataSource,
     private configService: ConfigService,
@@ -18,7 +20,6 @@ export class MeetupsRepository extends Repository<Meetup> {
   }
 
   async getMeetups(page: number, keyword: string): Promise<Meetup[]> {
-    const pageLimit = this.configService.get('MEETUPS_PAGE_LIMIT') || 18;
     return await this.createQueryBuilder('m')
       .select([
         'm.id',
@@ -39,14 +40,12 @@ export class MeetupsRepository extends Repository<Meetup> {
         keyword: `%${keyword}%`,
       })
       .orderBy('m.id', 'DESC')
-      .take(pageLimit)  // 몇개를 가져올지 - 기존의 limit
-      .skip((page - 1) * pageLimit)  // 몇개를 건너뛰고 보여줄지 - 기존의 offset 
+      .take(this.pageLimit)  // 몇개를 가져올지 - 기존의 limit
+      .skip((page - 1) * this.pageLimit)  // 몇개를 건너뛰고 보여줄지 - 기존의 offset 
       .getMany();
   }
 
   async getMeetupsWithJoined(userId: number, page: number, keyword: string): Promise<Meetup[]> {
-    const pageLimit = this.configService.get('MEETUPS_PAGE_LIMIT') || 18;
-
     const meetupIds = await this.joinRepository.createQueryBuilder('j')
       .select('j.meetupId', 'meetupId')
       .innerJoin('j.meetup', 'm')
@@ -81,8 +80,42 @@ export class MeetupsRepository extends Repository<Meetup> {
 
     const meetups = await tempQuery
       .orderBy('m.id', 'DESC')
-      .take(pageLimit)
-      .skip((page - 1) * pageLimit)
+      .take(this.pageLimit)
+      .skip((page - 1) * this.pageLimit)
+      .getMany();
+
+    return meetups;
+  }
+
+  async getMeetupsWithMine(userId: number, page: number, keyword: string): Promise<Meetup[]> {
+    const tempQuery = this.createQueryBuilder('m')
+      .select([
+        'm.id',
+        'm.userId',
+        'u.email',
+        'u.username',
+        'm.title',
+        'm.content',
+        'm.place',
+        'm.schedule',
+        'm.headcount',
+        'm.createdAt',
+        'j',
+      ])
+      .leftJoin('m.joins', 'j')
+      .leftJoin('m.user', 'u')
+      .where('(m.userId = :userId)', { userId })
+
+    if (keyword !== '') {
+      tempQuery.andWhere('(m.title LIKE :keyword OR m.content LIKE :keyword)', {
+        keyword: `%${keyword}%`,
+      })
+    }
+
+    const meetups = await tempQuery
+      .orderBy('m.id', 'DESC')
+      .take(this.pageLimit)
+      .skip((page - 1) * this.pageLimit)
       .getMany();
 
     return meetups;
