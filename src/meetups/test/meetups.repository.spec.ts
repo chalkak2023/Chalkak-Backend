@@ -17,7 +17,7 @@ describe('MeetupsRepsitory', () => {
     createQueryRunner: jest.fn()
   };
   let mockConfigService: jest.Mocked<ConfigService>;
-  const mockConfig = {
+  let mockConfig: { MEETUPS_PAGE_LIMIT: number | null } = {
     MEETUPS_PAGE_LIMIT: 9
   };
 
@@ -50,6 +50,42 @@ describe('MeetupsRepsitory', () => {
 
   describe('getMeetups Method', () => {
     it('Success', async () => {
+      const mockReturnValue = [new Meetup()];
+      jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(mockReturnValue),
+      } as any);
+
+      const page = 1;
+      const keyword = 'keyword';
+      const result = await repository.getMeetups(page, keyword);
+
+      expect(result).toBe(mockReturnValue);
+      expect(repository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(repository.createQueryBuilder).toHaveBeenCalledWith('m');
+      // expect(repository.createQueryBuilder().select()).toHaveBeenCalledTimes(1);
+      // expect(repository.createQueryBuilder().select()).toHaveBeenCalledWith([
+      //   'm.id',
+      //   'm.userId',
+      //   'u.email',
+      //   'm.title',
+      //   'm.content',
+      //   'm.place',
+      //   'm.schedule',
+      //   'm.headcount',
+      //   'm.createdAt',
+      //   'j',
+      // ]);
+      expect(result).toBeInstanceOf(Array);
+    });
+
+    it('Success - when configService get MEETUPS_PAGE_LIMIT is null ', async () => {
+      mockConfig.MEETUPS_PAGE_LIMIT = null;
       const mockReturnValue = [new Meetup()];
       jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
         select: jest.fn().mockReturnThis(),
