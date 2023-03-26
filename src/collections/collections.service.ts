@@ -43,7 +43,7 @@ export class CollectionsService {
     const { userId, title, description, keywords } = createCollectionDto;
     const collection = this.collectionsRepository.create({ userId, title, description })
     const keywordsArray = await this.createCollectionKeyword(keywords)
-    collection.collection_keywords = keywordsArray
+    collection.collectionKeywords = keywordsArray
     return await this.collectionsRepository.save(collection)
   };
 
@@ -72,7 +72,7 @@ export class CollectionsService {
       throw new NotFoundException('해당 콜렉션의 키워드를 찾을 수 없습니다.');
     }
     const keywordsArray = await this.createCollectionKeyword(keywords)
-    collection.collection_keywords = keywordsArray
+    collection.collectionKeywords = keywordsArray
     return await this.collectionsRepository.save(collection)
   }
 

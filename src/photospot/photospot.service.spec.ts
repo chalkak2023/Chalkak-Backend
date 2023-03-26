@@ -96,7 +96,7 @@ describe.skip('PhotospotService', () => {
         deletedAt: null,
         user: {} as User,
         photospots: [{}] as Photospot[],
-        collection_keywords: [{}] as CollectionKeyword[],
+        collectionKeywords: [{}] as CollectionKeyword[],
       };
       const mockInsertPhotospotResult = {
         identifiers: [{ id: 1 }],
@@ -154,7 +154,7 @@ describe.skip('PhotospotService', () => {
     //     deletedAt: null,
     //     user: {} as User,
     //     photospots: [{}] as Photospot[],
-    //     collection_keywords: [{}] as CollectionKeyword[],
+    //     collectionKeywords: [{}] as CollectionKeyword[],
     //   };
     //   const { title, description, latitude, longitude } = dto;
     //   const files = [{}] as Express.Multer.File[];
@@ -225,7 +225,7 @@ describe.skip('PhotospotService', () => {
         deletedAt: null,
         user: {} as User,
         photospots: [{}] as Photospot[],
-        collection_keywords: [{}] as CollectionKeyword[],
+        collectionKeywords: [{}] as CollectionKeyword[],
       };
 
       mockCollectionRepository.findOne.mockResolvedValue(collection);
@@ -284,7 +284,7 @@ describe.skip('PhotospotService', () => {
     it('should db defined', () => {
       expect(service.modifyPhotospot).toBeDefined();
     });
-    
+
     // TO DO 포토스팟 수정 부분 테스트 코드 제대로 작성
     // it('modifyPhotospot image가 있을 때 성공', async () => {
     //   const dto = { title: '테스트', description: '테스트 설명', deletePhotos: [1, 2, 3] };

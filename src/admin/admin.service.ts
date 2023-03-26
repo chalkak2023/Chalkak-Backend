@@ -41,7 +41,7 @@ export class AdminService {
     @InjectRepository(Faq) private adminFaqRepository: Repository<Faq>,
     private jwtService: JwtService,
     private configService: ConfigService
-  ) {}
+  ) { }
 
   // 관리자 관리
   async getAdminsList(search: string, p: number = 1): Promise<any> {
@@ -209,7 +209,7 @@ export class AdminService {
     } else {
       this.cacheManager.del(`user-${id}-block`);
     }
-   
+
     return this.adminUsersRepository
       .createQueryBuilder()
       .update()
@@ -232,7 +232,7 @@ export class AdminService {
       .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'ck'])
       .leftJoin('c.user', 'user')
       .leftJoin('c.photospots', 'photospot')
-      .leftJoin('c.collection_keywords', 'ck')
+      .leftJoin('c.collectionKeywords', 'ck')
       .orderBy('c.id', 'DESC');
 
     const take = this.configService.get('PAGE_TAKE_ADMIN_COLLECTION_LIST');

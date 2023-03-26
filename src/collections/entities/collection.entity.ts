@@ -47,9 +47,9 @@ export class Collection {
   @OneToMany(() => CollectionLike, (collectionLike) => collectionLike.collection)
   collectionLikes: CollectionLike[];
 
-  @ManyToMany(() => CollectionKeyword, (collection_keyword) => collection_keyword.collections, {
+  @ManyToMany(() => CollectionKeyword, (collectionKeyword) => collectionKeyword.collections, {
     cascade: true,
   })
   @JoinTable({ name: 'collection_keyword_connector' })
-  collection_keywords: CollectionKeyword[];
+  collectionKeywords: CollectionKeyword[];
 }

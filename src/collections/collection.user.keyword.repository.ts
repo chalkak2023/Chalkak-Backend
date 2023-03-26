@@ -17,7 +17,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
       .where(whereQuery.q1, whereQuery.q2)
       .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt'])
       .leftJoinAndSelect('c.user', 'cu')
-      .leftJoinAndSelect('c.collection_keywords', 'ck')
+      .leftJoinAndSelect('c.collectionKeywords', 'ck')
       .leftJoinAndSelect('c.collectionLikes', 'cl')
       .orderBy('c.id', 'DESC')
       .take(take)
@@ -49,7 +49,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
       .leftJoinAndSelect('c.user', 'cu')
       .leftJoinAndSelect('c.photospots', 'cp')
       .leftJoinAndSelect('cp.photos', 'cpt')
-      .leftJoinAndSelect('c.collection_keywords', 'ck')
+      .leftJoinAndSelect('c.collectionKeywords', 'ck')
       .leftJoinAndSelect('c.collectionLikes', 'cl')
       .getOne();
   }

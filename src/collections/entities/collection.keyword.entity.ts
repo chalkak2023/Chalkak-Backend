@@ -9,7 +9,7 @@ export class CollectionKeyword {
   @Column('varchar', { unique: true })
   keyword: string;
 
-  @ManyToMany(() => Collection, (collection) => collection.collection_keywords, {
+  @ManyToMany(() => Collection, (collection) => collection.collectionKeywords, {
   })
   collections: Collection[];
 }
