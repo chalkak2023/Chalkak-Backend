@@ -31,6 +31,16 @@ export class CollectionsService {
     return collectionsLikesData
   }
 
+  async getTopCollectionsListForMain(user: any) {
+    const collections = await this.collectionUserKeywordRepository.getTopCollectionsListForMain();
+    const collectionsLikesData = collections.map((collection) => ({
+      ...collection,
+      isCollectionLiked: user ? collection.collectionLikes.some(like => like.userId === user.id) : false,
+      likes: collection.collectionLikes.length
+    }))
+    return collectionsLikesData
+  }
+
   async getCollection(collectionId: GetCollectionIdDto['collectionId']): Promise<Collection> {
     const collection = await this.collectionUserKeywordRepository.getCollection(collectionId);
     if (!collection) {

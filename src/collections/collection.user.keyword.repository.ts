@@ -42,6 +42,19 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
     } return query
   }
 
+  async getTopCollectionsListForMain(): Promise<Collection[]> {
+    return await this.createQueryBuilder('c')
+      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt'])
+      .leftJoinAndSelect('c.user', 'cu')
+      .leftJoinAndSelect('c.collectionKeywords', 'ck')
+      .leftJoinAndSelect('c.collectionLikes', 'cl')
+      .leftJoin('c.collectionLikes', 'clikes')
+      .addSelect('COUNT(clikes.userId) as clikesCount')
+      .groupBy('c.id, cu.id, ck.id, cl.userId, cl.collectionId')
+      .orderBy('clikesCount', 'DESC')
+      .getMany()
+  }
+
   async getCollection(collectionId: number): Promise<Collection | null> {
     return await this.createQueryBuilder('c')
       .where('c.id = :id', { id: collectionId })
@@ -54,4 +67,3 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
       .getOne();
   }
 }
-
