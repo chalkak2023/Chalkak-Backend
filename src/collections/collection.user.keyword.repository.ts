@@ -10,7 +10,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
     super(Collection, dataSource.createEntityManager());
   }
 
-  async getCollectionsList({ p, search, userId }: GetCollectionsListQueryDto) {
+  async getCollectionsList({ p, search, userId }: GetCollectionsListQueryDto): Promise<Collection[]> {
     const take = 18;
     const whereQuery = this.isThereSearchUserid(search, userId)
     return await this.createQueryBuilder('c')
@@ -25,7 +25,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
       .getMany()
   }
 
-  isThereSearchUserid(search?: string, userId?: number) {
+  isThereSearchUserid(search?: string, userId?: number): { q1: string; q2: {}; } {
     const myCollectionQuery = 'c.userId = :userId';
     const searchCollectionQuery = 'c.title LIKE :search OR c.description LIKE :search';
     const query = { q1: '', q2: {} };

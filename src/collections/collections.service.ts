@@ -87,7 +87,7 @@ export class CollectionsService {
     return await this.collectionsRepository.save(collection)
   }
 
-  async deleteCollection(collectionId: number, userId: number) {
+  async deleteCollection(collectionId: number, userId: number): Promise<void> {
     const collection = await this.getCollection(collectionId);
     if (userId !== collection.userId) {
       throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
