@@ -9,18 +9,26 @@ import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { UpdateCollectionDto } from 'src/collections/dto/update.collection.dto';
 import { GetCollectionIdDto } from 'src/collections/dto/get.collection.id.dto';
 import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
+import { CollectionLike } from './entities/collection.like.entity';
 
 @Injectable()
 export class CollectionsService {
   constructor(
     private readonly collectionUserKeywordRepository: CollectionUserKeywordRepository,
     @InjectRepository(Collection) private readonly collectionsRepository: Repository<Collection>,
-    @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>
+    @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>,
+    @InjectRepository(CollectionLike) private readonly collectionLikesRepository: Repository<CollectionLike>
   ) { }
 
-  async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto): Promise<Collection[]> {
+  // 콜렉션
+  async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto, user: any) {
     getCollectionsListQueryDto.p = getCollectionsListQueryDto.p || 1;
-    return await this.collectionUserKeywordRepository.getCollectionsList(getCollectionsListQueryDto);
+    const collections = await this.collectionUserKeywordRepository.getCollectionsList(getCollectionsListQueryDto);
+    const collectionsLikesData = collections.map((collection) => ({
+      ...collection, isCollectionLiked: user ?
+        collection.collectionLikes.some(like => like.userId === user.id) : false, likes: collection.collectionLikes.length
+    }))
+    return collectionsLikesData
   }
 
   async getCollection(collectionId: GetCollectionIdDto['collectionId']): Promise<Collection> {
@@ -75,4 +83,32 @@ export class CollectionsService {
     }
     this.collectionsRepository.softDelete(collectionId);
   }
+
+  // 콜렉션 좋아요
+  async getCollectionLikeById(userId: number, collectionId: number): Promise<CollectionLike | null> {
+    await this.getCollection(collectionId)
+    return await this.collectionLikesRepository.createQueryBuilder('collectionLike')
+      .where('collectionLike.userId = :userId AND collectionLike.collectionId = :collectionId', {
+        userId, collectionId
+      })
+      .getOne();
+  }
+
+  async addCollectionLike(userId: number, collectionId: number): Promise<CollectionLike> {
+    await this.getCollectionLikeById(userId, collectionId)
+    const collectionLike = new CollectionLike();
+    collectionLike.userId = userId;
+    collectionLike.collectionId = collectionId;
+    await this.collectionLikesRepository.save(collectionLike);
+    return collectionLike;
+  }
+
+  async removeCollectionLike(userId: number, collectionId: number): Promise<void> {
+    await this.getCollectionLikeById(userId, collectionId)
+    const collectionLike = new CollectionLike();
+    collectionLike.userId = userId;
+    collectionLike.collectionId = collectionId;
+    await this.collectionLikesRepository.remove(collectionLike);
+  }
 }
+

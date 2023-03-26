@@ -14,11 +14,11 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
     const take = 18;
     const whereQuery = this.isThereSearchUserid(search, userId)
     return await this.createQueryBuilder('c')
-      .where( whereQuery.q1, whereQuery.q2)
-      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'ck'])
+      .where(whereQuery.q1, whereQuery.q2)
+      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'cu', 'ck', 'cl'])
       .leftJoin('c.user', 'cu')
-      .leftJoin('c.photospots', 'cp')
       .leftJoin('c.collection_keywords', 'ck')
+      .leftJoin('c.collectionLikes', 'cl')
       .orderBy('c.id', 'DESC')
       .take(take)
       .skip((p - 1) * take)
@@ -45,12 +45,13 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
   async getCollection(collectionId: number): Promise<Collection | null> {
     return await this.createQueryBuilder('c')
       .where('c.id = :id', { id: collectionId })
-      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'cp', 'cpt', 'ck'])
+      .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt', 'cp', 'cpt', 'ck', 'cl'])
       .leftJoin('c.user', 'cu')
       .leftJoin('c.photospots', 'cp')
       .leftJoin('cp.photos', 'cpt')
       .leftJoin('c.collection_keywords', 'ck')
+      .leftJoin('c.collectionLikes', 'cl')
       .getOne();
-    }
   }
+}
 

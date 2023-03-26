@@ -3,7 +3,7 @@ import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Join } from 'src/meetups/entities/join.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
-import { CollectionKeyword } from 'src/collections/entities/collection.keyword.entity';
+import { CollectionLike } from 'src/collections/entities/collection.like.entity';
 import {
   ChildEntity,
   Column,
@@ -51,6 +51,9 @@ export class User {
   @OneToMany((type) => Collection, (collection) => collection.user)
   collections: Collection[];
 
+  @OneToMany((type) => CollectionLike, (collectionLike) => collectionLike.user)
+  collectionLikes: CollectionLike[];
+
   @OneToMany((type) => Photospot, (photospot) => photospot.user)
   photospots: Photospot[];
 
@@ -71,7 +74,7 @@ export class LocalUser extends User {
 }
 
 @ChildEntity('naver')
-export class NaverUser extends User {}
+export class NaverUser extends User { }
 
 @ChildEntity('kakao')
-export class KakaoUser extends User {}
+export class KakaoUser extends User { }
