@@ -71,6 +71,38 @@ describe('MeetupsService', () => {
     });
   });
 
+  describe('getMeetupsWithJoined Method', () => {
+    const userId = 1;
+    const page = 1;
+    const keyword = 'keyword';
+    it('success', async () => {
+      const mockReturnValue = [new Meetup()];
+      mockMeetupRepository.getMeetupsWithJoined.mockResolvedValue(mockReturnValue);
+      const result = await service.getMeetupsWithJoined(userId, page, keyword);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockMeetupRepository.getMeetupsWithJoined).toHaveBeenCalled();
+      expect(mockMeetupRepository.getMeetupsWithJoined).toHaveBeenCalledWith(userId, page, keyword);
+      expect(result).toBeInstanceOf(Array);
+    });
+  });
+
+  describe('getMeetupsWithMine Method', () => {
+    const userId = 1;
+    const page = 1;
+    const keyword = 'keyword';
+    it('success', async () => {
+      const mockReturnValue = [new Meetup()];
+      mockMeetupRepository.getMeetupsWithMine.mockResolvedValue(mockReturnValue);
+      const result = await service.getMeetupsWithMine(userId, page, keyword);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockMeetupRepository.getMeetupsWithMine).toHaveBeenCalled();
+      expect(mockMeetupRepository.getMeetupsWithMine).toHaveBeenCalledWith(userId, page, keyword);
+      expect(result).toBeInstanceOf(Array);
+    });
+  });
+
   describe('createMeetup Method', () => {
     const meetupDTO: CreateMeetupDTO = {
       userId: 1,
@@ -310,4 +342,7 @@ describe('MeetupsService', () => {
       expect(mockMeetupRepository.softDelete).toHaveBeenCalledWith(meetupId);
     });
   });
+
+  describe.skip('addJoinQueue Method', () => {});
+  describe.skip('waitFinish Method', () => {});
 });
