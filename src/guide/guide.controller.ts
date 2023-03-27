@@ -2,7 +2,7 @@ import { Body, Controller, Get } from '@nestjs/common';
 import { Faq } from 'src/admin/entities/faq.entity';
 import { GuideService } from 'src/guide/guide.service';
 
-@Controller('/api/service')
+@Controller('/api/guide')
 export class GuideController {
   constructor(private guideService: GuideService) { }
 
