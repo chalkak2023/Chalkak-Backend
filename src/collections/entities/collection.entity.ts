@@ -38,7 +38,9 @@ export class Collection {
   @ManyToOne((type) => User, (user) => user.collections)
   user: User;
 
-  @OneToMany((type) => Photospot, (photospot) => photospot.collection)
+  @OneToMany((type) => Photospot, (photospot) => photospot.collection, {
+    cascade: true,
+  })
   photospots: Photospot[];
 
   @OneToMany((type) => CollectionKeyword, (collection_keyword) => collection_keyword.collection, {

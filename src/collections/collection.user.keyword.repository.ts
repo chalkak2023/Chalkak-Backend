@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import { Injectable } from '@nestjs/common';
 import _ from 'lodash';
 import { DataSource, Repository } from 'typeorm';
@@ -6,12 +7,12 @@ import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.
 
 @Injectable()
 export class CollectionUserKeywordRepository extends Repository<Collection> {
-  constructor(private readonly dataSource: DataSource) {
+  constructor(private readonly dataSource: DataSource, private readonly configService: ConfigService) {
     super(Collection, dataSource.createEntityManager());
   }
 
   async getCollectionsList({ p, search, userId }: GetCollectionsListQueryDto) {
-    const take = 18;
+    const take = this.configService.get('COLLECTIONS_PAGE_LIMIT') || 18;
     const whereQuery = this.isThereSearchUserid(search, userId)
     return await this.createQueryBuilder('c')
       .where( whereQuery.q1, whereQuery.q2)

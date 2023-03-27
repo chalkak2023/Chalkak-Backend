@@ -1,4 +1,4 @@
-import { BadRequestException, NotAcceptableException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, NotAcceptableException, NotFoundException, Module } from '@nestjs/common';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
@@ -7,24 +7,97 @@ import { PhotospotService } from './photospot.service';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Photo } from './entities/photo.entity';
 import { User } from 'src/auth/entities/user.entity';
+import { PhotoKeyword } from './entities/photokeyword.entity';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { CollectionKeyword } from 'src/collections/entities/collection.keyword.entity';
 import { S3Service } from './../common/aws/s3.service';
+import { GoogleVisionService } from './../googleVision/GoogleVision.service';
+import { ConfigService } from '@nestjs/config';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 
 const moduleMocker = new ModuleMocker(global);
+const collectionId = 1;
+const photospotId = 1;
+const userId = 1;
+const photoId = 1;
+const files: any[] = ['test-file'];
+const imagePath = 'test-image-path';
+const mockInsertPhotospotResult = {
+  identifiers: [{ id: 1 }],
+};
+const mockInsertPhotoResult = {
+  identifiers: [{ id: 1 }],
+};
+const mockCollection: Collection = {
+  id: 1,
+  userId: 1,
+  title: '테스트',
+  description: '테스트 내용',
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  deletedAt: null,
+  user: new User(),
+  photospots: [new Photospot()],
+  collection_keywords: [new CollectionKeyword()],
+};
+const mockPhotospots: Photospot[] = [
+  {
+    id: 1,
+    userId: 1,
+    collectionId: 1,
+    title: '테스트',
+    description: '테스트 내용',
+    latitude: 123.123123123,
+    longitude: 222.2231231,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    user: new User(),
+    collection: new Collection(),
+    photos: [new Photo()],
+  },
+  {
+    id: 2,
+    userId: 2,
+    collectionId: 2,
+    title: '테스트',
+    description: '테스트 내용',
+    latitude: 123.123123123,
+    longitude: 222.2231231,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    deletedAt: null,
+    user: new User(),
+    collection: new Collection(),
+    photos: [new Photo()],
+  },
+];
+const mockPhoto = {
+  id: 1,
+  userId: 1,
+  photospotId: 1,
+  image: 'test-image-path',
+  createAt: new Date(),
+  user: new User(),
+  photospot: new Photospot(),
+  photoKeywords: [new PhotoKeyword()],
+}
 
-describe.skip('PhotospotService', () => {
+describe('PhotospotService', () => {
   let service: PhotospotService;
   let mockPhotospotRepository: jest.Mocked<Repository<Photospot>>;
   let mockCollectionRepository: jest.Mocked<Repository<Collection>>;
   let mockPhotoRepository: jest.Mocked<Repository<Photo>>;
+  let mockPhotoKeywordRepositor: jest.Mocked<Repository<PhotoKeyword>>;
   let mockS3Service: jest.Mocked<S3Service>;
+  let mockGoogleService: jest.Mocked<GoogleVisionService>;
+  let mockConfigService: jest.Mocked<ConfigService>;
   let mockDataSource: jest.Mocked<DataSource>;
   const PHOTOSPOT_REPOSITORY_TOKEN = getRepositoryToken(Photospot);
   const COLLECTION_REPOSITORY_TOKEN = getRepositoryToken(Collection);
   const PHOTO_REPOSITORY_TOKEN = getRepositoryToken(Photo);
+  const PHOTOKEYWORD_REPOSITORY_TOKEN = getRepositoryToken(PhotoKeyword);
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -37,7 +110,7 @@ describe.skip('PhotospotService', () => {
             findOne: jest.fn(),
             find: jest.fn(),
             update: jest.fn(),
-            softDelete: jest.fn(),
+            softRemove: jest.fn(),
           };
         }
         if (token === COLLECTION_REPOSITORY_TOKEN) {
@@ -49,6 +122,14 @@ describe.skip('PhotospotService', () => {
           return {
             findOne: jest.fn(),
             delete: jest.fn(),
+            createQueryBuilder: jest.fn(),
+            save: jest.fn(),
+          };
+        }
+        if (token === PHOTOKEYWORD_REPOSITORY_TOKEN) {
+          return {
+            save: jest.fn(),
+            findOne: jest.fn(),
           };
         }
         if (typeof token === 'function') {
@@ -63,7 +144,10 @@ describe.skip('PhotospotService', () => {
     mockPhotospotRepository = module.get(PHOTOSPOT_REPOSITORY_TOKEN);
     mockCollectionRepository = module.get(COLLECTION_REPOSITORY_TOKEN);
     mockPhotoRepository = module.get(PHOTO_REPOSITORY_TOKEN);
+    mockPhotoKeywordRepositor = module.get(PHOTOKEYWORD_REPOSITORY_TOKEN);
     mockS3Service = module.get(S3Service);
+    mockGoogleService = module.get(GoogleVisionService);
+    mockConfigService = module.get(ConfigService);
     mockDataSource = module.get(DataSource);
   });
 
@@ -72,35 +156,8 @@ describe.skip('PhotospotService', () => {
   });
 
   describe('Service createPhotospot', () => {
-    it('should be defined', () => {
-      expect(service.getAllPhotospot).toBeDefined();
-      expect(mockS3Service.putObject).toBeDefined();
-      expect(mockPhotospotRepository.insert).toBeDefined();
-      expect(mockCollectionRepository.findOne).toBeDefined();
-    });
-
     it('createPhotospot 성공', async () => {
       const dto = new CreatePhotospotDto();
-      const userId = 1;
-      const collectionId = 1;
-      // const { title, description, latitude, longitude } = dto;
-      const files = [{}] as Express.Multer.File[];
-      const imagePath = 'AWS path';
-      const collection = {
-        id: 1,
-        userId: 1,
-        title: '테스트',
-        description: '테스트 내용',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-        user: {} as User,
-        photospots: [{}] as Photospot[],
-        collection_keywords: [{}] as CollectionKeyword[],
-      };
-      const mockInsertPhotospotResult = {
-        identifiers: [{ id: 1 }],
-      };
       const mockQueryRunner = {
         connect: jest.fn(),
         startTransaction: jest.fn(),
@@ -116,16 +173,18 @@ describe.skip('PhotospotService', () => {
             }
             if (entity === Photo) {
               return {
-                insert: jest.fn().mockResolvedValue(null),
+                insert: jest.fn().mockResolvedValue(mockInsertPhotoResult),
               };
             }
           }),
         },
       } as unknown as QueryRunner;
 
-      mockDataSource.createQueryRunner.mockReturnValue(mockQueryRunner);
-      mockCollectionRepository.findOne.mockResolvedValue(collection);
-      mockS3Service.putObject.mockResolvedValue(imagePath);
+      service.isSafePhoto = jest.fn();
+      service.createImageKeyword = jest.fn();
+      jest.spyOn(mockS3Service, 'putObject').mockResolvedValue(imagePath);
+      jest.spyOn(mockDataSource, 'createQueryRunner').mockReturnValue(mockQueryRunner);
+      jest.spyOn(mockCollectionRepository, 'findOne').mockResolvedValue(mockCollection);
 
       await service.createPhotospot(dto, files, userId, collectionId);
       expect(mockCollectionRepository.findOne).toHaveBeenCalledTimes(1);
@@ -137,283 +196,205 @@ describe.skip('PhotospotService', () => {
       expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
       expect(mockQueryRunner.rollbackTransaction).not.toHaveBeenCalled();
       expect(mockQueryRunner.release).toHaveBeenCalled();
+      expect(service.isSafePhoto).toHaveBeenCalledTimes(1);
     });
-
-    // TO DO 실패의 경우 테스트 코드 제대로 작성
-    // it('createPhotospot 실패', async () => {
-    //   const dto = new CreatePhotospotDto();
-    //   const userId = 1;
-    //   const collectionId = 1;
-    //   const collection = {
-    //     id: 1,
-    //     userId: 1,
-    //     title: '테스트',
-    //     description: '테스트 내용',
-    //     createdAt: new Date(),
-    //     updatedAt: new Date(),
-    //     deletedAt: null,
-    //     user: {} as User,
-    //     photospots: [{}] as Photospot[],
-    //     collection_keywords: [{}] as CollectionKeyword[],
-    //   };
-    //   const { title, description, latitude, longitude } = dto;
-    //   const files = [{}] as Express.Multer.File[];
-    //   const imagePath = 'AWS path';
-
-    //   const mockQueryRunner = {
-    //     connect: jest.fn(),
-    //     startTransaction: jest.fn(),
-    //     commitTransaction: jest.fn(),
-    //     rollbackTransaction: jest.fn(),
-    //     release: jest.fn(),
-    //     manager: {
-    //       getRepository: jest.fn().mockImplementation((entity) => {
-    //         if (entity === Photospot) {
-    //           return {
-    //             insert: jest.fn().mockResolvedValue(new Error('에러야')),
-    //           };
-    //         }
-    //         if (entity === Photo) {
-    //           return {
-    //             insert: jest.fn().mockResolvedValue(null),
-    //           };
-    //         }
-    //       }),
-    //     },
-    //   } as unknown as QueryRunner;
-
-    //   mockDataSource.createQueryRunner.mockReturnValue(mockQueryRunner);
-    //   mockCollectionRepository.findOne.mockResolvedValue(collection);
-    //   mockS3Service.putObject.mockResolvedValue(imagePath);
-
-    //   await service.createPhotospot(dto, files, userId, collectionId);
-    //   expect(mockCollectionRepository.findOne).toHaveBeenCalledTimes(1);
-    //   expect(mockQueryRunner.connect).toHaveBeenCalled();
-    //   expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
-    //   expect(mockQueryRunner.manager.getRepository).toHaveBeenCalledWith(Photospot);
-    //   expect(
-    //     mockQueryRunner.manager.getRepository(Photo).insert({ title, description, latitude, longitude, userId, collectionId })
-    //   ).rejects.toThrow(new BadRequestException('요청이 올바르지 않습니다.'));
-    //   expect(mockS3Service.putObject).not.toHaveBeenCalled();
-    //   expect(mockQueryRunner.commitTransaction).not.toHaveBeenCalled();
-    //   expect(mockQueryRunner.rollbackTransaction).toHaveBeenCalled();
-    //   expect(mockQueryRunner.release).toHaveBeenCalled();
-
-    //   mockCollectionRepository.findOne.mockResolvedValue(collection)
-    //   mockPhotospotRepository.insert.mockRejectedValue(new Error());
-    //   expect(service.createPhotospot(dto, files, userId, collectionId)).rejects.toThrowError(
-    //     new BadRequestException('요청이 올바르지 않습니다.')
-    //   );
-    // });
   });
 
-  describe('Service getAllPhotospot', () => {
-    it('should db defined', () => {
-      expect(service.getAllPhotospot).toBeDefined();
-    });
-
+  describe('service getAllPhotospot', () => {
     it('getAllPhotospot 성공', async () => {
-      const collectionId = 1;
-      const photospots = [new Photospot()];
-      const collection = {
-        id: 1,
-        userId: 1,
-        title: '테스트',
-        description: '테스트 내용',
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-        user: {} as User,
-        photospots: [{}] as Photospot[],
-        collection_keywords: [{}] as CollectionKeyword[],
-      };
+      jest.spyOn(mockCollectionRepository, 'findOne').mockResolvedValue(mockCollection);
+      jest.spyOn(mockPhotospotRepository, 'find').mockResolvedValue(mockPhotospots);
 
-      mockCollectionRepository.findOne.mockResolvedValue(collection);
-      mockPhotospotRepository.find.mockResolvedValue(photospots);
-      expect(service.getAllPhotospot(collectionId)).resolves.toStrictEqual(photospots);
-    });
-
-    it('getAllPhotospot 해당 값 못 찾을 경우', async () => {
-      const collectionId = 1;
-      const collection = null;
-
-      mockCollectionRepository.findOne.mockResolvedValue(collection);
-      expect(service.getAllPhotospot(collectionId)).rejects.toThrowError(
-        new NotFoundException('해당 콜렉션을 찾을 수 없습니다.')
-      );
+      const returnPhotospots = await service.getAllPhotospot(collectionId);
+      expect(mockCollectionRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(mockPhotospotRepository.find).toHaveBeenCalledTimes(1);
+      expect(returnPhotospots).toEqual(mockPhotospots);
     });
   });
 
-  describe('Service getPhotospot', () => {
-    it('should db defined', () => {
-      expect(service.getPhotospot).toBeDefined();
-    });
+  describe('service getPhotospot', () => {
     it('getPhotospot 성공', async () => {
-      const photospotId = 1;
-      const photospot = new Photospot();
+      jest.spyOn(mockPhotospotRepository, 'findOne').mockResolvedValue(mockPhotospots[0]);
 
-      mockPhotospotRepository.findOne.mockResolvedValue(photospot);
-      expect(service.getPhotospot(photospotId)).resolves.toStrictEqual(photospot);
-    });
-
-    it('getPhotospot 해당 값 못 찾을 경우', async () => {
-      const photospotId = 1;
-
-      mockPhotospotRepository.findOne.mockResolvedValue(null);
-      expect(service.getPhotospot(photospotId)).rejects.toThrowError(new NotFoundException('해당 포토스팟을 찾을 수 없습니다.'));
+      const returnPhtospot = await service.getPhotospot(photospotId);
+      expect(mockPhotospotRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(returnPhtospot).toEqual(mockPhotospots[0]);
     });
   });
 
-  describe('Service modifyPhotospot', () => {
-    const photospot = {
-      id: 1,
-      userId: 1,
-      collectionId: 1,
-      title: '테스트',
-      description: '테스트입니다',
-      latitude: 33.3333,
-      longitude: 111.11111,
-      photos: [new Photo()],
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      deletedAt: null,
-      user: new User(),
-      collection: new Collection(),
-    };
+  describe('service modifyPhotospot', () => {
+    it('modifyPhotospot 성공', async () => {
+      const dto = new ModifyPhotospotDto();
+      const mockQueryRunner = {
+        connect: jest.fn(),
+        startTransaction: jest.fn(),
+        commitTransaction: jest.fn(),
+        rollbackTransaction: jest.fn(),
+        release: jest.fn(),
+        manager: {
+          getRepository: jest.fn().mockImplementation((entity) => {
+            if (entity === Photospot) {
+              return {
+                update: jest.fn(),
+              };
+            }
+            if (entity === Photo) {
+              return {
+                insert: jest.fn().mockResolvedValue(mockInsertPhotoResult),
+                delete: jest.fn(),
+              };
+            }
+          }),
+        },
+      } as unknown as QueryRunner;
+      service.getPhotospot = jest.fn(async () => mockPhotospots[0]);
+      service.createImageKeyword = jest.fn();
+      service.isSafePhoto = jest.fn();
+      jest.spyOn(mockS3Service, 'putObject').mockResolvedValue(imagePath);
+      jest.spyOn(mockDataSource, 'createQueryRunner').mockReturnValue(mockQueryRunner);
 
-    it('should db defined', () => {
-      expect(service.modifyPhotospot).toBeDefined();
-    });
-    
-    // TO DO 포토스팟 수정 부분 테스트 코드 제대로 작성
-    // it('modifyPhotospot image가 있을 때 성공', async () => {
-    //   const dto = { title: '테스트', description: '테스트 설명', deletePhotos: [1, 2, 3] };
-    //   const photospotId = 1;
-    //   const files = [{}] as Express.Multer.File[];
-    //   const imagePath = 'AWS path';
-    //   const userId = 1;
-
-    //   const mockQueryRunner = {
-    //     connect: jest.fn(),
-    //     startTransaction: jest.fn(),
-    //     commitTransaction: jest.fn(),
-    //     rollbackTransaction: jest.fn(),
-    //     release: jest.fn(),
-    //     manager: {
-    //       getRepository: jest.fn().mockImplementation((entity) => {
-    //         if (entity === Photospot) {
-    //           return {
-    //             update: jest.fn(),
-    //           };
-    //         }
-    //         if (entity === Photo) {
-    //           return {
-    //             insert: jest.fn().mockResolvedValue(null),
-    //           };
-    //         }
-    //       }),
-    //     },
-    //   } as unknown as QueryRunner;
-
-    //   mockPhotospotRepository.findOne.mockResolvedValue(photospot);
-    //   mockDataSource.createQueryRunner.mockReturnValue(mockQueryRunner);
-    //   mockS3Service.putObject.mockResolvedValue(imagePath);
-
-    //   await service.modifyPhotospot(dto, files, photospotId, userId);
-    //   expect(mockPhotospotRepository.findOne).toHaveBeenCalledTimes(1);
-    //   expect(mockQueryRunner.connect).toHaveBeenCalled();
-    //   expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
-    //   expect(mockQueryRunner.manager.getRepository).toHaveBeenCalledWith(Photospot);
-    //   expect(mockS3Service.putObject).toHaveBeenCalled();
-    //   expect(mockQueryRunner.manager.getRepository).toHaveBeenCalledWith(Photo);
-    //   expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
-    //   expect(mockQueryRunner.rollbackTransaction).not.toHaveBeenCalled();
-    //   expect(mockQueryRunner.release).toHaveBeenCalled();
-    //   mockS3Service.putObject.mockResolvedValue(imagePath);
-    // });
-
-    // TO DO 포토스팟 수정 부분 테스트 코드 제대로 작성
-    //   it('modifyPhotospot image가 없을 때 성공', async () => {
-    //     const dto = new ModifyPhotospotDto();
-    //     const photospotId = 1;
-    //     const userId = 1;
-
-    //     mockPhotospotRepository.findOne.mockResolvedValue(photospot);
-    //     await service.modifyPhotospot(dto, photospotId,userId);
-    //     expect(mockS3Service.putObject).toHaveBeenCalledTimes(0);
-    //     expect(mockPhotospotRepository.update).toHaveBeenCalledTimes(1);
-    //     expect(mockPhotospotRepository.update).toHaveBeenCalledWith({ id: photospotId }, dto);
-    //   });
-
-    //   it('modifyPhotospot 해당 값 없을 때 실패', async () => {
-    //     const dto = { title: '테스트', description: '테스트 설명', image: {} as FileSystemStoredFile };
-    //     const photospotId = 1;
-    //     const userId = 1;
-
-    //     mockPhotospotRepository.findOne.mockResolvedValue(null);
-    //     expect(service.modifyPhotospot(dto, photospotId,userId)).rejects.toThrowError(new NotFoundException('해당 포토스팟을 찾을 수 없습니다.'));
-    //   })
-
-    //   it('modifyPhotospot 권한이 없는 수정 실패', async () => {
-    //     const dto = new ModifyPhotospotDto();
-    //     const photospotId = 1;
-    //     const userId = 2;
-
-    //     mockPhotospotRepository.findOne.mockResolvedValue(photospot);
-    //     expect(service.modifyPhotospot(dto, photospotId,userId)).rejects.toThrowError(new NotAcceptableException('해당 포토스팟에 접근 할 수 없습니다'));
-    //   })
-    // });
-
-    describe('Service deletePhotospot', () => {
-      const photospot = {
-        id: 1,
-        userId: 1,
-        collectionId: 1,
-        title: '테스트',
-        description: '테스트입니다',
-        latitude: 33.3333,
-        longitude: 111.11111,
-        photos: [new Photo()],
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        deletedAt: null,
-        user: new User(),
-        collection: new Collection(),
-      };
-
-      it('should db defined', () => {
-        expect(service.deletePhotospot).toBeDefined();
-      });
-      it('deletePhotospot 성공', async () => {
-        const photospotId = 1;
-        const userId = 1;
-
-        mockPhotospotRepository.findOne.mockResolvedValue(photospot);
-
-        await service.deletePhotospot(photospotId, userId);
-        expect(mockPhotospotRepository.softDelete).toHaveBeenCalledTimes(1);
-        expect(mockPhotospotRepository.softDelete).toHaveBeenCalledWith(photospotId);
-      });
-
-      it('deletePhotospot 해당 값 못 찾을 경우', async () => {
-        const photospotId = 1;
-        const userId = 1;
-
-        mockPhotospotRepository.findOne.mockResolvedValue(null);
-        expect(service.deletePhotospot(photospotId, userId)).rejects.toThrowError(
-          new NotFoundException('해당 포토스팟을 찾을 수 없습니다.')
-        );
-      });
-
-      it('deletePhotospot 권한이 없는 실패', async () => {
-        const photospotId = 1;
-        const userId = 2;
-
-        mockPhotospotRepository.findOne.mockResolvedValue(photospot);
-        expect(service.deletePhotospot(photospotId, userId)).rejects.toThrowError(
-          new NotAcceptableException('해당 포토스팟에 접근 할 수 없습니다')
-        );
-      });
+      await service.modifyPhotospot(dto, files, userId, photospotId);
+      expect(service.getPhotospot).toHaveBeenCalledTimes(1);
+      expect(await service.getPhotospot(photospotId)).toEqual(mockPhotospots[0]);
+      expect(mockQueryRunner.connect).toHaveBeenCalled();
+      expect(mockQueryRunner.startTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.manager.getRepository).toHaveBeenCalledWith(Photospot);
+      expect(mockS3Service.putObject).toHaveBeenCalled();
+      expect(mockQueryRunner.manager.getRepository).toHaveBeenCalledWith(Photo);
+      expect(mockQueryRunner.commitTransaction).toHaveBeenCalled();
+      expect(mockQueryRunner.rollbackTransaction).not.toHaveBeenCalled();
+      expect(mockQueryRunner.release).toHaveBeenCalled();
     });
   });
+
+  describe('service deletePhotospot', () => {
+    it('deletePhotospot 성공', async () => {
+      service.getPhotospot = jest.fn(async () => mockPhotospots[0]);
+
+      await service.deletePhotospot(photospotId, userId);
+      expect(mockPhotospotRepository.softRemove).toHaveBeenCalledTimes(1);
+      expect(mockPhotospotRepository.softRemove).toHaveBeenCalledWith(mockPhotospots[0]);
+      expect(mockPhotoRepository.delete).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('service getRandomPhoto', () => {
+    it('getRandomPhoto 성공', async () => {
+      const photos = [
+        {
+          id: 1,
+          image: 'photo1.jpg',
+          photospot: {
+            id: 1,
+            collection: {
+              id: 1,
+            },
+          },
+        },
+        {
+          id: 2,
+          image: 'photo2.jpg',
+          photospot: {
+            id: 2,
+            collection: {
+              id: 2,
+            },
+          },
+        },
+      ];
+
+      jest.spyOn(mockPhotoRepository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(photos),
+      } as any);
+
+      const randomPhoto = await service.getRandomPhoto();
+      expect(mockPhotoRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(randomPhoto).toEqual(photos);
+    });
+  });
+
+  describe('service createImageKeyword', () => {
+    it('createImageKeyword 성공', async () => {
+      const photoKeywords = ['test1', 'test2', 'test3'];
+      const preKeyword = { id: 1, keyword: 'test1', photos: [mockPhoto] };
+      const insertKeyword = { id: 2, keyword: 'test4', photos: [mockPhoto] };
+      
+      jest.spyOn(mockGoogleService, 'imageLabeling').mockResolvedValue(photoKeywords);
+      jest.spyOn(mockPhotoKeywordRepositor, 'findOne').mockResolvedValue(preKeyword);
+      jest.spyOn(mockPhotoKeywordRepositor, 'findOne').mockResolvedValueOnce(null);
+      jest.spyOn(mockPhotoKeywordRepositor, 'save').mockResolvedValue(insertKeyword);
+      jest.spyOn(mockPhotoRepository, 'findOne').mockResolvedValue(mockPhoto);
+
+      await service.createImageKeyword(imagePath, photoId);
+
+      expect(mockGoogleService.imageLabeling).toHaveBeenCalledTimes(1);
+      expect(mockGoogleService.imageLabeling).toHaveBeenCalledWith(imagePath);
+      expect(await mockGoogleService.imageLabeling(imagePath)).toEqual(photoKeywords);
+      expect(mockPhotoKeywordRepositor.findOne).toHaveBeenCalledTimes(3);
+      expect(mockPhotoKeywordRepositor.save).toHaveBeenCalledTimes(1);
+      expect(mockPhotoRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(mockPhotoRepository.save).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('service getRecommendPhoto', () => {
+    it('getRecommendPhoto 성공', async () => {
+      jest.spyOn(mockPhotoRepository, 'findOne').mockResolvedValue(mockPhoto);
+      jest.spyOn(mockPhotoRepository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        groupBy: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        limit: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([mockPhoto]),
+      } as any);
+
+      const recommendPhoto = await service.getRecommendPhoto(photoId);
+      expect(mockPhotoRepository.findOne).toHaveBeenCalledTimes(1);
+      expect(mockPhotoRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(recommendPhoto).toEqual([mockPhoto])
+    })
+  })
+
+  describe('service getAllPhoto', () => {
+    it('getAllPhoto 성공', async () => {
+      const take = 18;
+      const page = 1;
+      jest.spyOn(mockConfigService, 'get').mockReturnValue(take);
+      jest.spyOn(mockPhotoRepository, 'createQueryBuilder').mockReturnValue({
+        leftJoinAndSelect: jest.fn().mockReturnThis(),
+        select: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue([mockPhoto]),
+      } as any);
+
+      const returnPhoto = await service.getAllPhoto(page);
+      expect(mockConfigService.get).toHaveBeenCalledTimes(1);
+      expect(mockPhotoRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(returnPhoto).toEqual([mockPhoto]);
+    })
+  })
+
+  describe('service isSafePhoto', () => {
+    it('isSafePhoto 사진 문제없음 성공', async () => {
+      const isSafe = true
+
+      service.getPhotospot = jest.fn( async () => mockPhotospots[0]);
+      jest.spyOn(mockGoogleService, 'imageSafeGuard').mockResolvedValue(isSafe);
+
+      await service.isSafePhoto(photospotId);
+      expect(service.getPhotospot).toHaveBeenCalledTimes(1)
+      expect(service.getPhotospot).toHaveBeenCalledWith(photospotId)
+      expect(mockGoogleService.imageSafeGuard).toHaveBeenCalled();
+      expect(mockPhotospotRepository.softRemove).not.toHaveBeenCalled();
+      expect(mockPhotoRepository.delete).not.toHaveBeenCalled();
+    }) 
+  })
 });
