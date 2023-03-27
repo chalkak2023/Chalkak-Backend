@@ -161,4 +161,23 @@ describe('MeetupsController', () => {
       expect(mockService.deleteJoin).toHaveBeenCalledWith(meetupId, userDTO.id);
     });
   });
+
+  describe('POST /api/meetups/:meetupId/chat', () => {
+    const meetupId = 1;
+    const userDTO: decodedAccessTokenDTO = {
+      id: 1,
+      username: 'test',
+      email: 'test@gmail.com',
+      role: 'user',
+      iat: 0,
+      exp: 0
+    }
+    it('addChat', async () => {
+      mockService.addChat.mockResolvedValue();
+      await controller.addChat(meetupId, userDTO);
+
+      expect(mockService.addChat).toHaveBeenCalled();
+      expect(mockService.addChat).toHaveBeenCalledWith(meetupId, userDTO.id);
+    });
+  });
 });

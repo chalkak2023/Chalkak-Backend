@@ -1,5 +1,5 @@
 import { User } from 'src/auth/entities/user.entity';
-import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
+import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 import { Join } from './join.entity';
 
 @Entity({ schema: 'chalkak', name: 'meetup' })
@@ -30,6 +30,9 @@ export class Meetup {
   
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date | null;
 
   @ManyToOne(() => User, (user) => user.meetups)
   user: User;

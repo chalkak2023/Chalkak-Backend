@@ -19,9 +19,9 @@ import { AuthService } from '../auth.service';
 import {
   ChangePasswordBodyDTO,
   decodedAccessTokenDTO,
-  PostEmailVerificationBodyDTO,
-  PutChangePasswordVerificationBodyDTO,
-  PutEmailVerificationBodyDTO,
+  SendEmailForSignupBodyDTO,
+  VerifyEmailForChangePasswordBodyDTO,
+  VerifyEmailForSignupBodyDTO,
   SignUpBodyDTO,
   SocialLoginBodyDTO,
 } from '../dto/auth.dto';
@@ -400,32 +400,32 @@ describe('AuthService', () => {
     });
   });
 
-  describe('postSignupEmailVerification', () => {
+  describe('SendEmailForSignup', () => {
     it('should be defined', () => {
-      expect(service.postSignupEmailVerification).toBeDefined();
-      expect(typeof service.postSignupEmailVerification).toBe('function');
+      expect(service.SendEmailForSignup).toBeDefined();
+      expect(typeof service.SendEmailForSignup).toBe('function');
     });
 
     it('정상 작동', () => {
-      const body: PostEmailVerificationBodyDTO = {
+      const body: SendEmailForSignupBodyDTO = {
         email: 'test@gmail.com',
       };
 
       mockLocalUsersRepository.findOne.mockResolvedValueOnce(null);
 
-      expect(service.postSignupEmailVerification(body)).resolves.toStrictEqual({
+      expect(service.SendEmailForSignup(body)).resolves.toStrictEqual({
         message: '회원가입 이메일 인증번호가 요청되었습니다.',
       });
     });
 
     it('이미 가입된 이메일', () => {
-      const body: PostEmailVerificationBodyDTO = {
+      const body: SendEmailForSignupBodyDTO = {
         email: 'test@gmail.com',
       };
 
       mockLocalUsersRepository.findOne.mockResolvedValueOnce(users[0] as LocalUser);
 
-      expect(service.postSignupEmailVerification(body)).rejects.toThrowError(
+      expect(service.SendEmailForSignup(body)).rejects.toThrowError(
         new ConflictException({
           message: '이미 가입된 이메일입니다.',
         })
@@ -433,34 +433,34 @@ describe('AuthService', () => {
     });
   });
 
-  describe('putSignupEmailVerification', () => {
+  describe('VerifyEmailForSignup', () => {
     it('should be defined', () => {
-      expect(service.putSignupEmailVerification).toBeDefined();
-      expect(typeof service.putSignupEmailVerification).toBe('function');
+      expect(service.VerifyEmailForSignup).toBeDefined();
+      expect(typeof service.VerifyEmailForSignup).toBe('function');
     });
 
     it('정상 작동', () => {
-      const body: PutEmailVerificationBodyDTO = {
+      const body: VerifyEmailForSignupBodyDTO = {
         email: 'test@gmail.com',
         verifyToken: 123456,
       };
 
       mockAuthCacheService.getVerifyToken.mockResolvedValueOnce(body.verifyToken);
 
-      expect(service.putSignupEmailVerification(body)).resolves.toStrictEqual({
+      expect(service.VerifyEmailForSignup(body)).resolves.toStrictEqual({
         message: '회원가입 이메일 인증번호가 확인되었습니다.',
       });
     });
 
     it('인증번호가 캐시되어있지 않음', () => {
-      const body: PutEmailVerificationBodyDTO = {
+      const body: VerifyEmailForSignupBodyDTO = {
         email: 'test@gmail.com',
         verifyToken: 123456,
       };
 
       mockAuthCacheService.getVerifyToken.mockResolvedValueOnce(undefined);
 
-      expect(service.putSignupEmailVerification(body)).rejects.toThrowError(
+      expect(service.VerifyEmailForSignup(body)).rejects.toThrowError(
         new NotFoundException({
           message: '인증번호를 요청하지 않았거나 만료되었습니다.',
         })
@@ -468,14 +468,14 @@ describe('AuthService', () => {
     });
 
     it('인증번호가 틀림', () => {
-      const body: PutEmailVerificationBodyDTO = {
+      const body: VerifyEmailForSignupBodyDTO = {
         email: 'test@gmail.com',
         verifyToken: 123456,
       };
 
       mockAuthCacheService.getVerifyToken.mockResolvedValueOnce(body.verifyToken + 10);
 
-      expect(service.putSignupEmailVerification(body)).rejects.toThrowError(
+      expect(service.VerifyEmailForSignup(body)).rejects.toThrowError(
         new UnauthorizedException({
           message: '인증번호가 일치하지 않습니다.',
         })
@@ -491,6 +491,29 @@ describe('AuthService', () => {
 
     it('정상 작동', () => {
       const body: ChangePasswordBodyDTO = {
+        password: 'test1235!'
+      }
+
+      const decodedPayload: decodedAccessTokenDTO = {
+        id: 1,
+        username: 'testman',
+        email: 'test@gmail.com',
+        role: 'user',
+      } as decodedAccessTokenDTO;
+
+      mockLocalUsersRepository.findOne.mockResolvedValueOnce({
+        id: 1,
+        password: 'test1234!|10'
+      } as LocalUser);
+      mockAuthHashService.comparePassword.mockImplementationOnce((password, hash) => hash.split('|')[0] === password);
+
+      expect(service.changePassword(body, decodedPayload)).resolves.toStrictEqual({
+        message: '비밀번호가 변경되었습니다.',
+      });
+    });
+    
+    it('기존 비밀번호와 같은 경우 실패', () => {
+      const body: ChangePasswordBodyDTO = {
         password: 'test1234!'
       }
 
@@ -501,9 +524,17 @@ describe('AuthService', () => {
         role: 'user',
       } as decodedAccessTokenDTO;
 
-      expect(service.changePassword(body, decodedPayload)).resolves.toStrictEqual({
-        message: '비밀번호가 변경되었습니다.',
-      });
+      mockLocalUsersRepository.findOne.mockResolvedValueOnce({
+        id: 1,
+        password: 'test1234!|10'
+      } as LocalUser);
+      mockAuthHashService.comparePassword.mockImplementationOnce((password, hash) => hash.split('|')[0] === password);
+
+      expect(service.changePassword(body, decodedPayload)).rejects.toThrowError(
+        new ConflictException({
+          message: '기존의 비밀번호로는 변경이 불가능합니다.'
+        })
+      );
     });
   });
 
@@ -541,10 +572,10 @@ describe('AuthService', () => {
     });
   });
 
-  describe('putChangePasswordEmailVerification', () => {
+  describe('verifyEmailForChangePassword', () => {
     it('should be defined', () => {
-      expect(service.putChangePasswordEmailVerification).toBeDefined();
-      expect(typeof service.putChangePasswordEmailVerification).toBe('function');
+      expect(service.verifyEmailForChangePassword).toBeDefined();
+      expect(typeof service.verifyEmailForChangePassword).toBe('function');
     });
 
     it('정상 작동', () => {
@@ -555,13 +586,13 @@ describe('AuthService', () => {
         role: 'user',
       } as decodedAccessTokenDTO;
 
-      const body: PutChangePasswordVerificationBodyDTO = {
+      const body: VerifyEmailForChangePasswordBodyDTO = {
         verifyToken: 123456,
       };
 
       mockAuthCacheService.getVerifyToken.mockResolvedValueOnce(body.verifyToken);
 
-      expect(service.putChangePasswordEmailVerification(body, decodedPayload)).resolves.toStrictEqual({
+      expect(service.verifyEmailForChangePassword(body, decodedPayload)).resolves.toStrictEqual({
         message: '패스워드변경 이메일 인증번호가 확인되었습니다.',
       });
     });
@@ -573,11 +604,11 @@ describe('AuthService', () => {
         role: 'user',
       } as decodedAccessTokenDTO;
 
-      const body: PutChangePasswordVerificationBodyDTO = {
+      const body: VerifyEmailForChangePasswordBodyDTO = {
         verifyToken: 123456,
       };
 
-      expect(service.putChangePasswordEmailVerification(body, decodedPayload)).rejects.toThrowError(
+      expect(service.verifyEmailForChangePassword(body, decodedPayload)).rejects.toThrowError(
         new BadRequestException({
           message: '이메일, 패스워드로 가입한 유저가 아닙니다.',
         })
@@ -592,13 +623,13 @@ describe('AuthService', () => {
         role: 'user',
       } as decodedAccessTokenDTO;
 
-      const body: PutChangePasswordVerificationBodyDTO = {
+      const body: VerifyEmailForChangePasswordBodyDTO = {
         verifyToken: 123456,
       };
 
       mockAuthCacheService.getVerifyToken.mockResolvedValueOnce(undefined);
 
-      expect(service.putChangePasswordEmailVerification(body, decodedPayload)).rejects.toThrowError(
+      expect(service.verifyEmailForChangePassword(body, decodedPayload)).rejects.toThrowError(
         new NotFoundException({
           message: '인증번호를 요청하지 않았거나 만료되었습니다.',
         })
@@ -613,13 +644,13 @@ describe('AuthService', () => {
         role: 'user',
       } as decodedAccessTokenDTO;
 
-      const body: PutChangePasswordVerificationBodyDTO = {
+      const body: VerifyEmailForChangePasswordBodyDTO = {
         verifyToken: 123456,
       };
 
       mockAuthCacheService.getVerifyToken.mockResolvedValueOnce(body.verifyToken + 10);
 
-      expect(service.putChangePasswordEmailVerification(body, decodedPayload)).rejects.toThrowError(
+      expect(service.verifyEmailForChangePassword(body, decodedPayload)).rejects.toThrowError(
         new UnauthorizedException({
           message: '인증번호가 일치하지 않습니다.',
         })

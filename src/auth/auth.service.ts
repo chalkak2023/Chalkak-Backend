@@ -10,13 +10,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LocalUser, KakaoUser, NaverUser, User } from './entities/user.entity';
 import {
-  PostEmailVerificationBodyDTO,
+  SendEmailForSignupBodyDTO,
   SignUpBodyDTO,
-  PutEmailVerificationBodyDTO,
+  VerifyEmailForSignupBodyDTO,
   ChangePasswordBodyDTO,
   SocialLoginBodyDTO,
   decodedAccessTokenDTO,
-  PutChangePasswordVerificationBodyDTO,
+  VerifyEmailForChangePasswordBodyDTO,
+  SendEmailForResetPasswordBodyDTO,
+  ResetPasswordWithEmailVerificationBodyDTO,
 } from './dto/auth.dto';
 import { MailerAuthService } from 'src/mailer/services/mailer.auth.service';
 import _ from 'lodash';
@@ -73,6 +75,7 @@ export class AuthService {
         message: '회원가입하는데 문제가 발생했습니다.',
       });
     }
+    this.authCacheService.deleteVerifyToken('signup', email);
     return {
       message: '회원가입 되었습니다.',
     };
@@ -107,7 +110,7 @@ export class AuthService {
     };
   }
 
-  async postSignupEmailVerification(body: PostEmailVerificationBodyDTO) {
+  async SendEmailForSignup(body: SendEmailForSignupBodyDTO) {
     const { email } = body;
     const user = await this.localUsersRepository.findOne({where: { email }})
     if (!_.isNil(user)) {
@@ -123,7 +126,7 @@ export class AuthService {
     };
   }
 
-  async putSignupEmailVerification(body: PutEmailVerificationBodyDTO) {
+  async VerifyEmailForSignup(body: VerifyEmailForSignupBodyDTO) {
     const { email, verifyToken } = body;
     
     const cachedVerifyToken = await this.authCacheService.getVerifyToken('signup', email);
@@ -144,6 +147,12 @@ export class AuthService {
 
   async changePassword(body: ChangePasswordBodyDTO, user: decodedAccessTokenDTO) {
     const { password } = body;
+    const userInfo = await this.localUsersRepository.findOne({where: {id: user.id}, select: ['id', 'password']});
+    if (this.authHashService.comparePassword(password, userInfo!.password)) {
+      throw new ConflictException({
+        message: '기존의 비밀번호로는 변경이 불가능합니다.'
+      })
+    }
     const passwordHash = this.authHashService.hashPassword(password);
     await this.localUsersRepository.update(user.id, { password: passwordHash });
     return {
@@ -166,7 +175,7 @@ export class AuthService {
     };
   }
 
-  async putChangePasswordEmailVerification(body: PutChangePasswordVerificationBodyDTO, user: decodedAccessTokenDTO) {
+  async verifyEmailForChangePassword(body: VerifyEmailForChangePasswordBodyDTO, user: decodedAccessTokenDTO) {
     const { verifyToken } = body;
     const { email } = user;
     if (_.isNil(email)) {
@@ -185,6 +194,7 @@ export class AuthService {
         message: '인증번호가 일치하지 않습니다.',
       });
     }
+    this.authCacheService.deleteVerifyToken('changePassword', email);
     return {
       message: '패스워드변경 이메일 인증번호가 확인되었습니다.',
     };
@@ -272,6 +282,54 @@ export class AuthService {
       accessToken: newAccessToken,
       message: '액세스 토큰을 재발급받았습니다.',
     };
+  }
+
+  async sendEmailForResetPassword(body: SendEmailForResetPasswordBodyDTO) {
+    const { email, url } = body;
+    const user = await this.localUsersRepository.findOne({where: { email }})
+    if (_.isNil(user)) {
+      throw new BadRequestException({
+        message: '가입되지 않은 이메일입니다.'
+      })
+    }
+    const verifyToken = this.createVerifyToken();
+    await this.mailerAuthService.sendResetPasswordAuthMail(url, email, user.username, verifyToken);
+    this.authCacheService.storeVerifyToken('resetPassword', email, verifyToken, 60 * 10);
+    return {
+      message: '비밀번호 재설정 이메일이 발송되었습니다.',
+    };
+  }
+
+  async resetPasswordWithEmailVerification(body: ResetPasswordWithEmailVerificationBodyDTO) {
+    const { email, verifyToken, password } = body;
+    const cachedVerifyToken = await this.authCacheService.getVerifyToken('resetPassword', email);
+    if (_.isNil(cachedVerifyToken)) {
+      throw new NotFoundException({
+        message: '인증번호를 요청하지 않았거나 만료되었습니다.',
+      });
+    }
+    if (verifyToken != cachedVerifyToken) {
+      throw new UnauthorizedException({
+        message: '인증번호가 일치하지 않습니다.',
+      });
+    }
+    const user = await this.localUsersRepository.findOne({where: {email}, select: ['id', 'email', 'password']});
+    if (_.isNil(user)) {
+      throw new NotFoundException({
+        message: '탈퇴한 유저입니다.',
+      });
+    }
+    if (this.authHashService.comparePassword(password, user.password)) {
+      throw new ConflictException({
+        message: '기존의 비밀번호로는 변경이 불가능합니다.'
+      })
+    }
+    user.password = this.authHashService.hashPassword(password);
+    await this.localUsersRepository.save(user);
+    this.authCacheService.deleteVerifyToken('resetPassword', email);
+    return {
+      message: '비밀번호가 재설정되었습니다.'
+    }
   }
 
   private createVerifyToken(): number {

@@ -12,6 +12,7 @@ import { CollectionKeyword } from 'src/collections/entities/collection.keyword.e
 import { LocalUser } from '../../auth/entities/user.entity';
 import { Photo } from './../../photospot/entities/photo.entity';
 import { PhotoKeyword } from './../../photospot/entities/photokeyword.entity';
+import { Chat } from 'src/chat/entities/chat.entity';
 
 @Injectable()
 export class TypeOrmConfigService implements TypeOrmOptionsFactory {
@@ -26,7 +27,7 @@ export class TypeOrmConfigService implements TypeOrmOptionsFactory {
       password: this.configService.get<string>('DATABASE_PASSWORD'),
       database: this.configService.get<string>('DATABASE_NAME'),
       synchronize: Boolean(this.configService.get<string>('DATABASE_SYNC')), // 배포 시 false
-      entities: [User, LocalUser, NaverUser, KakaoUser, Collection, Photospot, Meetup, Join, Admin, Faq, CollectionKeyword, Photo, PhotoKeyword],
+      entities: [User, LocalUser, NaverUser, KakaoUser, Collection, Photospot, Meetup, Join, Admin, Faq, CollectionKeyword, Photo, PhotoKeyword, Chat],
     };
   }
 }

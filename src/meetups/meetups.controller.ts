@@ -48,4 +48,10 @@ export class MeetupsController {
   async deleteJoin(@Param('meetupId') meetupId: number, @InjectUser() userDTO: decodedAccessTokenDTO): Promise<void> {
     return await this.meetupsService.deleteJoin(meetupId, userDTO.id);
   }
+
+  @Post(':meetupId/chat')
+  @UserGuard
+  async addChat(@Param('meetupId') meetupId: number, @InjectUser() userDTO: decodedAccessTokenDTO) {
+    return await this.meetupsService.addChat(meetupId, userDTO.id);
+  }
 }
