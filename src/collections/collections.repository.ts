@@ -13,7 +13,7 @@ export class CollectionsRepository extends Repository<Collection> {
 
   async getCollectionsList({ p, search, userId }: GetCollectionsListQueryDto) {
     const take = this.configService.get('COLLECTIONS_PAGE_LIMIT') || 18;
-    const whereQuery = this.isThereSearchUserid(search, userId)
+    const whereQuery = search || userId ? this.isThereSearchUserid(search, userId) : { q1: '1', q2: {} };
     return await this.createQueryBuilder('c')
       .where(whereQuery.q1, whereQuery.q2)
       .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt'])
