@@ -1,14 +1,8 @@
-import { IsNotEmpty, IsNumber, IsString } from 'class-validator';
+import { PickType } from '@nestjs/mapped-types';
+import { IsNumber } from 'class-validator';
+import { SignupAdminReqDto } from './signup.admin.req.dto';
 
-export class SigninAdminDto {
+export class SigninAdminDto extends PickType(SignupAdminReqDto, ['account', 'password']) {
   @IsNumber()
   id: number;
-
-  @IsNotEmpty()
-  @IsString()
-  account: string;
-
-  @IsNotEmpty()
-  @IsString()
-  password: string;
 }
