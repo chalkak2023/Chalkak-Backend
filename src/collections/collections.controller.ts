@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards, UsePipes, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, DefaultValuePipe, Delete, Get, Param, ParseIntPipe, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { InjectUser, Token } from 'src/auth/auth.decorator';
 import { CollectionsService } from 'src/collections/collections.service';
 import { JwtGuard } from 'src/auth/guard/jwt/jwt.guard';
@@ -6,7 +6,6 @@ import { Collection } from 'src/collections/entities/collection.entity';
 import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { decodedAccessTokenDTO } from 'src/auth/dto/auth.dto';
 import { UpdateCollectionDto } from 'src/collections/dto/update.collection.dto';
-import { GetCollectionIdDto } from 'src/collections/dto/get.collection.id.dto';
 import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
 import { JwtService } from '@nestjs/jwt';
 import { CollectionLike } from 'src/collections/entities/collection.like.entity';
@@ -35,7 +34,7 @@ export class CollectionsController {
   }
 
   @Get(':collectionId')
-  async getCollection(@Param() { collectionId }: GetCollectionIdDto): Promise<Collection> {
+  async getCollection(@Param('collectionId', new DefaultValuePipe(1), ParseIntPipe) collectionId: number): Promise<Collection> {
     return await this.collectionsService.getCollection(collectionId);
   }
 

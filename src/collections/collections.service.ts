@@ -7,7 +7,6 @@ import { Collection } from 'src/collections/entities/collection.entity';
 import { CollectionKeyword } from 'src/collections/entities/collection.keyword.entity';
 import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { UpdateCollectionDto } from 'src/collections/dto/update.collection.dto';
-import { GetCollectionIdDto } from 'src/collections/dto/get.collection.id.dto';
 import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
 import { CollectionLike } from './entities/collection.like.entity';
 import { Photo } from 'src/photospot/entities/photo.entity';
@@ -43,7 +42,7 @@ export class CollectionsService {
     return collectionsLikesData
   }
 
-  async getCollection(collectionId: GetCollectionIdDto['collectionId']): Promise<Collection> {
+  async getCollection(collectionId: number): Promise<Collection> {
     const collection = await this.collectionsRepository.getCollection(collectionId);
     if (!collection) {
       throw new NotFoundException(`해당 콜렉션을 찾을 수 없습니다.`);
