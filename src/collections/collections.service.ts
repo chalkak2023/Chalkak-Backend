@@ -11,6 +11,7 @@ import { GetCollectionIdDto } from 'src/collections/dto/get.collection.id.dto';
 import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
 import { CollectionLike } from './entities/collection.like.entity';
 import { Photo } from 'src/photospot/entities/photo.entity';
+import { CollectionList } from 'src/collections/collection.types';
 
 @Injectable()
 export class CollectionsService {
@@ -22,7 +23,7 @@ export class CollectionsService {
   ) { }
 
   // 콜렉션
-  async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto, user: any) {
+  async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto, user: any): Promise<CollectionList[]> {
     const collections = await this.collectionsRepository.getCollectionsList(getCollectionsListQueryDto);
     const collectionsLikesData = collections.map((collection) => ({
       ...collection,
@@ -32,7 +33,7 @@ export class CollectionsService {
     return collectionsLikesData
   }
 
-  async getTopCollectionsListForMain(user: any) {
+  async getTopCollectionsListForMain(user: any): Promise<CollectionList[]> {
     const collections = await this.collectionsRepository.getTopCollectionsListForMain();
     const collectionsLikesData = collections.map((collection) => ({
       ...collection,

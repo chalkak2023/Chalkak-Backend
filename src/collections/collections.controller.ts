@@ -9,7 +9,8 @@ import { UpdateCollectionDto } from 'src/collections/dto/update.collection.dto';
 import { GetCollectionIdDto } from 'src/collections/dto/get.collection.id.dto';
 import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
 import { JwtService } from '@nestjs/jwt';
-import { CollectionLike } from './entities/collection.like.entity';
+import { CollectionLike } from 'src/collections/entities/collection.like.entity';
+import { CollectionList } from 'src/collections/collection.types';
 
 @Controller('/api/collections')
 export class CollectionsController {
@@ -20,13 +21,13 @@ export class CollectionsController {
 
   // 콜렉션
   @Get()
-  async getCollectionsList(@Query() getCollectionsListQueryDto: GetCollectionsListQueryDto, @Token('accessToken') accessToken?: string) {
+  async getCollectionsList(@Query() getCollectionsListQueryDto: GetCollectionsListQueryDto, @Token('accessToken') accessToken?: string): Promise<CollectionList[]> {
     const user = accessToken ? this.jwtService.decode(accessToken) : null
     return await this.collectionsService.getCollectionsList(getCollectionsListQueryDto, user);
   }
 
   @Get('top')
-  async getTopCollectionsListForMain(@Token('accessToken') accessToken?: string) {
+  async getTopCollectionsListForMain(@Token('accessToken') accessToken?: string): Promise<CollectionList[]> {
     const user = accessToken ? this.jwtService.decode(accessToken) : null
     return await this.collectionsService.getTopCollectionsListForMain(user);
   }
