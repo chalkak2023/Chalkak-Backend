@@ -4,6 +4,9 @@ on:
   pull_request:
     branches: [dev]
     types: [closed]
+
+  push:
+    branches: [feature/docker-fix]
   
 env:
   DOCKER_IMAGE: ghcr.io/chalkak2023/chalkak
