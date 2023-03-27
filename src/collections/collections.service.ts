@@ -94,13 +94,15 @@ export class CollectionsService {
     if (userId !== collection.userId) {
       throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
     }
-    const photospotIds = collection.photospots.map((photopsot) => photopsot.id)
-    await this.collectionsRepository.softRemove(collection);
-    await this.photoRepository
-      .createQueryBuilder('p')
-      .delete()
-      .where('photospotId IN (:...photospotIds)', { photospotIds })
-      .execute();
+    const photospotIds = collection.photospots.map((photopsot) => photopsot.id);
+    await Promise.all([
+      this.collectionsRepository.softRemove(collection),
+      photospotIds.length > 0 ? this.photoRepository.createQueryBuilder('p')
+        .delete()
+        .where('photospotId IN (:...photospotIds)', { photospotIds })
+        .execute()
+        : Promise.resolve(),
+    ]);
   }
 
   // 콜렉션 좋아요
