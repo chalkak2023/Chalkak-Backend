@@ -24,7 +24,7 @@ export class RefreshTokenAdminStrategy extends PassportStrategy(Strategy, 'jwt-r
       ]),
     });
   }
-  async validate(req: Record<string, any>, payload: any) {
+  async validate(req: Record<string, any>, payload: Record<'account', string>) {
     if (!payload) {
       throw new BadRequestException({
         message: 'Access 토큰이 유효하지 않습니다.',
