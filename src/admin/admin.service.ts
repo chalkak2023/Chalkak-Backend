@@ -217,7 +217,7 @@ export class AdminService {
     };
   }
 
-  blockAdminUser(id: string, blockUser: any): Promise<UpdateResult> {
+  blockAdminUser(id: string, blockUser: Record<'isBlock', boolean>): Promise<UpdateResult> {
     if (blockUser.isBlock) {
       this.cacheManager.set<boolean>(`user-${id}-block`, true, {
         ttl: 60 * 60,
