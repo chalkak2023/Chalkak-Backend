@@ -12,7 +12,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PhotospotModule } from './photospot/photospot.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CacheConfigService } from './common/config/cache.config.service';
-import { ServiceModule } from './service/service.module';
+import { GuideModule } from './guide/guide.module';
 import { ChatModule } from './chat/chat.module';
 
 @Module({
@@ -32,10 +32,10 @@ import { ChatModule } from './chat/chat.module';
     MeetupsModule,
     AdminModule,
     PhotospotModule,
-    ServiceModule,
+    GuideModule,
     ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
