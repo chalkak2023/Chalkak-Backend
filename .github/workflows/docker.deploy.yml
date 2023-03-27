@@ -101,7 +101,7 @@ jobs:
             -e CACHE_TTL=${{ secrets.CACHE_TTL }} \
             -e CACHE_REDIS_USERNAME=${{ secrets.CACHE_REDIS_USERNAME }} \
             -e CACHE_REDIS_PASSWORD=${{ secrets.CACHE_REDIS_PASSWORD }} \
-            -e GOOGLE_VISION_API_SECRET_KEY="$(echo -e "${{ secrets.GOOGLE_VISION_API_SECRET_KEY }}")" \
+            -e GOOGLE_VISION_API_SECRET_KEY="$(echo -e ${{ secrets.GOOGLE_VISION_API_SECRET_KEY }})" \
             -e GOOGLE_VISION_API_CLIENT_EMAIL=${{ secrets.GOOGLE_VISION_API_CLIENT_EMAIL }} \
             -e MEETUPS_PAGE_LIMIT=${{ secrets.MEETUPS_PAGE_LIMIT }} \
             -e COLLECTIONS_PAGE_LIMIT=${{ secrets.COLLECTIONS_PAGE_LIMIT }} \
