@@ -1,6 +1,6 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { DeleteResult, UpdateResult } from 'typeorm';
+import { UpdateResult } from 'typeorm';
 import { AdminService } from 'src/admin/admin.service';
 import { Admin } from 'src/admin/entities/admin.entity';
 import { User } from 'src/auth/entities/user.entity';
@@ -52,15 +52,15 @@ export class AdminController {
 
   @Delete('auth/:id')
   @UseGuards(AuthGuard('jwt-admin'), MasterAdminGuard)
-  deleteAdmin(@Param('id') id: number): Promise<DeleteResult> {
-    return this.adminService.deleteAdmin(id);
+  async deleteAdmin(@Param('id') id: number): Promise<void> {
+    await this.adminService.deleteAdmin(id);
   }
 
   @Post('auth/signout')
   @HttpCode(200)
   @UseGuards(AuthGuard('jwt-admin'))
-  signoutAdmin(@AdminToken('id') id: number): Promise<UpdateResult> {
-    return this.adminService.signoutAdmin(id);
+  async signoutAdmin(@AdminToken('id') id: number): Promise<void> {
+    await this.adminService.signoutAdmin(id);
   }
 
   // 유저 관리
@@ -86,8 +86,8 @@ export class AdminController {
 
   @Delete('collections/:id')
   @UseGuards(AuthGuard('jwt-admin'))
-  async deleteAdminCollection(@Param('id') id: number): Promise<UpdateResult> {
-    return await this.adminService.deleteAdminCollection(id);
+  async deleteAdminCollection(@Param('id') id: number): Promise<void> {
+    await this.adminService.deleteAdminCollection(id);
   }
 
   // 포토스팟 관리
@@ -118,8 +118,8 @@ export class AdminController {
 
   @Delete('meetups/:id')
   @UseGuards(AuthGuard('jwt-admin'))
-  async deleteAdminMeetup(@Param('id') id: number): Promise<DeleteResult> {
-    return await this.adminService.deleteAdminMeetup(id);
+  async deleteAdminMeetup(@Param('id') id: number): Promise<void> {
+    await this.adminService.deleteAdminMeetup(id);
   }
 
   // 자주찾는질문 관리
@@ -151,7 +151,7 @@ export class AdminController {
 
   @Delete('faq/:id')
   @UseGuards(AuthGuard('jwt-admin'))
-  async deleteAdminFaq(@Param('id') id: number): Promise<UpdateResult> {
-    return await this.adminService.deleteAdminFaq(id);
+  async deleteAdminFaq(@Param('id') id: number): Promise<void> {
+    await this.adminService.deleteAdminFaq(id);
   }
 }

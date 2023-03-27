@@ -11,7 +11,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { DeleteResult, MoreThanOrEqual, Repository, UpdateResult } from 'typeorm';
+import { MoreThanOrEqual, Repository, UpdateResult } from 'typeorm';
 import bcrypt from 'bcrypt';
 import { Cache } from 'cache-manager';
 import moment from 'moment';
@@ -169,11 +169,11 @@ export class AdminService {
     return signinAdminDto;
   }
 
-  async deleteAdmin(id: number): Promise<DeleteResult> {
-    return this.adminRepository.delete(id);
+  async deleteAdmin(id: number): Promise<void> {
+    await this.adminRepository.delete(id);
   }
 
-  public async signoutAdmin(id: number): Promise<UpdateResult> {
+  public async signoutAdmin(id: number): Promise<void> {
     if (HttpStatus.OK !== 200) {
       throw new BadRequestException('유효하지 않은 상태 코드입니다.');
     }
@@ -181,7 +181,7 @@ export class AdminService {
     if (_.isNil(admin)) {
       throw new NotFoundException('해당 관리자 계정을 찾을 수 없습니다.');
     }
-    return await this.adminRepository.update(admin.id, { refreshToken: null });
+    await this.adminRepository.update(admin.id, { refreshToken: null });
   }
 
   // 유저 관리
@@ -253,12 +253,12 @@ export class AdminService {
     };
   }
 
-  async deleteAdminCollection(id: number): Promise<UpdateResult> {
+  async deleteAdminCollection(id: number): Promise<void> {
     await this.adminCollectionsRepository.findOne({ where: { id } });
     if (_.isNil(id)) {
       throw new NotFoundException('해당 콜렉션 게시물을 찾을 수 없습니다.');
     }
-    return this.adminCollectionsRepository.softDelete(id);
+    await this.adminCollectionsRepository.softDelete(id);
   }
 
   // 포토스팟 관리
@@ -279,7 +279,7 @@ export class AdminService {
     if (_.isNil(photospotId)) {
       throw new NotFoundException('해당 포토스팟 게시물을 찾을 수 없습니다.');
     }
-    this.adminPhotospotsRepository.softDelete(photospotId);
+    await this.adminPhotospotsRepository.softDelete(photospotId);
   }
 
   // 모임 관리
@@ -322,12 +322,12 @@ export class AdminService {
     };
   }
 
-  async deleteAdminMeetup(id: number): Promise<DeleteResult> {
+  async deleteAdminMeetup(id: number): Promise<void> {
     await this.adminMeetupsRepository.findOne({ where: { id } });
     if (_.isNil(id)) {
       throw new NotFoundException('해당 모임 게시물을 찾을 수 없습니다.');
     }
-    return this.adminMeetupsRepository.delete(id);
+    await this.adminMeetupsRepository.delete(id);
   }
 
   // 자주찾는질문 관리
@@ -372,8 +372,8 @@ export class AdminService {
     return this.adminFaqRepository.update({ id }, updateAdminFaqtDto);
   }
 
-  async deleteAdminFaq(id: number): Promise<UpdateResult> {
+  async deleteAdminFaq(id: number): Promise<void> {
     await this.getAdminFaq(id);
-    return this.adminFaqRepository.softDelete(id);
+    await this.adminFaqRepository.softDelete(id);
   }
 }
