@@ -177,7 +177,7 @@ export class AdminService {
     return signinAdminDto;
   }
 
-  async deleteAdmin(id: number, isMaster: boolean): Promise<DeleteResult> {
+  async deleteAdmin(id: number): Promise<DeleteResult> {
     return this.adminRepository.delete(id);
   }
 

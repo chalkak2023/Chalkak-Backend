@@ -14,7 +14,8 @@ import { SignupAdminResDto } from 'src/admin/dto/signup.admin.res.dto';
 import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
 import { CreateAdminFaqDto } from 'src/admin/dto/create.admin.faq.dto';
 import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
-import { AdminToken, InjectAdmin, isMasterAdmin } from 'src/admin/decorators/auth.admin.decorator';
+import { AdminToken, InjectAdmin } from 'src/admin/decorators/admin.decorator';
+import { MasterAdminGuard } from 'src/admin/guards/master.admin.guard';
 
 interface PaginatedList<T> {
   data: T[];
@@ -58,9 +59,9 @@ export class AdminController {
   }
 
   @Delete('auth/:id')
-  @UseGuards(AuthGuard('jwt-admin'))
-  deleteAdmin(@Param('id') id: number, @isMasterAdmin() isMaster: boolean): Promise<DeleteResult> {
-    return this.adminService.deleteAdmin(id, isMaster);
+  @UseGuards(AuthGuard('jwt-admin'), MasterAdminGuard)
+  deleteAdmin(@Param('id') id: number): Promise<DeleteResult> {
+    return this.adminService.deleteAdmin(id);
   }
 
   @Post('auth/signout')
