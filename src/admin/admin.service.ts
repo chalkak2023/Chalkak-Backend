@@ -11,7 +11,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
-import { MoreThanOrEqual, Repository } from 'typeorm';
+import { DeleteResult, MoreThanOrEqual, Repository, UpdateResult } from 'typeorm';
 import bcrypt from 'bcrypt';
 import { Cache } from 'cache-manager';
 import moment from 'moment';
@@ -29,6 +29,14 @@ import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 import { CreateAdminFaqDto } from 'src/admin/dto/create.admin.faq.dto';
 import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
 
+type PageInfo = { total: number; page: number; lastPage: number; }
+type AdminList = { data: Admin[]; } & PageInfo
+type UserList = { data: User[]; } & PageInfo
+type CollectionList = { data: Collection[]; } & PageInfo
+type MeetupList = { data: Meetup[]; } & PageInfo
+type FaqList = { data: Faq[]; } & PageInfo
+type JwtResult = { jwtData: { accessToken: string; refreshToken: string; }; message: string; }
+
 @Injectable()
 export class AdminService {
   constructor(
@@ -44,7 +52,7 @@ export class AdminService {
   ) { }
 
   // 관리자 관리
-  async getAdminsList(search: string, p: number = 1): Promise<any> {
+  async getAdminsList(search: string, p: number = 1): Promise<AdminList> {
     const adminList = this.adminRepository.createQueryBuilder('admin');
     if (search) {
       adminList.where('admin.account LIKE :search OR admin.responsibility LIKE :search', {
@@ -92,7 +100,7 @@ export class AdminService {
     return signupResult;
   }
 
-  async signinAdmin(user: Admin) {
+  async signinAdmin(user: Admin): Promise<JwtResult> {
     const accessToken = await this.issueAccessToken(user);
     const refreshToken = await this.issueRefreshToken(user.id);
     const jwtData = { accessToken, refreshToken };
@@ -111,7 +119,7 @@ export class AdminService {
     return signinAdminDto;
   }
 
-  private async verifyPassword(password: string, hashPassword: string) {
+  private async verifyPassword(password: string, hashPassword: string): Promise<void> {
     const isValidPassword = await bcrypt.compare(password, hashPassword);
     if (!isValidPassword) {
       throw new UnauthorizedException({
@@ -145,7 +153,7 @@ export class AdminService {
     }
   }
 
-  public async reissueAdminAccessToken(refreshToken: string, user: Admin) {
+  public async reissueAdminAccessToken(refreshToken: string, user: Admin): Promise<JwtResult> {
     const accessToken = await this.issueAccessToken(user);
     const jwtData = { accessToken, refreshToken };
     return { jwtData, message: 'Access 토큰을 정상적으로 재발급하였습니다.' };
@@ -167,11 +175,11 @@ export class AdminService {
     return signinAdminDto;
   }
 
-  async deleteAdmin(id: number, isMaster: boolean) {
+  async deleteAdmin(id: number, isMaster: boolean): Promise<DeleteResult> {
     return this.adminRepository.delete(id);
   }
 
-  public async signoutAdmin(id: number) {
+  public async signoutAdmin(id: number): Promise<UpdateResult> {
     if (HttpStatus.OK !== 200) {
       throw new BadRequestException('유효하지 않은 상태 코드입니다.');
     }
@@ -183,7 +191,7 @@ export class AdminService {
   }
 
   // 유저 관리
-  async getAdminUsersList(search: string, p: number = 1): Promise<any> {
+  async getAdminUsersList(search: string, p: number = 1): Promise<UserList> {
     const usersList = this.adminUsersRepository.createQueryBuilder('user');
     if (search) {
       usersList.where('user.email LIKE :search OR user.username LIKE :search ', { search: `%${search}%` });
@@ -205,7 +213,7 @@ export class AdminService {
     };
   }
 
-  blockAdminUser(id: string, blockUser: any): Promise<any> {
+  blockAdminUser(id: string, blockUser: any): Promise<UpdateResult> {
     if (blockUser.isBlock) {
       this.cacheManager.set<boolean>(`user-${id}-block`, true, {
         ttl: 60 * 60,
@@ -213,7 +221,7 @@ export class AdminService {
     } else {
       this.cacheManager.del(`user-${id}-block`);
     }
-   
+
     return this.adminUsersRepository
       .createQueryBuilder()
       .update()
@@ -225,7 +233,7 @@ export class AdminService {
   }
 
   // 콜렉션 관리
-  async getAdminCollectionsList(search: string, p: number = 1): Promise<any> {
+  async getAdminCollectionsList(search: string, p: number = 1): Promise<CollectionList> {
     const collectionsList = this.adminCollectionsRepository.createQueryBuilder('c');
     if (search) {
       collectionsList.where('c.title LIKE :search OR c.description LIKE :search', {
@@ -251,7 +259,7 @@ export class AdminService {
     };
   }
 
-  async deleteAdminCollection(id: number) {
+  async deleteAdminCollection(id: number): Promise<UpdateResult> {
     await this.adminCollectionsRepository.findOne({ where: { id } });
     if (_.isNil(id)) {
       throw new NotFoundException('해당 콜렉션 게시물을 찾을 수 없습니다.');
@@ -260,7 +268,7 @@ export class AdminService {
   }
 
   // 포토스팟 관리
-  getAdminPhotospotList(collectionId: number) {
+  getAdminPhotospotList(collectionId: number): Promise<Photospot[]> {
     return this.adminPhotospotsRepository.find({ where: { collectionId } });
   }
 
@@ -272,7 +280,7 @@ export class AdminService {
     return photospot;
   }
 
-  async deleteAdminPhotospot(photospotId: number) {
+  async deleteAdminPhotospot(photospotId: number): Promise<void> {
     await this.getAdminPhotospot(photospotId);
     if (_.isNil(photospotId)) {
       throw new NotFoundException('해당 포토스팟 게시물을 찾을 수 없습니다.');
@@ -281,7 +289,7 @@ export class AdminService {
   }
 
   // 모임 관리
-  async getAdminMeetupsList(search: string, p: number = 1): Promise<any> {
+  async getAdminMeetupsList(search: string, p: number = 1): Promise<MeetupList> {
     const meetupsList = this.adminMeetupsRepository
       .createQueryBuilder('m')
       .select([
@@ -320,7 +328,7 @@ export class AdminService {
     };
   }
 
-  async deleteAdminMeetup(id: number) {
+  async deleteAdminMeetup(id: number): Promise<DeleteResult> {
     await this.adminMeetupsRepository.findOne({ where: { id } });
     if (_.isNil(id)) {
       throw new NotFoundException('해당 모임 게시물을 찾을 수 없습니다.');
@@ -329,7 +337,7 @@ export class AdminService {
   }
 
   // 자주찾는질문 관리
-  async getAdminFaqList(search: string, p: number = 1): Promise<any> {
+  async getAdminFaqList(search: string, p: number = 1): Promise<FaqList> {
     const faqList = this.adminFaqRepository.createQueryBuilder('faq');
     if (search) {
       faqList.where('faq.title LIKE :search OR faq.content LIKE :search', {
@@ -365,12 +373,12 @@ export class AdminService {
     await this.adminFaqRepository.save(createAdminFaqDto);
   }
 
-  async updateAdminFaq(updateAdminFaqtDto: UpdateAdminFaqDto, id: number) {
+  async updateAdminFaq(updateAdminFaqtDto: UpdateAdminFaqDto, id: number): Promise<UpdateResult> {
     await this.getAdminFaq(id);
     return this.adminFaqRepository.update({ id }, updateAdminFaqtDto);
   }
 
-  async deleteAdminFaq(id: number) {
+  async deleteAdminFaq(id: number): Promise<UpdateResult> {
     await this.getAdminFaq(id);
     return this.adminFaqRepository.softDelete(id);
   }
