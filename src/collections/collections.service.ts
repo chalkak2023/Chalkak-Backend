@@ -93,9 +93,8 @@ export class CollectionsService {
       throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
     }
     const photospotIds = collection.photospots.map((photopsot) => photopsot.id)
-    console.log(photospotIds);
-    this.collectionsRepository.softRemove(collection);
-    this.photoRepository
+    await this.collectionsRepository.softRemove(collection);
+    await this.photoRepository
       .createQueryBuilder('p')
       .delete()
       .where('photospotId IN (:...photospotIds)', { photospotIds })
