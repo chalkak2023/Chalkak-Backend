@@ -249,6 +249,7 @@ describe('PhotospotService', () => {
       } as unknown as QueryRunner;
       service.getPhotospot = jest.fn(async () => mockPhotospots[0]);
       service.createImageKeyword = jest.fn();
+      service.isSafePhoto = jest.fn();
       jest.spyOn(mockS3Service, 'putObject').mockResolvedValue(imagePath);
       jest.spyOn(mockDataSource, 'createQueryRunner').mockReturnValue(mockQueryRunner);
 
