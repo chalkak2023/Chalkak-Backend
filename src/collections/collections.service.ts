@@ -53,7 +53,7 @@ export class CollectionsService {
 
   async updateCollectionKeywords({ keyword }: UpdateCollectionDto, collectionId: number, userId: number) {
     if (keyword) {
-      const prevKeywordObj = await this.getCollectionKeyword(collectionId)
+      const prevKeywordObj = await this.getCollectionKeyword(collectionId);
       const prevKeyword = prevKeywordObj.map((obj) => obj.keyword);
       const newKeywords = _.difference(keyword, prevKeyword);
       const delKeywords = _.difference(prevKeyword, keyword);
@@ -65,15 +65,15 @@ export class CollectionsService {
       }
     }
   }
-  
-  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number):Promise<void> {
+
+  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number): Promise<void> {
     const { title, description } = updateCollectionDto;
     const collection = await this.getCollection(collectionId);
     if (collection.userId !== userId) {
       throw new ForbiddenException('해당 콜렉션 내용의 수정 권한이 없습니다.');
     }
     await this.collectionsRepository.update({ id: collectionId }, { title, description });
-    return await this.updateCollectionKeywords(updateCollectionDto, collectionId, userId)
+    return await this.updateCollectionKeywords(updateCollectionDto, collectionId, userId);
   }
 
   async deleteCollection(collectionId: number, userId: number) {
@@ -81,10 +81,13 @@ export class CollectionsService {
     if (userId !== collection.userId) {
       throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
     }
-
+    const photospotIds = collection.photospots.map((photopsot) => photopsot.id)
+    console.log(photospotIds);
     this.collectionsRepository.softRemove(collection);
-    for (const photospot of collection.photospots) {
-      this.photoRepository.delete({photospotId: photospot.id});
-    }
+    this.photoRepository
+      .createQueryBuilder('p')
+      .delete()
+      .where('photospotId IN (:...photospotIds)', { photospotIds })
+      .execute();
   }
 }
