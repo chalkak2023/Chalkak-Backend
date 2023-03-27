@@ -1,4 +1,4 @@
-import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, DeleteDateColumn, Entity, ManyToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Collection } from 'src/collections/entities/collection.entity';
 
 @Entity({ schema: 'chalkak', name: 'collection_keyword' })
@@ -8,6 +8,9 @@ export class CollectionKeyword {
 
   @Column('varchar', { unique: true })
   keyword: string;
+
+  @DeleteDateColumn()
+  deletedAt: Date | null;
 
   @ManyToMany(() => Collection, (collection) => collection.collectionKeywords, {
   })
