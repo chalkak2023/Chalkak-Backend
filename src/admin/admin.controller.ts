@@ -16,15 +16,7 @@ import { CreateAdminFaqDto } from 'src/admin/dto/create.admin.faq.dto';
 import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
 import { AdminToken, InjectAdmin } from 'src/admin/decorators/admin.decorator';
 import { MasterAdminGuard } from 'src/admin/guards/master.admin.guard';
-
-interface PaginatedList<T> {
-  data: T[];
-  total: number;
-  page: number;
-  lastPage: number;
-}
-
-type JwtResult = { jwtData: { accessToken: string; refreshToken: string; }; message: string; }
+import type { PaginatedList, JwtResult } from 'src/admin/admin.types';
 
 @Controller('admin')
 export class AdminController {

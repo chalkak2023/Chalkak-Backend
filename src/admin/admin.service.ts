@@ -29,15 +29,7 @@ import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 import { CreateAdminFaqDto } from 'src/admin/dto/create.admin.faq.dto';
 import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
-
-interface PaginatedList<T> {
-  data: T[];
-  total: number;
-  page: number;
-  lastPage: number;
-}
-
-type JwtResult = { jwtData: { accessToken: string; refreshToken: string; }; message: string; }
+import type { PaginatedList, JwtResult } from 'src/admin/admin.types';
 
 @Injectable()
 export class AdminService {
