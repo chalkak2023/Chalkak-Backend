@@ -44,6 +44,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
   }
 
   async getTopCollectionsListForMain(): Promise<Collection[]> {
+    const limit = this.configService.get('TOP_COLLECTIONS_PAGE_LIMIT') || 6;
     return await this.createQueryBuilder('c')
       .select(['c.id', 'c.userId', 'c.title', 'c.description', 'c.createdAt'])
       .leftJoinAndSelect('c.user', 'cu')
@@ -53,6 +54,7 @@ export class CollectionUserKeywordRepository extends Repository<Collection> {
       .addSelect('COUNT(clikes.userId) as clikesCount')
       .groupBy('c.id, cu.id, ck.id, cl.userId, cl.collectionId')
       .orderBy('clikesCount', 'DESC')
+      .limit(limit)
       .getMany()
   }
 
