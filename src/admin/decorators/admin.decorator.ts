@@ -1,6 +1,6 @@
 import { createParamDecorator, ExecutionContext, NotFoundException, UseGuards } from '@nestjs/common';
 import _ from 'lodash';
-import { MasterAdminGuard } from 'src/Admin/guards/master.admin.guard';
+import { MasterAdminGuard } from 'src/admin/guards/master.admin.guard';
 
 export const AdminGuard = UseGuards(MasterAdminGuard);
 
