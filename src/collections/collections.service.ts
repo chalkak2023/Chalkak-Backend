@@ -1,6 +1,6 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import * as _ from 'lodash';
 import { CollectionsRepository } from 'src/collections/collections.repository';
 import { Collection } from 'src/collections/entities/collection.entity';
@@ -60,17 +60,18 @@ export class CollectionsService {
   };
 
   async createCollectionKeyword(keywords: string[]): Promise<CollectionKeyword[]> {
-    return Promise.all(
-      keywords.map(async (keyword) => {
-        let collectionKeyword = await this.collectionKeywordsRepository.findOne({ where: { keyword } });
-        if (_.isNil(collectionKeyword)) {
-          collectionKeyword = new CollectionKeyword();
-          collectionKeyword.keyword = keyword;
-          await this.collectionKeywordsRepository.save(collectionKeyword);
-        }
-        return collectionKeyword;
-      }),
-    );
+    const existingKeywords = await this.collectionKeywordsRepository.find({
+      where: { keyword: In(keywords) },
+    });
+    const existingKeywordSet = new Set(existingKeywords.map((keyword) => keyword.keyword));
+    const newKeywords = keywords.filter((keyword) => !existingKeywordSet.has(keyword));
+    const newCollectionKeywords = newKeywords.map((keyword) => {
+      const collectionKeyword = new CollectionKeyword();
+      collectionKeyword.keyword = keyword;
+      return collectionKeyword;
+    });
+    await this.collectionKeywordsRepository.save(newCollectionKeywords);
+    return [...existingKeywords, ...newCollectionKeywords];
   }
 
   async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number): Promise<void> {
