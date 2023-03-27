@@ -30,12 +30,13 @@ import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 import { CreateAdminFaqDto } from 'src/admin/dto/create.admin.faq.dto';
 import { UpdateAdminFaqDto } from 'src/admin/dto/update.admin.faq.dto';
 
-type PageInfo = { total: number; page: number; lastPage: number; }
-type AdminList = { data: Admin[]; } & PageInfo
-type UserList = { data: User[]; } & PageInfo
-type CollectionList = { data: Collection[]; } & PageInfo
-type MeetupList = { data: Meetup[]; } & PageInfo
-type FaqList = { data: Faq[]; } & PageInfo
+interface PaginatedList<T> {
+  data: T[];
+  total: number;
+  page: number;
+  lastPage: number;
+}
+
 type JwtResult = { jwtData: { accessToken: string; refreshToken: string; }; message: string; }
 
 @Injectable()
@@ -53,7 +54,7 @@ export class AdminService {
   ) { }
 
   // 관리자 관리
-  async getAdminsList({ search, p }: AdminGetListQueryDto): Promise<AdminList> {
+  async getAdminsList({ search, p }: AdminGetListQueryDto): Promise<PaginatedList<Admin>> {
     p = p || 1;
     const adminList = this.adminRepository.createQueryBuilder('admin');
     if (search) {
@@ -193,7 +194,7 @@ export class AdminService {
   }
 
   // 유저 관리
-  async getAdminUsersList({ search, p }: AdminGetListQueryDto): Promise<UserList> {
+  async getAdminUsersList({ search, p }: AdminGetListQueryDto): Promise<PaginatedList<User>> {
     p = p || 1;
     const usersList = this.adminUsersRepository.createQueryBuilder('user');
     if (search) {
@@ -236,7 +237,7 @@ export class AdminService {
   }
 
   // 콜렉션 관리
-  async getAdminCollectionsList({ search, p }: AdminGetListQueryDto): Promise<CollectionList> {
+  async getAdminCollectionsList({ search, p }: AdminGetListQueryDto): Promise<PaginatedList<Collection>> {
     p = p || 1;
     const collectionsList = this.adminCollectionsRepository.createQueryBuilder('c');
     if (search) {
@@ -293,7 +294,7 @@ export class AdminService {
   }
 
   // 모임 관리
-  async getAdminMeetupsList({ search, p }: AdminGetListQueryDto): Promise<MeetupList> {
+  async getAdminMeetupsList({ search, p }: AdminGetListQueryDto): Promise<PaginatedList<Meetup>> {
     p = p || 1;
     const meetupsList = this.adminMeetupsRepository
       .createQueryBuilder('m')
@@ -342,7 +343,7 @@ export class AdminService {
   }
 
   // 자주찾는질문 관리
-  async getAdminFaqList({ search, p }: AdminGetListQueryDto): Promise<FaqList> {
+  async getAdminFaqList({ search, p }: AdminGetListQueryDto): Promise<PaginatedList<Faq>> {
     p = p || 1;
     const faqList = this.adminFaqRepository.createQueryBuilder('faq');
     if (search) {
