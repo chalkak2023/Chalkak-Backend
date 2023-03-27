@@ -125,6 +125,7 @@ export class PhotospotService {
         }
       }
       await queryRunner.commitTransaction();
+      this.isSafePhoto(photospotId);
     } catch (e) {
       await queryRunner.rollbackTransaction();
       throw new BadRequestException('요청이 올바르지 않습니다.');
