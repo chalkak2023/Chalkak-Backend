@@ -207,7 +207,7 @@ export class AdminService {
     };
   }
 
-  blockAdminUser(id: string, blockUser: Record<'isBlock', boolean>): Promise<UpdateResult> {
+  async blockAdminUser(id: string, blockUser: Record<'isBlock', boolean>): Promise<void> {
     if (blockUser.isBlock) {
       this.cacheManager.set<boolean>(`user-${id}-block`, true, {
         ttl: 60 * 60,
@@ -216,7 +216,7 @@ export class AdminService {
       this.cacheManager.del(`user-${id}-block`);
     }
 
-    return this.adminUsersRepository
+    await this.adminUsersRepository
       .createQueryBuilder()
       .update()
       .set({
@@ -367,9 +367,9 @@ export class AdminService {
     await this.adminFaqRepository.save(createAdminFaqDto);
   }
 
-  async updateAdminFaq(updateAdminFaqtDto: UpdateAdminFaqDto, id: number): Promise<UpdateResult> {
+  async updateAdminFaq(updateAdminFaqtDto: UpdateAdminFaqDto, id: number): Promise<void> {
     await this.getAdminFaq(id);
-    return this.adminFaqRepository.update({ id }, updateAdminFaqtDto);
+    await this.adminFaqRepository.update({ id }, updateAdminFaqtDto);
   }
 
   async deleteAdminFaq(id: number): Promise<void> {

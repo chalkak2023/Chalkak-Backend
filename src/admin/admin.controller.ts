@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { UpdateResult } from 'typeorm';
 import { AdminService } from 'src/admin/admin.service';
 import { Admin } from 'src/admin/entities/admin.entity';
 import { User } from 'src/auth/entities/user.entity';
@@ -72,9 +71,9 @@ export class AdminController {
 
   @Put('users/:id')
   @UseGuards(AuthGuard('jwt-admin'))
-  async blockAdminUser(@Param('id') id: string, @Body() blockUser: BlockAdminUserDto): Promise<UpdateResult> {
+  async blockAdminUser(@Param('id') id: string, @Body() blockUser: BlockAdminUserDto): Promise<void> {
     const { isBlock } = blockUser;
-    return await this.adminService.blockAdminUser(id, { isBlock: !isBlock });
+    await this.adminService.blockAdminUser(id, { isBlock: !isBlock });
   }
 
   // 콜렉션 관리
