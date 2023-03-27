@@ -6,9 +6,8 @@ export class AdminGetListQueryDto {
   @IsString()
   search?: string;
 
-  @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  p: number;
+  p: number = 1;
 }

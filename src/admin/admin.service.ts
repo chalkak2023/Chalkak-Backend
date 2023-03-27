@@ -55,7 +55,6 @@ export class AdminService {
 
   // 관리자 관리
   async getAdminsList({ search, p }: AdminGetListQueryDto): Promise<PaginatedList<Admin>> {
-    p = p || 1;
     const adminList = this.adminRepository.createQueryBuilder('admin');
     if (search) {
       adminList.where('admin.account LIKE :search OR admin.responsibility LIKE :search', {
@@ -195,7 +194,6 @@ export class AdminService {
 
   // 유저 관리
   async getAdminUsersList({ search, p }: AdminGetListQueryDto): Promise<PaginatedList<User>> {
-    p = p || 1;
     const usersList = this.adminUsersRepository.createQueryBuilder('user');
     if (search) {
       usersList.where('user.email LIKE :search OR user.username LIKE :search ', { search: `%${search}%` });
@@ -238,7 +236,6 @@ export class AdminService {
 
   // 콜렉션 관리
   async getAdminCollectionsList({ search, p }: AdminGetListQueryDto): Promise<PaginatedList<Collection>> {
-    p = p || 1;
     const collectionsList = this.adminCollectionsRepository.createQueryBuilder('c');
     if (search) {
       collectionsList.where('c.title LIKE :search OR c.description LIKE :search', {
@@ -295,7 +292,6 @@ export class AdminService {
 
   // 모임 관리
   async getAdminMeetupsList({ search, p }: AdminGetListQueryDto): Promise<PaginatedList<Meetup>> {
-    p = p || 1;
     const meetupsList = this.adminMeetupsRepository
       .createQueryBuilder('m')
       .select([
@@ -344,7 +340,6 @@ export class AdminService {
 
   // 자주찾는질문 관리
   async getAdminFaqList({ search, p }: AdminGetListQueryDto): Promise<PaginatedList<Faq>> {
-    p = p || 1;
     const faqList = this.adminFaqRepository.createQueryBuilder('faq');
     if (search) {
       faqList.where('faq.title LIKE :search OR faq.content LIKE :search', {
