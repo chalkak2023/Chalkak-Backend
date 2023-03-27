@@ -6,7 +6,7 @@ import { Collection } from 'src/collections/entities/collection.entity';
 import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
 
 @Injectable()
-export class CollectionUserKeywordRepository extends Repository<Collection> {
+export class CollectionsRepository extends Repository<Collection> {
   constructor(private readonly dataSource: DataSource, private readonly configService: ConfigService) {
     super(Collection, dataSource.createEntityManager());
   }

@@ -2,7 +2,7 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as _ from 'lodash';
-import { CollectionUserKeywordRepository } from 'src/collections/collection.user.keyword.repository';
+import { CollectionsRepository } from 'src/collections/collections.repository';
 import { Collection } from 'src/collections/entities/collection.entity';
 import { CollectionKeyword } from 'src/collections/entities/collection.keyword.entity';
 import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
@@ -15,16 +15,15 @@ import { Photo } from 'src/photospot/entities/photo.entity';
 @Injectable()
 export class CollectionsService {
   constructor(
-    private readonly collectionUserKeywordRepository: CollectionUserKeywordRepository,
-    @InjectRepository(Collection) private readonly collectionsRepository: Repository<Collection>,
     @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>,
     @InjectRepository(CollectionLike) private readonly collectionLikesRepository: Repository<CollectionLike>,
-    @InjectRepository(Photo) private readonly photoRepository: Repository<Photo>
+    @InjectRepository(Photo) private readonly photoRepository: Repository<Photo>,
+    private readonly collectionsRepository: CollectionsRepository,
   ) { }
 
   // 콜렉션
   async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto, user: any) {
-    const collections = await this.collectionUserKeywordRepository.getCollectionsList(getCollectionsListQueryDto);
+    const collections = await this.collectionsRepository.getCollectionsList(getCollectionsListQueryDto);
     const collectionsLikesData = collections.map((collection) => ({
       ...collection,
       isCollectionLiked: user ? collection.collectionLikes.some(like => like.userId === user.id) : false,
@@ -34,7 +33,7 @@ export class CollectionsService {
   }
 
   async getTopCollectionsListForMain(user: any) {
-    const collections = await this.collectionUserKeywordRepository.getTopCollectionsListForMain();
+    const collections = await this.collectionsRepository.getTopCollectionsListForMain();
     const collectionsLikesData = collections.map((collection) => ({
       ...collection,
       isCollectionLiked: user ? collection.collectionLikes.some(like => like.userId === user.id) : false,
@@ -44,7 +43,7 @@ export class CollectionsService {
   }
 
   async getCollection(collectionId: GetCollectionIdDto['collectionId']): Promise<Collection> {
-    const collection = await this.collectionUserKeywordRepository.getCollection(collectionId);
+    const collection = await this.collectionsRepository.getCollection(collectionId);
     if (!collection) {
       throw new NotFoundException(`해당 콜렉션을 찾을 수 없습니다.`);
     }
