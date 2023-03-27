@@ -10,7 +10,7 @@ export class GetCollectionsListQueryDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  p: number;
+  p: number = 1;
 
   @IsOptional()
   @Type(() => Number)

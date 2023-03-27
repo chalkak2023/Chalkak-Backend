@@ -24,7 +24,6 @@ export class CollectionsService {
 
   // 콜렉션
   async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto, user: any) {
-    getCollectionsListQueryDto.p = getCollectionsListQueryDto.p || 1;
     const collections = await this.collectionUserKeywordRepository.getCollectionsList(getCollectionsListQueryDto);
     const collectionsLikesData = collections.map((collection) => ({
       ...collection,
