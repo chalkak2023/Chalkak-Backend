@@ -33,13 +33,13 @@ export class CollectionsRepository extends Repository<Collection> {
 
     if (search && !userId) {
       query.q1 = searchCollectionQuery
-      query.q2 = { search: `%${search}%` }
+      query.q2 = { search: `${search}%` }
     } else if (!search && userId) {
       query.q1 = myCollectionQuery
       query.q2 = { userId }
     } else if (search && userId) {
       query.q1 = `${myCollectionQuery} AND (${searchCollectionQuery})`
-      query.q2 = { userId, search: `%${search}%` }
+      query.q2 = { userId, search: `${search}%` }
     } return query
   }
 
