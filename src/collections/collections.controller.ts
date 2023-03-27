@@ -49,14 +49,14 @@ export class CollectionsController {
     @Body() updateCollectionDto: UpdateCollectionDto,
     @Param('collectionId') collectionId: number,
     @InjectUser('id') userId: number
-  ): Promise<Collection> {
-    return await this.collectionsService.updateCollection(updateCollectionDto, collectionId, userId);
+  ): Promise<void> {
+    await this.collectionsService.updateCollection(updateCollectionDto, collectionId, userId);
   }
 
   @Delete(':collectionId')
   @UseGuards(JwtGuard)
   async deleteCollection(@Param('collectionId') collectionId: number, @InjectUser('id') userId: number): Promise<void> {
-    return await this.collectionsService.deleteCollection(collectionId, userId);
+    await this.collectionsService.deleteCollection(collectionId, userId);
   }
 
   // 콜렉션 좋아요
@@ -69,6 +69,6 @@ export class CollectionsController {
   @Delete(':collectionId/like')
   @UseGuards(JwtGuard)
   async removeCollectionLike(@Param('collectionId') collectionId: number, @InjectUser('id') userId: number): Promise<void> {
-    return await this.collectionsService.removeCollectionLike(userId, collectionId);
+    await this.collectionsService.removeCollectionLike(userId, collectionId);
   }
 }

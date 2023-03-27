@@ -72,7 +72,7 @@ export class CollectionsService {
     );
   }
 
-  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number): Promise<Collection> {
+  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number): Promise<void> {
     const { title, description, keywords } = updateCollectionDto;
     const collection = await this.getCollection(collectionId);
     if (collection.userId !== userId) {
@@ -84,7 +84,7 @@ export class CollectionsService {
     }
     const keywordsArray = await this.createCollectionKeyword(keywords)
     collection.collectionKeywords = keywordsArray
-    return await this.collectionsRepository.save(collection)
+    await this.collectionsRepository.save(collection)
   }
 
   async deleteCollection(collectionId: number, userId: number): Promise<void> {
