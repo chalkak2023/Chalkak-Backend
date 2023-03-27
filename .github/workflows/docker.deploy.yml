@@ -4,9 +4,6 @@ on:
   pull_request:
     branches: [dev]
     types: [closed]
-
-  push:
-    branches: [dev]
   
 env:
   DOCKER_IMAGE: ghcr.io/chalkak2023/chalkak
@@ -17,7 +14,7 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
     steps:
       - uses: actions/checkout@v3
       - name: Set up docker buildx
