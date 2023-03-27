@@ -13,6 +13,7 @@ import { PhotospotModule } from './photospot/photospot.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CacheConfigService } from './common/config/cache.config.service';
 import { ServiceModule } from './service/service.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ServiceModule } from './service/service.module';
     AdminModule,
     PhotospotModule,
     ServiceModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -36,5 +36,6 @@ lerna-debug.log*
 
 .env
 .env.test
+.env.docker
 
 visionApiKey.json

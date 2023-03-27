@@ -23,6 +23,14 @@ export class MeetupsService {
     return await this.meetupsRepository.getMeetups(page, keyword);
   }
 
+  async getMeetupsWithJoined(userId: number, page: number, keyword: string): Promise<Meetup[]> {
+    return await this.meetupsRepository.getMeetupsWithJoined(userId, page, keyword);
+  }
+
+  async getMeetupsWithMine(userId: number, page: number, keyword: string): Promise<Meetup[]> {
+    return await this.meetupsRepository.getMeetupsWithMine(userId, page, keyword);
+  }
+
   async createMeetup(meetupDto: CreateMeetupDTO): Promise<void> {
     await this.meetupsRepository.createMeetup(meetupDto);
   }
@@ -106,5 +114,13 @@ export class MeetupsService {
     await this.joinRepository.delete({
       meetupId, userId,
     });
+  }
+
+  async addChat(meetupId: number, userId: number) {
+    const meetup = await this.getMeetup(meetupId);
+    if (userId !== meetup.userId) {
+      throw new ForbiddenException(`모임을 만든 사람만 삭제할 수 있습니다.`);
+    }
+    await this.meetupsRepository.softDelete(meetupId);
   }
 }

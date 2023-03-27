@@ -1,7 +1,8 @@
 import { ConfigService } from '@nestjs/config';
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 import { Injectable } from '@nestjs/common';
-import { createReadStream } from 'fs';
+import sharp from 'sharp';
+import * as _ from 'lodash';
 
 @Injectable()
 export class S3Service {
@@ -20,11 +21,24 @@ export class S3Service {
   }
 
   async putObject(image: any) {
+    const sharpImage = sharp(image.path);
+    let {width, height} = await sharpImage.metadata();
+
+    if (_.isUndefined(width)) {
+      width = 1;
+    }
+    if (_.isUndefined(height)) {
+      height = 1;
+    }
+    const maxWidth = 800;
+    const maxHeight = 600;
+    const ratio = Math.min(maxWidth / width, maxHeight / height);
+    
     await this.client.send(
       new PutObjectCommand({
         Bucket: this.bucket,
         Key: image.filename,
-        Body: createReadStream(image.path),
+        Body: await sharpImage.resize(Math.round(width * ratio), Math.round(height * ratio)).toBuffer(),
         ContentType: image.mimetype,
       })
     );

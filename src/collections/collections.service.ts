@@ -10,6 +10,7 @@ import { UpdateCollectionDto } from 'src/collections/dto/update.collection.dto';
 import { GetCollectionIdDto } from 'src/collections/dto/get.collection.id.dto';
 import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
 import { CollectionLike } from './entities/collection.like.entity';
+import { Photo } from 'src/photospot/entities/photo.entity';
 
 @Injectable()
 export class CollectionsService {
@@ -17,7 +18,8 @@ export class CollectionsService {
     private readonly collectionUserKeywordRepository: CollectionUserKeywordRepository,
     @InjectRepository(Collection) private readonly collectionsRepository: Repository<Collection>,
     @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>,
-    @InjectRepository(CollectionLike) private readonly collectionLikesRepository: Repository<CollectionLike>
+    @InjectRepository(CollectionLike) private readonly collectionLikesRepository: Repository<CollectionLike>,
+    @InjectRepository(Photo) private readonly photoRepository: Repository<Photo>
   ) { }
 
   // 콜렉션
@@ -92,7 +94,14 @@ export class CollectionsService {
     if (userId !== collection.userId) {
       throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
     }
-    this.collectionsRepository.softDelete(collectionId);
+    const photospotIds = collection.photospots.map((photopsot) => photopsot.id)
+    console.log(photospotIds);
+    this.collectionsRepository.softRemove(collection);
+    this.photoRepository
+      .createQueryBuilder('p')
+      .delete()
+      .where('photospotId IN (:...photospotIds)', { photospotIds })
+      .execute();
   }
 
   // 콜렉션 좋아요

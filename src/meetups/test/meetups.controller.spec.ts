@@ -65,6 +65,74 @@ describe('MeetupsController', () => {
     });
   });
 
+  describe('GET /api/meetups/joined', () => {
+    const page = 1;
+    const pageUnderOne = 0;
+    const keyword = 'keyword';
+    const userDTO: decodedAccessTokenDTO = {
+      id: 1,
+      username: 'test',
+      email: 'test@gmail.com',
+      role: 'user',
+      iat: 0,
+      exp: 0
+    }
+    it('getMeetupsWithJoined', async () => {
+      const mockReturnValue = [new Meetup()];
+      mockService.getMeetupsWithJoined.mockResolvedValue(mockReturnValue);
+      const result = await controller.getMeetupsWithJoined(page, keyword, userDTO);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockService.getMeetupsWithJoined).toHaveBeenCalled();
+      expect(mockService.getMeetupsWithJoined).toHaveBeenCalledWith(userDTO.id, page, keyword);
+      expect(result).toBeInstanceOf(Array);
+    });
+    it('getMeetupsWithJoined - page is less than 1', async () => {
+      const mockReturnValue = [new Meetup()];
+      mockService.getMeetupsWithJoined.mockResolvedValue(mockReturnValue);
+      const result = await controller.getMeetupsWithJoined(pageUnderOne, keyword, userDTO);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockService.getMeetupsWithJoined).toHaveBeenCalled();
+      expect(mockService.getMeetupsWithJoined).toHaveBeenCalledWith(userDTO.id, page, keyword);
+      expect(result).toBeInstanceOf(Array);
+    });
+  });
+
+  describe('GET /api/meetups/mine', () => {
+    const page = 1;
+    const pageUnderOne = 0;
+    const keyword = 'keyword';
+    const userDTO: decodedAccessTokenDTO = {
+      id: 1,
+      username: 'test',
+      email: 'test@gmail.com',
+      role: 'user',
+      iat: 0,
+      exp: 0
+    }
+    it('getMeetupsWithMine', async () => {
+      const mockReturnValue = [new Meetup()];
+      mockService.getMeetupsWithMine.mockResolvedValue(mockReturnValue);
+      const result = await controller.getMeetupsWithMine(page, keyword, userDTO);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockService.getMeetupsWithMine).toHaveBeenCalled();
+      expect(mockService.getMeetupsWithMine).toHaveBeenCalledWith(userDTO.id, page, keyword);
+      expect(result).toBeInstanceOf(Array);
+    });
+    it('getMeetupsWithMine - page is less than 1', async () => {
+      const mockReturnValue = [new Meetup()];
+      mockService.getMeetupsWithMine.mockResolvedValue(mockReturnValue);
+      const result = await controller.getMeetupsWithMine(pageUnderOne, keyword, userDTO);
+
+      expect(result).toBe(mockReturnValue);
+      expect(mockService.getMeetupsWithMine).toHaveBeenCalled();
+      expect(mockService.getMeetupsWithMine).toHaveBeenCalledWith(userDTO.id, page, keyword);
+      expect(result).toBeInstanceOf(Array);
+    });
+  });
+
   describe('POST /api/meetups', () => {
     const meetupDTO: CreateMeetupDTO = {
       userId: 1,
@@ -159,6 +227,25 @@ describe('MeetupsController', () => {
 
       expect(mockService.deleteJoin).toHaveBeenCalled();
       expect(mockService.deleteJoin).toHaveBeenCalledWith(meetupId, userDTO.id);
+    });
+  });
+
+  describe('POST /api/meetups/:meetupId/chat', () => {
+    const meetupId = 1;
+    const userDTO: decodedAccessTokenDTO = {
+      id: 1,
+      username: 'test',
+      email: 'test@gmail.com',
+      role: 'user',
+      iat: 0,
+      exp: 0
+    }
+    it('addChat', async () => {
+      mockService.addChat.mockResolvedValue();
+      await controller.addChat(meetupId, userDTO);
+
+      expect(mockService.addChat).toHaveBeenCalled();
+      expect(mockService.addChat).toHaveBeenCalledWith(meetupId, userDTO.id);
     });
   });
 });

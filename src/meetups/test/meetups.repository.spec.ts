@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { MeetupsRepository } from '../meetups.repository';
 import { Meetup } from '../entities/meetup.entity';
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
@@ -7,17 +7,19 @@ import { Join } from '../entities/join.entity';
 import { CreateMeetupDTO } from '../dto/create-meetup.dto';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { ConfigService } from '@nestjs/config';
+import { getRepositoryToken } from '@nestjs/typeorm';
 
 const moduleMocker = new ModuleMocker(global);
 
 describe('MeetupsRepsitory', () => {
   let repository: MeetupsRepository;
+  let mockJoinRepository: jest.Mocked<Repository<Join>>;
   const mockDataSource = {
     createEntityManager: jest.fn(),
     createQueryRunner: jest.fn()
   };
   let mockConfigService: jest.Mocked<ConfigService>;
-  const mockConfig = {
+  let mockConfig: { MEETUPS_PAGE_LIMIT: number | null } = {
     MEETUPS_PAGE_LIMIT: 9
   };
 
@@ -32,6 +34,11 @@ describe('MeetupsRepsitory', () => {
         }
       ]
     }).useMocker((token) => {
+      if (token === getRepositoryToken(Join)) {
+        return {
+          createQueryBuilder: jest.fn(),
+        };
+      }
       if (typeof token === 'function') {
         const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
         const Mock = moduleMocker.generateFromMetadata(mockMetadata);
@@ -40,6 +47,7 @@ describe('MeetupsRepsitory', () => {
     }).compile();
 
     repository = module.get(MeetupsRepository);
+    mockJoinRepository = module.get(getRepositoryToken(Join));
     mockConfigService = module.get(ConfigService);
     mockConfigService.get.mockImplementation((key: keyof typeof mockConfig) => mockConfig[key]);
   });
@@ -81,6 +89,105 @@ describe('MeetupsRepsitory', () => {
       //   'm.createdAt',
       //   'j',
       // ]);
+      expect(result).toBeInstanceOf(Array);
+    });
+
+    // it('Success - when configService get MEETUPS_PAGE_LIMIT is null ', async () => {
+    //   mockConfig.MEETUPS_PAGE_LIMIT = null;
+    //   const mockReturnValue = [new Meetup()];
+    //   jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+    //     select: jest.fn().mockReturnThis(),
+    //     leftJoin: jest.fn().mockReturnThis(),
+    //     where: jest.fn().mockReturnThis(),
+    //     orderBy: jest.fn().mockReturnThis(),
+    //     take: jest.fn().mockReturnThis(),
+    //     skip: jest.fn().mockReturnThis(),
+    //     getMany: jest.fn().mockResolvedValue(mockReturnValue),
+    //   } as any);
+
+    //   const page = 1;
+    //   const keyword = 'keyword';
+    //   const result = await repository.getMeetups(page, keyword);
+
+    //   expect(result).toBe(mockReturnValue);
+    //   expect(repository.createQueryBuilder).toHaveBeenCalledTimes(1);
+    //   expect(repository.createQueryBuilder).toHaveBeenCalledWith('m');
+    //   // expect(repository.createQueryBuilder().select()).toHaveBeenCalledTimes(1);
+    //   // expect(repository.createQueryBuilder().select()).toHaveBeenCalledWith([
+    //   //   'm.id',
+    //   //   'm.userId',
+    //   //   'u.email',
+    //   //   'm.title',
+    //   //   'm.content',
+    //   //   'm.place',
+    //   //   'm.schedule',
+    //   //   'm.headcount',
+    //   //   'm.createdAt',
+    //   //   'j',
+    //   // ]);
+    //   expect(result).toBeInstanceOf(Array);
+    // });
+  });
+
+  describe('getMeetupsWithJoined Method', () => {mockJoinRepository
+    it('Success', async () => {
+      const mockJoinCreateQueryBuilderReturnValue = [{ meetupId: 1 }];
+      const mockMeetupCreateQueryBuilderReturnValue = [new Meetup()];
+      jest.spyOn(mockJoinRepository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        innerJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        getRawMany: jest.fn().mockResolvedValue(mockJoinCreateQueryBuilderReturnValue),
+      } as any);
+
+      jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        whereInIds: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(mockMeetupCreateQueryBuilderReturnValue),
+      } as any);
+
+      const userId = 1;
+      const page = 1;
+      const keyword = 'keyword';
+      const result = await repository.getMeetupsWithJoined(userId, page, keyword);
+
+      expect(result).toBe(mockMeetupCreateQueryBuilderReturnValue);
+      expect(mockJoinRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(mockJoinRepository.createQueryBuilder).toHaveBeenCalledWith('j');
+      expect(repository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(repository.createQueryBuilder).toHaveBeenCalledWith('m');
+      expect(result).toBeInstanceOf(Array);
+    });
+  });
+
+  describe('getMeetupsWithMine Method', () => {mockJoinRepository
+    it('Success', async () => {
+      const mockMeetupCreateQueryBuilderReturnValue = [new Meetup()];
+      jest.spyOn(repository, 'createQueryBuilder').mockReturnValue({
+        select: jest.fn().mockReturnThis(),
+        leftJoin: jest.fn().mockReturnThis(),
+        where: jest.fn().mockReturnThis(),
+        andWhere: jest.fn().mockReturnThis(),
+        orderBy: jest.fn().mockReturnThis(),
+        take: jest.fn().mockReturnThis(),
+        skip: jest.fn().mockReturnThis(),
+        getMany: jest.fn().mockResolvedValue(mockMeetupCreateQueryBuilderReturnValue),
+      } as any);
+
+      const userId = 1;
+      const page = 1;
+      const keyword = 'keyword';
+      const result = await repository.getMeetupsWithMine(userId, page, keyword);
+
+      expect(result).toBe(mockMeetupCreateQueryBuilderReturnValue);
+      expect(repository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(repository.createQueryBuilder).toHaveBeenCalledWith('m');
       expect(result).toBeInstanceOf(Array);
     });
   });

@@ -5,11 +5,12 @@ import { CollectionKeyword } from 'src/collections/entities/collection.keyword.e
 import { CollectionsController } from 'src/collections/collections.controller';
 import { CollectionsService } from 'src/collections/collections.service';
 import { CollectionUserKeywordRepository } from 'src/collections/collection.user.keyword.repository';
+import { Photo } from 'src/photospot/entities/photo.entity';
 import { CollectionLike } from './entities/collection.like.entity';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Collection, CollectionKeyword, CollectionLike]), JwtModule],
+  imports: [TypeOrmModule.forFeature([Collection, CollectionKeyword, Photo, CollectionLike]), JwtModule],
   controllers: [CollectionsController],
   providers: [CollectionsService, CollectionUserKeywordRepository],
 })
