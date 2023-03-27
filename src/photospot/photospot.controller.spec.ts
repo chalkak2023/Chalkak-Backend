@@ -123,4 +123,46 @@ describe('PhotospotController', () => {
       expect(service.deletePhotospot).toHaveBeenCalledWith(photospotId, userId);
     });
   });
+
+  describe('GET getRandomPhoto', () => {
+    it('should be defined', () => {
+      expect(controller.getRandomPhoto).toBeDefined();
+    });
+
+    it('getRandomPhoto 성공', async () => {
+      await service.getRandomPhoto();
+
+      expect(service.getRandomPhoto).toHaveBeenCalledTimes(1);
+      expect(service.getRandomPhoto).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('GET getRecommendPhoto', () => {
+    it('should be defined', () => {
+      expect(controller.getRecommendPhoto).toBeDefined();
+    });
+
+    it('getRecommendPhoto 성공', async () => {
+      const photoId = 1;
+
+      await service.getRecommendPhoto(photoId);
+
+      expect(service.getRecommendPhoto).toHaveBeenCalledTimes(1);
+      expect(service.getRecommendPhoto).toHaveBeenCalledWith(photoId);
+    });
+  });
+
+  describe('GET getAllPhoto', () => {
+    it('should be defined', () => {
+      expect(controller.getAllPhoto).toBeDefined();
+    });
+
+    it('getAllPhoto 성공', async () => {
+      const page = 1;
+      await service.getAllPhoto(page);
+
+      expect(service.getAllPhoto).toHaveBeenCalledTimes(1);
+      expect(service.getAllPhoto).toHaveBeenCalledWith(page);
+    });
+  });
 });

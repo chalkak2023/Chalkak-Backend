@@ -22,9 +22,7 @@ export class CollectionKeyword {
   @DeleteDateColumn()
   deletedAt: Date | null;
 
-  @ManyToOne(() => Collection, (collection) => collection.collection_keywords, {
-    onDelete: 'CASCADE',
-  })
+  @ManyToOne(() => Collection, (collection) => collection.collection_keywords)
   collection: Collection;
 
   @ManyToOne(() => User, (user) => user.collection_keywords)

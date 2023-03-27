@@ -9,13 +9,15 @@ import { CreateCollectionDto } from 'src/collections/dto/create.collection.dto';
 import { UpdateCollectionDto } from 'src/collections/dto/update.collection.dto';
 import { GetCollectionIdDto } from 'src/collections/dto/get.collection.id.dto';
 import { GetCollectionsListQueryDto } from 'src/collections/dto/get.collections.list.query.dto';
+import { Photo } from 'src/photospot/entities/photo.entity';
 
 @Injectable()
 export class CollectionsService {
   constructor(
     private readonly collectionUserKeywordRepository: CollectionUserKeywordRepository,
     @InjectRepository(Collection) private readonly collectionsRepository: Repository<Collection>,
-    @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>
+    @InjectRepository(CollectionKeyword) private readonly collectionKeywordsRepository: Repository<CollectionKeyword>,
+    @InjectRepository(Photo) private readonly photoRepository: Repository<Photo>
   ) {}
 
   async getCollectionsList(getCollectionsListQueryDto: GetCollectionsListQueryDto): Promise<Collection[]> {
@@ -51,7 +53,7 @@ export class CollectionsService {
 
   async updateCollectionKeywords({ keyword }: UpdateCollectionDto, collectionId: number, userId: number) {
     if (keyword) {
-      const prevKeywordObj = await this.getCollectionKeyword(collectionId)
+      const prevKeywordObj = await this.getCollectionKeyword(collectionId);
       const prevKeyword = prevKeywordObj.map((obj) => obj.keyword);
       const newKeywords = _.difference(keyword, prevKeyword);
       const delKeywords = _.difference(prevKeyword, keyword);
@@ -63,15 +65,15 @@ export class CollectionsService {
       }
     }
   }
-  
-  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number):Promise<void> {
+
+  async updateCollection(updateCollectionDto: UpdateCollectionDto, collectionId: number, userId: number): Promise<void> {
     const { title, description } = updateCollectionDto;
     const collection = await this.getCollection(collectionId);
     if (collection.userId !== userId) {
       throw new ForbiddenException('해당 콜렉션 내용의 수정 권한이 없습니다.');
     }
     await this.collectionsRepository.update({ id: collectionId }, { title, description });
-    return await this.updateCollectionKeywords(updateCollectionDto, collectionId, userId)
+    return await this.updateCollectionKeywords(updateCollectionDto, collectionId, userId);
   }
 
   async deleteCollection(collectionId: number, userId: number) {
@@ -79,6 +81,13 @@ export class CollectionsService {
     if (userId !== collection.userId) {
       throw new ForbiddenException('해당 콜렉션의 삭제 권한이 없습니다.');
     }
-    this.collectionsRepository.softDelete(collectionId);
+    const photospotIds = collection.photospots.map((photopsot) => photopsot.id)
+    console.log(photospotIds);
+    this.collectionsRepository.softRemove(collection);
+    this.photoRepository
+      .createQueryBuilder('p')
+      .delete()
+      .where('photospotId IN (:...photospotIds)', { photospotIds })
+      .execute();
   }
 }

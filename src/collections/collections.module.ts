@@ -5,9 +5,10 @@ import { CollectionKeyword } from 'src/collections/entities/collection.keyword.e
 import { CollectionsController } from 'src/collections/collections.controller';
 import { CollectionsService } from 'src/collections/collections.service';
 import { CollectionUserKeywordRepository } from 'src/collections/collection.user.keyword.repository';
+import { Photo } from 'src/photospot/entities/photo.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Collection, CollectionKeyword])],
+  imports: [TypeOrmModule.forFeature([Collection, CollectionKeyword, Photo])],
   controllers: [CollectionsController],
   providers: [CollectionsService, CollectionUserKeywordRepository],
 })
