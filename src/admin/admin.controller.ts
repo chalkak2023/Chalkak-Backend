@@ -8,6 +8,7 @@ import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
 import { Faq } from 'src/admin/entities/faq.entity';
+import { AdminGetListQueryDto } from 'src/admin/dto/admin.get.list.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
 import { SignupAdminResDto } from 'src/admin/dto/signup.admin.res.dto';
 import { BlockAdminUserDto } from 'src/admin/dto/block.admin.user.dto';
@@ -30,8 +31,8 @@ export class AdminController {
   // 관리자 관리
   @Get('auth')
   @UseGuards(AuthGuard('jwt-admin'))
-  async getAdminsList(@Query('search') search: string, @Query('p') p: number = 1): Promise<AdminList> {
-    return await this.adminService.getAdminsList(search, p);
+  async getAdminsList(@Query() adminGetListQueryDto: AdminGetListQueryDto): Promise<AdminList> {
+    return await this.adminService.getAdminsList(adminGetListQueryDto);
   }
 
   @Post('auth/signup')
@@ -71,8 +72,8 @@ export class AdminController {
   // 유저 관리
   @Get('users')
   @UseGuards(AuthGuard('jwt-admin'))
-  async getAdminUsersList(@Query('search') search: string, @Query('p') p: number = 1): Promise<UserList> {
-    return await this.adminService.getAdminUsersList(search, p);
+  async getAdminUsersList(@Query() adminGetListQueryDto: AdminGetListQueryDto): Promise<UserList> {
+    return await this.adminService.getAdminUsersList(adminGetListQueryDto);
   }
 
   @Put('users/:id')
@@ -85,8 +86,8 @@ export class AdminController {
   // 콜렉션 관리
   @Get('collections')
   @UseGuards(AuthGuard('jwt-admin'))
-  async getAdminCollectionsList(@Query('search') search: string, @Query('p') p: number = 1): Promise<CollectionList> {
-    return await this.adminService.getAdminCollectionsList(search, p);
+  async getAdminCollectionsList(@Query() adminGetListQueryDto: AdminGetListQueryDto): Promise<CollectionList> {
+    return await this.adminService.getAdminCollectionsList(adminGetListQueryDto);
   }
 
   @Delete('collections/:id')
@@ -117,8 +118,8 @@ export class AdminController {
   // 모임 관리
   @Get('meetups')
   @UseGuards(AuthGuard('jwt-admin'))
-  async getAdminMeetupsList(@Query('search') search: string, @Query('p') p: number = 1): Promise<MeetupList> {
-    return await this.adminService.getAdminMeetupsList(search, p);
+  async getAdminMeetupsList(@Query() adminGetListQueryDto: AdminGetListQueryDto): Promise<MeetupList> {
+    return await this.adminService.getAdminMeetupsList(adminGetListQueryDto);
   }
 
   @Delete('meetups/:id')
@@ -130,8 +131,8 @@ export class AdminController {
   // 자주찾는질문 관리
   @Get('faq')
   @UseGuards(AuthGuard('jwt-admin'))
-  async getAdminFaqList(@Query('search') search: string, @Query('p') p: number = 1): Promise<FaqList> {
-    return await this.adminService.getAdminFaqList(search, p);
+  async getAdminFaqList(@Query() adminGetListQueryDto: AdminGetListQueryDto): Promise<FaqList> {
+    return await this.adminService.getAdminFaqList(adminGetListQueryDto);
   }
 
   @Get('faq/:id')

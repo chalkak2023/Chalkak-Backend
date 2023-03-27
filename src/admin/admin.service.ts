@@ -23,6 +23,7 @@ import { Collection } from 'src/collections/entities/collection.entity';
 import { Photospot } from 'src/photospot/entities/photospot.entity';
 import { Meetup } from 'src/meetups/entities/meetup.entity';
 import { Faq } from 'src/admin/entities/faq.entity';
+import { AdminGetListQueryDto } from 'src/admin/dto/admin.get.list.dto';
 import { SignupAdminResDto } from 'src/admin/dto/signup.admin.res.dto';
 import { SigninAdminDto } from 'src/admin/dto/signin.admin.dto';
 import { SignupAdminReqDto } from 'src/admin/dto/signup.admin.req.dto';
@@ -52,7 +53,8 @@ export class AdminService {
   ) { }
 
   // 관리자 관리
-  async getAdminsList(search: string, p: number = 1): Promise<AdminList> {
+  async getAdminsList({ search, p }: AdminGetListQueryDto): Promise<AdminList> {
+    p = p || 1;
     const adminList = this.adminRepository.createQueryBuilder('admin');
     if (search) {
       adminList.where('admin.account LIKE :search OR admin.responsibility LIKE :search', {
@@ -191,7 +193,8 @@ export class AdminService {
   }
 
   // 유저 관리
-  async getAdminUsersList(search: string, p: number = 1): Promise<UserList> {
+  async getAdminUsersList({ search, p }: AdminGetListQueryDto): Promise<UserList> {
+    p = p || 1;
     const usersList = this.adminUsersRepository.createQueryBuilder('user');
     if (search) {
       usersList.where('user.email LIKE :search OR user.username LIKE :search ', { search: `%${search}%` });
@@ -233,7 +236,8 @@ export class AdminService {
   }
 
   // 콜렉션 관리
-  async getAdminCollectionsList(search: string, p: number = 1): Promise<CollectionList> {
+  async getAdminCollectionsList({ search, p }: AdminGetListQueryDto): Promise<CollectionList> {
+    p = p || 1;
     const collectionsList = this.adminCollectionsRepository.createQueryBuilder('c');
     if (search) {
       collectionsList.where('c.title LIKE :search OR c.description LIKE :search', {
@@ -289,7 +293,8 @@ export class AdminService {
   }
 
   // 모임 관리
-  async getAdminMeetupsList(search: string, p: number = 1): Promise<MeetupList> {
+  async getAdminMeetupsList({ search, p }: AdminGetListQueryDto): Promise<MeetupList> {
+    p = p || 1;
     const meetupsList = this.adminMeetupsRepository
       .createQueryBuilder('m')
       .select([
@@ -337,7 +342,8 @@ export class AdminService {
   }
 
   // 자주찾는질문 관리
-  async getAdminFaqList(search: string, p: number = 1): Promise<FaqList> {
+  async getAdminFaqList({ search, p }: AdminGetListQueryDto): Promise<FaqList> {
+    p = p || 1;
     const faqList = this.adminFaqRepository.createQueryBuilder('faq');
     if (search) {
       faqList.where('faq.title LIKE :search OR faq.content LIKE :search', {
