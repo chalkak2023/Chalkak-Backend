@@ -1,4 +1,4 @@
-name: CI/CD Docker(Development)
+name: CI/CD Docker
 
 on:
   pull_request:
