@@ -21,7 +21,9 @@ export class CollectionsController {
 
   // 콜렉션
   @Get()
-  async getCollectionsList(@Query() getCollectionsListQueryDto: GetCollectionsListQueryDto, @Token('accessToken') accessToken?: string): Promise<CollectionList[]> {
+  async getCollectionsList(
+    @Query() getCollectionsListQueryDto: GetCollectionsListQueryDto,
+    @Token('accessToken') accessToken?: string): Promise<CollectionList[]> {
     const user = accessToken ? this.jwtService.decode(accessToken) : null
     return await this.collectionsService.getCollectionsList(getCollectionsListQueryDto, user);
   }
