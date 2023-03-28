@@ -5,8 +5,8 @@ import _ from 'lodash';
 import { Faq } from 'src/admin/entities/faq.entity';
 
 @Injectable()
-export class ServiceService {
-  constructor(@InjectRepository(Faq) private adminFaqRepository: Repository<Faq>) {}
+export class GuideService {
+  constructor(@InjectRepository(Faq) private adminFaqRepository: Repository<Faq>) { }
 
   async getFaqList(id: number): Promise<Faq[]> {
     const faq = await this.adminFaqRepository.find({ where: { id } });
