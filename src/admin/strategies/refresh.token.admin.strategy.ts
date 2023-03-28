@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import _ from 'lodash';
 import { AdminService } from 'src/admin/admin.service';
@@ -14,8 +13,8 @@ export class RefreshTokenAdminStrategy extends PassportStrategy(Strategy, 'jwt-r
       passReqToCallback: true,
       secretOrKey: configService.get('JWT_ADMIN_ACCESS_TOKEN_SECRET'),
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: Request) => {
-          const reqCookies = request?.cookies['auth-cookie'];
+        (req) => {
+          const reqCookies = req.cookies['auth-cookie'];
           if (_.isNil(reqCookies)) {
             throw new BadRequestException();
           }
@@ -25,19 +24,19 @@ export class RefreshTokenAdminStrategy extends PassportStrategy(Strategy, 'jwt-r
       ]),
     });
   }
-  async validate(req: Request, payload: any) {
+  async validate(req: Record<string, any>, payload: Record<'account', string>) {
     if (!payload) {
       throw new BadRequestException({
         message: 'Access 토큰이 유효하지 않습니다.',
       });
     }
-    let authCookieData = JSON.parse(req?.cookies['auth-cookie']);
+    const authCookieData = JSON.parse(req.cookies['auth-cookie']);
     if (!authCookieData?.refreshToken) {
       throw new BadRequestException({
         message: 'Refresh 토큰이 유효하지 않습니다.',
       });
     }
-    let admin = await this.adminService.verifyRefreshToken(payload.account, authCookieData.refreshToken);
+    const admin = await this.adminService.verifyRefreshToken(payload.account, authCookieData.refreshToken);
     if (!admin) {
       throw new BadRequestException({
         message: '토큰이 만료되었습니다.',

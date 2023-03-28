@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { Request } from 'express';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import _ from 'lodash';
 
@@ -12,8 +11,8 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
       ignoreExpiration: false,
       secretOrKey: configService.get('JWT_ADMIN_ACCESS_TOKEN_SECRET'),
       jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: Request) => {
-          const reqCookies = request?.cookies['auth-cookie'];
+        (req) => {
+          const reqCookies = req.cookies['auth-cookie'];
           if (_.isNil(reqCookies)) {
             throw new NotFoundException();
           }
@@ -23,7 +22,7 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
       ]),
     });
   }
-  async validate(payload: any) {
+  async validate(payload: Record<string, any>) {
     if (_.isNil(payload)) {
       throw new UnauthorizedException();
     }

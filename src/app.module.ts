@@ -1,5 +1,5 @@
 import { CacheModule, Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -12,8 +12,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { PhotospotModule } from './photospot/photospot.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CacheConfigService } from './common/config/cache.config.service';
-import { ServiceModule } from './service/service.module';
+import { GuideModule } from './guide/guide.module';
 import { ChatModule } from './chat/chat.module';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
@@ -27,15 +28,25 @@ import { ChatModule } from './chat/chat.module';
     EventEmitterModule.forRoot({
       global: true,
     }),
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        redis: {
+          host: configService.get<string>('CACHE_HOST') || 'localhost',
+          port: configService.get<number>('CACHE_PORT') || 6379
+        }
+      })
+    }),
     AuthModule,
     CollectionsModule,
     MeetupsModule,
     AdminModule,
     PhotospotModule,
-    ServiceModule,
+    GuideModule,
     ChatModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }
