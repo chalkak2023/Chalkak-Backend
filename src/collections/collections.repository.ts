@@ -48,7 +48,7 @@ export class CollectionsRepository extends Repository<Collection> {
     } return query
   }
 
-  async getTopCollectionsListForMain() {
+  async getTopCollectionsListForMain(): Promise<Collection[]> {
     const limit = this.configService.get('TOP_COLLECTIONS_PAGE_LIMIT') || 6;
     const result = await this.createQueryBuilder('c')
       .select([

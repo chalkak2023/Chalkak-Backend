@@ -32,7 +32,7 @@ export class CollectionsService {
     return collectionsLikesData
   }
 
-  async getTopCollectionsListForMain() {
+  async getTopCollectionsListForMain(): Promise<Collection[]> {
     const collectionsLikesData = await this.collectionsRepository.getTopCollectionsListForMain();
     return collectionsLikesData
   }
