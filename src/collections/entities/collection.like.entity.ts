@@ -16,12 +16,6 @@ export class CollectionLike {
   @PrimaryColumn()
   collectionId: number;
 
-  @CreateDateColumn()
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  updatedAt: Date;
-
   @ManyToOne(() => User, (user) => user.collectionLikes, { cascade: true })
   user: User;
 
