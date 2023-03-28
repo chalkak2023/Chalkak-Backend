@@ -50,22 +50,25 @@ describe('MeetupsRepsitory', () => {
 
   describe('getChatRooms Method', () => {
     it('Success', async () => {
-      const mockReturnValue = [new Meetup()];
+      const mockGetRawManyReturnValue = [{ meetupId: 1 }];
+      const mockGetManyReturnValue = [new Meetup()];
       jest.spyOn(mockMeetupRepository, 'createQueryBuilder').mockReturnValue({
         select: jest.fn().mockReturnThis(),
         leftJoin: jest.fn().mockReturnThis(),
         withDeleted: jest.fn().mockReturnThis(),
         where: jest.fn().mockReturnThis(),
         andWhere: jest.fn().mockReturnThis(),
+        andWhereInIds: jest.fn().mockReturnThis(),
         orderBy: jest.fn().mockReturnThis(),
-        getMany: jest.fn().mockResolvedValue(mockReturnValue),
+        getRawMany: jest.fn().mockResolvedValue(mockGetRawManyReturnValue),
+        getMany: jest.fn().mockResolvedValue(mockGetManyReturnValue),
       } as any);
 
       const userId = 1;
       const result = await repository.getChatRooms(userId);
 
-      expect(result).toBe(mockReturnValue);
-      expect(mockMeetupRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
+      expect(result).toBe(mockGetManyReturnValue);
+      expect(mockMeetupRepository.createQueryBuilder).toHaveBeenCalledTimes(2);
       expect(mockMeetupRepository.createQueryBuilder).toHaveBeenCalledWith('m');
       expect(result).toBeInstanceOf(Array);
     });
