@@ -79,13 +79,16 @@ export class CollectionsService {
     if (collection.userId !== userId) {
       throw new ForbiddenException('해당 콜렉션 내용의 수정 권한이 없습니다.');
     }
-    await this.collectionsRepository.update({ id: collectionId }, { title, description });
     if (_.isNil(keywords)) {
       throw new NotFoundException('해당 콜렉션의 키워드를 찾을 수 없습니다.');
     }
-    const keywordsArray = await this.createCollectionKeyword(keywords)
-    collection.collectionKeywords = keywordsArray
-    await this.collectionsRepository.save(collection)
+    const keywordsArray = await this.createCollectionKeyword(keywords);
+    if (title) {
+      collection.title = title
+    }
+    collection.description = description || collection.description;
+    collection.collectionKeywords = keywordsArray;
+    await this.collectionsRepository.save(collection);
   }
 
   async deleteCollection(collectionId: number, userId: number): Promise<void> {
