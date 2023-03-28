@@ -28,9 +28,9 @@ export class CollectionsController {
   }
 
   @Get('top')
-  async getTopCollectionsListForMain(@Token('accessToken') accessToken?: string): Promise<CollectionList[]> {
+  async getTopCollectionsListForMain(@Token('accessToken') accessToken?: string) {
     const user = accessToken ? this.jwtService.decode(accessToken) : null
-    return await this.collectionsService.getTopCollectionsListForMain(user);
+    return await this.collectionsService.getTopCollectionsListForMain();
   }
 
   @Get(':collectionId')
