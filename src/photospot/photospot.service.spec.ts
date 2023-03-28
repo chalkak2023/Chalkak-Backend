@@ -15,6 +15,7 @@ import { GoogleVisionService } from './../googleVision/GoogleVision.service';
 import { ConfigService } from '@nestjs/config';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
+import { CollectionLike } from 'src/collections/entities/collection.like.entity';
 
 const moduleMocker = new ModuleMocker(global);
 const collectionId = 1;
@@ -39,7 +40,8 @@ const mockCollection: Collection = {
   deletedAt: null,
   user: new User(),
   photospots: [new Photospot()],
-  collection_keywords: [new CollectionKeyword()],
+  collectionKeywords: [new CollectionKeyword()],
+  collectionLikes: [new CollectionLike()],
 };
 const mockPhotospots: Photospot[] = [
   {
@@ -322,7 +324,7 @@ describe('PhotospotService', () => {
       const photoKeywords = ['test1', 'test2', 'test3'];
       const preKeyword = { id: 1, keyword: 'test1', photos: [mockPhoto] };
       const insertKeyword = { id: 2, keyword: 'test4', photos: [mockPhoto] };
-      
+
       jest.spyOn(mockGoogleService, 'imageLabeling').mockResolvedValue(photoKeywords);
       jest.spyOn(mockPhotoKeywordRepositor, 'findOne').mockResolvedValue(preKeyword);
       jest.spyOn(mockPhotoKeywordRepositor, 'findOne').mockResolvedValueOnce(null);
@@ -386,7 +388,7 @@ describe('PhotospotService', () => {
     it('isSafePhoto 사진 문제없음 성공', async () => {
       const isSafe = true
 
-      service.getPhotospot = jest.fn( async () => mockPhotospots[0]);
+      service.getPhotospot = jest.fn(async () => mockPhotospots[0]);
       jest.spyOn(mockGoogleService, 'imageSafeGuard').mockResolvedValue(isSafe);
 
       await service.isSafePhoto(photospotId);
@@ -395,6 +397,6 @@ describe('PhotospotService', () => {
       expect(mockGoogleService.imageSafeGuard).toHaveBeenCalled();
       expect(mockPhotospotRepository.softRemove).not.toHaveBeenCalled();
       expect(mockPhotoRepository.delete).not.toHaveBeenCalled();
-    }) 
+    })
   })
 });
