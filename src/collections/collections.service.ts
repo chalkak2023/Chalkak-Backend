@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConflictException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import * as _ from 'lodash';
@@ -114,21 +114,24 @@ export class CollectionsService {
       .getOne();
   }
 
-  async addCollectionLike(userId: number, collectionId: number): Promise<CollectionLike> {
-    await this.getCollectionLikeById(userId, collectionId)
-    const collectionLike = new CollectionLike();
-    collectionLike.userId = userId;
-    collectionLike.collectionId = collectionId;
-    await this.collectionLikesRepository.save(collectionLike);
-    return collectionLike;
+  async addCollectionLike(userId: number, collectionId: number): Promise<void> {
+    const collectionLike = await this.getCollectionLikeById(userId, collectionId)
+    if (!_.isNil(collectionLike)) {
+      throw new ConflictException('이미 해당 콜렉션의 좋아요가 존재합니다.')
+    } else {
+      const newCollectionLike = new CollectionLike();
+      newCollectionLike.userId = userId;
+      newCollectionLike.collectionId = collectionId;
+      this.collectionLikesRepository.insert(newCollectionLike);
+    }
   }
 
   async removeCollectionLike(userId: number, collectionId: number): Promise<void> {
-    await this.getCollectionLikeById(userId, collectionId)
-    const collectionLike = new CollectionLike();
-    collectionLike.userId = userId;
-    collectionLike.collectionId = collectionId;
-    await this.collectionLikesRepository.remove(collectionLike);
+    const collectionLike: CollectionLike | null = await this.getCollectionLikeById(userId, collectionId)
+    if (_.isNil(collectionLike)) {
+      throw new NotFoundException('해당 콜렉션의 좋아요를 찾을 수 없습니다.')
+    } else {
+      await this.collectionLikesRepository.remove(collectionLike);
+    }
   }
 }
-

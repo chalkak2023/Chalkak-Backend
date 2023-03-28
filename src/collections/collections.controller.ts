@@ -64,7 +64,7 @@ export class CollectionsController {
   // 콜렉션 좋아요
   @Post(':collectionId/like')
   @UseGuards(JwtGuard)
-  async addCollectionLike(@Param('collectionId') collectionId: number, @InjectUser('id') userId: number): Promise<CollectionLike> {
+  async addCollectionLike(@Param('collectionId') collectionId: number, @InjectUser('id') userId: number): Promise<void> {
     return await this.collectionsService.addCollectionLike(userId, collectionId);
   }
 
