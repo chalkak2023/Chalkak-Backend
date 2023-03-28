@@ -15,6 +15,7 @@ import { GoogleVisionService } from './../googleVision/GoogleVision.service';
 import { ConfigService } from '@nestjs/config';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
+import { CollectionLike } from 'src/collections/entities/collection.like.entity';
 
 const moduleMocker = new ModuleMocker(global);
 const collectionId = 1;
@@ -39,7 +40,8 @@ const mockCollection: Collection = {
   deletedAt: null,
   user: new User(),
   photospots: [new Photospot()],
-  collection_keywords: [new CollectionKeyword()],
+  collectionKeywords: [new CollectionKeyword()],
+  collectionLikes: [new CollectionLike()],
 };
 const mockPhotospots: Photospot[] = [
   {
