@@ -16,12 +16,20 @@ export class ChatRepository extends Repository<Chat> {
   }
 
   async getChatRooms(userId: number): Promise<Meetup[]> {
+    const chatIds = await this.meetupRepository.createQueryBuilder('m')
+      .select('j.meetupId', 'meetupId')
+      .leftJoin('m.joins', 'j')
+      .withDeleted()
+      .where('m.deletedAt IS NOT NULL')
+      .andWhere('j.userId = :userId', { userId })
+      .getRawMany();
+
     return await this.meetupRepository.createQueryBuilder('m')
       .select([
         'm.id',
         'm.userId',
-        'u.email',
-        'u.username',
+        'mu.email',
+        'mu.username',
         'm.title',
         'm.content',
         'm.place',
@@ -29,13 +37,16 @@ export class ChatRepository extends Repository<Chat> {
         'm.headcount',
         'm.createdAt',
         'm.deletedAt',
-        'j',
+        'j.userId',
+        'u.email',
+        'u.username',
       ])
       .leftJoin('m.joins', 'j')
-      .leftJoin('m.user', 'u')
+      .leftJoin('m.user', 'mu')
+      .leftJoin('j.user', 'u')
       .withDeleted()
       .where('m.deletedAt IS NOT NULL')
-      .andWhere('j.userId = :userId', { userId })
+      .andWhereInIds(chatIds.map((id) => id.meetupId))
       .orderBy('m.deletedAt', 'DESC')
       .getMany();
   }
