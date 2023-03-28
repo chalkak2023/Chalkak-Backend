@@ -2,24 +2,6 @@
 
 <br>
 
-## 확장 테스트
-<details>
-  <summary>첫번째 항목</summary>
-  <div markdown="1">
-  - **하나**
-  - **둘**
-  </div>
-</details>
-<details>
-  <summary>두번째 항목</summary>
-  <div markdown="2">
-  - 셋
-  - 넷
-  </div>
-</details>
-
-<br>
-
 ## 📸 사진 공유 플랫폼, 찰칵!
 
 여기저기 흩어져 있는 출사 관련 정보 및 커뮤니티를 한 곳에서!   
@@ -39,14 +21,14 @@
 
 ## 📌 목차 
 
-- [서비스 아키텍처](#-서비스-아키텍처)
+- [서비스 아키텍처](#%EF%B8%8F-서비스-아키텍처)
 - [설계](#-설계)
-- [주요기능](#주요기능)
-- [기술적 의사결정](#기술적-의사결정)
-- [트러블슈팅](#트러블슈팅)
-- [시연 영상](#시연-영상)
-- [지원하는 브라우저](#지원하는-브라우저)
-- [팀원 소개](#팀원-소개)
+- [주요 기능](#-주요-기능)
+- [기술적 의사결정](#%EF%B8%8F-기술적-의사결정)
+- [트러블슈팅](#%EF%B8%8F%EF%B8%8F-트러블슈팅)
+- [시연 영상](#-시연-영상)
+- [지원하는 브라우저](#-지원하는-브라우저)
+- [팀원 소개](#-팀원-소개)
 
 <br>
 <br>
@@ -54,45 +36,42 @@
 ## ⚙️ 서비스 아키텍처
 
 <img src="./docs/service_architecture.png" width=100%>
-<!-- Nest.js -->
-<img src="https://img.shields.io/badge/Nest.js-E0234E?style=flat-square&logo=NestJs&logoColor=white"/>
-<!-- Node.js -->
-<img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=Node.js&logoColor=white"/>
-<!-- TypeScript -->
-<img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=white"/>
+<div>
+  <!-- Nest.js -->
+  <img src="https://img.shields.io/badge/Nest.js-E0234E?style=flat-square&logo=NestJs&logoColor=white"/>
+  <!-- Node.js -->
+  <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=Node.js&logoColor=white"/>
+  <!-- TypeScript -->
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=white"/>
+</div>
 
-<!-- React -->
-<img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=React&logoColor=black"/>
-<!-- Redux -->
-<img src="https://img.shields.io/badge/Redux-764ABC?style=flat-square&logo=Redux&logoColor=black"/>
-<!-- HTML5 -->
-<!-- <img src="https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=HTML5&logoColor=black"/> -->
-<!-- JavaScript -->
-<!-- <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=flat-square&logo=JavaScript&logoColor=black"/> -->
-<!-- CSS3 -->
-<!-- <img src="https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=CSS3&logoColor=black"/> -->
-<!-- Bootstrap -->
-<!-- <img src="https://img.shields.io/badge/Bootstrapap-7952B3?style=flat-square&logo=bootstrap&logoColor=white"/> -->
+<div>
+  <!-- React -->
+  <img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=React&logoColor=black"/>
+  <!-- Redux -->
+  <img src="https://img.shields.io/badge/Redux-764ABC?style=flat-square&logo=Redux&logoColor=black"/>
+</div>
 
-<!-- AWS -->
-<img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=flat-square&logo=Amazon EC2&logoColor=white"/>
-<img src="https://img.shields.io/badge/Amazon RDS-527FFF?style=flat-square&logo=Amazon RDS&logoColor=white"/>
-<img src="https://img.shields.io/badge/Amazon S3-569A31?style=flat-square&logo=Amazon S3&logoColor=white"/>
-<!-- Vercel -->
-<img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=Vercel&logoColor=white"/>
-<!-- GitHub Actions -->
-<img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat-square&logo=GitHub Actions&logoColor=white"/>
+<div>
+  <!-- AWS -->
+  <img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=flat-square&logo=Amazon EC2&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Amazon RDS-527FFF?style=flat-square&logo=Amazon RDS&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Amazon S3-569A31?style=flat-square&logo=Amazon S3&logoColor=white"/>
+  <!-- Vercel -->
+  <img src="https://img.shields.io/badge/Vercel-000000?style=flat-square&logo=Vercel&logoColor=white"/>
+  <!-- GitHub Actions -->
+  <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat-square&logo=GitHub Actions&logoColor=white"/>
+</div>
 
-<!-- MySQL -->
-<img src="https://img.shields.io/badge/Mysql-4479A1?style=flat-square&logo=Mysql&logoColor=white"/>
-<!-- Redis -->
-<img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=Redis&logoColor=white"/>
-<!-- Docker -->
-<img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white"/>
-<!-- Github -->
-<!-- <img src="https://img.shields.io/badge/Github-181717?style=flat-square&logo=Github&logoColor=white"/> -->
-<!-- Slack -->
-<!-- <img src="https://img.shields.io/badge/Slack-4A154B?style=flat-square&logo=Slack&logoColor=white"/> -->
+<div>
+  <!-- MySQL -->
+  <img src="https://img.shields.io/badge/Mysql-4479A1?style=flat-square&logo=Mysql&logoColor=white"/>
+  <!-- Redis -->
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=Redis&logoColor=white"/>
+  <!-- Docker -->
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white"/>
+</div>
+
 
 <br>
 <br>
@@ -107,66 +86,129 @@
 
 ## 🚀 주요 기능
 
-- 포토스팟 콜렉션
-  - Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능
-  - 포토스팟 저장 시 최대 5장의 사진 저장 기능
-  - 좋아요 기능
-  # <img src="./docs/meetup1.gif" width=50%>  
+<details>
+  <summary>포토스팟 콜렉션</summary>
+  <div markdown="1">
+    <ul>
+      <img src="./docs/meetup1.gif" width=50%>
+      <li>Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능</li>
+      <li>포토스팟 저장 시 최대 5장의 사진 저장 기능</li>
+      <li>좋아요 기능</li>
+    </ul>
+  </div>
+</details>
 
-- 사진 모아보기
-  - 클릭한 사진과 비슷한 사진을 보여주는 추천 시스템
-  - 추천 시스템을 위해 업로드 하는 사진에 대해 자동 라벨링 기능 구현
-  - Google Vision API 사용
-  # <img src="./docs/meetup1.gif" width=50%>  
-
-- 함께 찍어요 & 채팅
-  - 출사 모임 모집 기능
-  - 주최자가 모집 마감 시 채팅으로 넘어가 참여자들 끼리 채팅 할 수 있는 기능 구현
-  # <img src="./docs/meetup1.gif" width=50%>  
+<details>
+  <summary>사진 모아보기</summary>
+  <div markdown="1">
+    <ul>
+      <img src="./docs/meetup1.gif" width=50%>
+      <li>클릭한 사진과 비슷한 사진을 보여주는 추천 시스템</li>
+      <li>추천 시스템을 위해 업로드 하는 사진에 대해 자동 라벨링 기능 구현</li>
+      <li>Google Vision API 사용</li>
+    </ul>
+  </div>
+</details>
+ 
+<details>
+  <summary>함께 찍어요 & 채팅</summary>
+  <div markdown="1">
+    <ul>
+      <img src="./docs/meetup1.gif" width=50%>
+      <li>출사 모임 모집 기능</li>
+      <li>주최자가 모집 마감 시 채팅으로 넘어가 참여자들 끼리 채팅 할 수 있는 기능 구현</li>
+    </ul>
+  </div>
+</details>
 
 <br>
 <br>
 
 ## 👨‍⚖️ 기술적 의사결정
 
-- Bull Queue
-  - Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능
-  - 포토스팟 저장 시 최대 5장의 사진 저장 기능
+<details>
+  <summary>Bull Queue</summary>
+  <div markdown="1">
+    <ul>
+      <li>Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능</li>
+      <li>포토스팟 저장 시 최대 5장의 사진 저장 기능</li>
+    </ul>
+  </div>
+</details>
 
-- AWS S3
-  - Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능
-  - 포토스팟 저장 시 최대 5장의 사진 저장 기능
+<details>
+  <summary>AWS S3</summary>
+  <div markdown="1">
+    <ul>
+      <li>Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능</li>
+      <li>포토스팟 저장 시 최대 5장의 사진 저장 기능</li>
+    </ul>
+  </div>
+</details>
+ 
+<details>
+  <summary>DB 모델링 STI</summary>
+  <div markdown="1">
+    <ul>
+      <li>Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능</li>
+      <li>포토스팟 저장 시 최대 5장의 사진 저장 기능</li>
+    </ul>
+  </div>
+</details>
 
-- DB 모델링 STI
-  - Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능
-  - 포토스팟 저장 시 최대 5장의 사진 저장 기능
+<details>
+  <summary>CI/CD</summary>
+  <div markdown="1">
+    <ul>
+      <li>Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능</li>
+      <li>포토스팟 저장 시 최대 5장의 사진 저장 기능</li>
+    </ul>
+  </div>
+</details>
 
-- CI/CD
-  - Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능
-  - 포토스팟 저장 시 최대 5장의 사진 저장 기능
 
 <br>
 <br>
 
 ## 🕵️‍♂️ 트러블슈팅
 
-- 유저 블락 전략
-  - Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능
-  - 포토스팟 저장 시 최대 5장의 사진 저장 기능
+<details>
+  <summary>유저 블락 전략</summary>
+  <div markdown="1">
+    <ul>
+      <li>Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능</li>
+      <li>포토스팟 저장 시 최대 5장의 사진 저장 기능</li>
+    </ul>
+  </div>
+</details>
 
-- 이미지 리사이징
-  - Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능
-  - 포토스팟 저장 시 최대 5장의 사진 저장 기능
+<details>
+  <summary>이미지 리사이징</summary>
+  <div markdown="1">
+    <ul>
+      <li>Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능</li>
+      <li>포토스팟 저장 시 최대 5장의 사진 저장 기능</li>
+    </ul>
+  </div>
+</details>
+ 
+<details>
+  <summary>즉각적인 Bull Queue의 작업 결과 응답</summary>
+  <div markdown="1">
+    <ul>
+      <li>Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능</li>
+      <li>포토스팟 저장 시 최대 5장의 사진 저장 기능</li>
+      <li>해결 전</li>
+      <img src="./docs/bullqueue1.png" width=50%>
+      <img src="./docs/bullqueue2.png" width=50%>
+      <li>해결 후</li>
+      <img src="./docs/bullqueue3.gif" width=50%>
+      <img src="./docs/bullqueue4.gif" width=50%>
+    </ul>
+  </div>
+</details>
 
-- 즉각적인 Bull Queue의 작업 결과 응답
-  - Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능
-  - 포토스팟 저장 시 최대 5장의 사진 저장 기능
-  - 해결 전   
-    <img src="./docs/bullqueue1.png" width=50%> 
-    <img src="./docs/bullqueue2.png" width=50%> 
-  - 해결 후   
-    <img src="./docs/bullqueue3.gif" width=50%> 
-    <img src="./docs/bullqueue4.gif" width=50%> 
+
 
 <br>
 <br>
