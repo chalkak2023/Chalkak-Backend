@@ -215,10 +215,7 @@ export class AdminService {
     } else {
       this.cacheManager.del(`user-${id}-block`);
     }
-<<<<<<<< <Temporary merge branch 1
     await this.adminUsersRepository
-=========
->>>>>>>>> Temporary merge branch 2
       .createQueryBuilder()
       .update()
       .set({
