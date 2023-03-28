@@ -83,9 +83,7 @@ export class CollectionsService {
       throw new NotFoundException('해당 콜렉션의 키워드를 찾을 수 없습니다.');
     }
     const keywordsArray = await this.createCollectionKeyword(keywords);
-    if (title) {
-      collection.title = title
-    }
+    collection.title = title || collection.title;
     collection.description = description || collection.description;
     collection.collectionKeywords = keywordsArray;
     await this.collectionsRepository.save(collection);
