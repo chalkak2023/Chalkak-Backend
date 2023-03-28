@@ -6,7 +6,11 @@
 
 여기저기 흩어져 있는 출사 관련 정보 및 커뮤니티를 한 곳에서!   
 `찰칵(Chalkak)`은 출사 관련 정보를 공유하는 플랫폼이자 커뮤니티 입니다.   
-[여기](https://www.chalkak.site/)를 클릭해 사이트를 확인하세요 🙂
+<!-- [여기](https://www.chalkak.site/)를 클릭해 사이트를 확인하세요 🙂 -->
+
+[📷 찰칵 사이트로 이동하기](https://www.chalkak.site)   
+[<img src='./docs/github_logo.png' width=20> Back-End 깃허브로 이동하기](https://github.com/chalkak2023/Chalkak-Backend)   
+[<img src='./docs/github_logo.png' width=20> Front-End 깃허브로 이동하기](https://github.com/chalkak2023/Chalkak-frontend)
 
 <br>
 
@@ -78,8 +82,25 @@
 
 ## 🛠 설계
 
-- [ERD 보러가기](https://www.erdcloud.com/d/a36xRNx6woXE7ukPk)
-- [API 보러가기](https://www.erdcloud.com/d/a36xRNx6woXE7ukPk)
+<details>
+  <summary>ERD</summary>
+  <div markdown="1">
+    <ul>
+      <div><img src="./docs/meetup1.gif" width=50%></div>
+      <a href="https://google.com" target="_blank">ERD 보러가기</a>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary>API</summary>
+  <div markdown="1">
+    <ul>
+      <div><img src="./docs/meetup1.gif" width=50%></div>
+      <a href="https://google.com" target="_blank">API 보러가기</a>
+    </ul>
+  </div>
+</details>
 
 <br>
 <br>
