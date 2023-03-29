@@ -160,9 +160,9 @@
 <details>
   <summary><b>API</b></summary>
   <div markdown="1">
+    <ul><li>이미지로 올리기엔 너무 긴 관계로 링크로 대체하였습니다.</li></ul>
     <ul>
-      <div><img src="./docs/설계/api.png" width=100%></div>
-      <a href="https://google.com" target="_blank">API 보러가기</a>
+      <a href="https://chalkak.notion.site/abed2bb362604af591ec713d8683f24f?v=14b01be7858842b396b16fa5e7d871cd" target="_blank" style="font-size: 25px;">[Notion 링크] API 보러가기</a>
     </ul>
   </div>
 </details>
