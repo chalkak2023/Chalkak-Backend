@@ -154,7 +154,6 @@
   <div markdown="1">
     <ul>
       <div><img src="./docs/설계/erd.png" width=100%></div>
-      <a href="https://google.com" target="_blank">ERD 보러가기</a>
     </ul>
   </div>
 </details>
@@ -198,8 +197,8 @@
     <ul>
       <li>출사 모임 모집 기능</li>
       <img src="./docs/주요_기능/같이찍어요/1.gif" width=70%>
-      <img src="./docs/주요_기능/같이찍어요/2.gif" width=70%>
       <li>모임이 모집 마감되면 모임에 참여한 인원끼리 실시간 채팅 기능</li>
+      <img src="./docs/주요_기능/같이찍어요/2.gif" width=70%>
       <img src="./docs/주요_기능/같이찍어요/3.gif" width=70%>
     </ul>
   </div>
@@ -762,7 +761,7 @@
 
 | <img src='./docs/chrome.png' width=60> | <img src='./docs/edge.png' width=60> | <img src='./docs/safari.png' width=60> |
 | :-: | :-: | :-: |
-|latest|latest|latest|
+| Chrome | Edge | Safari |
 
 <br>
 <br>
