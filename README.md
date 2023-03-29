@@ -88,7 +88,7 @@
   
 ```html
 📦src
- ┣ 📂admin                  # 어드민 API
+ ┣ 📂admin                  # 관리자 API
  ┣ 📂auth                   # 사용자 API
  ┣ 📂chat                   # 채팅 API
  ┣ 📂collections            # 콜렉션 API
@@ -115,14 +115,14 @@
 
 ```html
 📦src
- ┣ 📂environments           # 관리자페이지에서의 컴포넌트 재활용을 위한 파일 관련
+ ┣ 📂environments           # 관리자 페이지에서의 컴포넌트 재활용을 위한 파일 관련
  ┣ 📂pages
  ┃ ┣ 📜AdminPage.js
  ┃ ┗ 📜UserPage.js
  ┣ 📂routes
  ┃ ┣ 📂Photospot            # 포토스팟 관련
- ┃ ┣ 📂admin                # 관리자페이지 관련
- ┃ ┣ 📂auth                 # 사용자페이지 관련
+ ┃ ┣ 📂admin                # 관리자 관련
+ ┃ ┣ 📂auth                 # 사용자 관련
  ┃ ┣ 📂chat                 # 채팅 관련
  ┃ ┣ 📂collections          # 콜렉션 관련
  ┃ ┣ 📂components           # header, footer, nav 등 공통 컴포넌트 관련
@@ -136,7 +136,7 @@
  ┃ ┗ 📜NotFound.js
  ┣ 📂store                  # Redux slice 관련
  ┣ 📂utils
- ┃ ┣ 📜api-axios.js         # 편한 Axios 사용 관련 세팅
+ ┃ ┣ 📜api-axios.js         # Axios 요청 관련 세팅 모듈화
  ┃ ┗ 📜controlCookie.js     # 쿠키 관리
  ┣ 📜App.js
  ┣ 📜index.js
@@ -182,7 +182,7 @@
       <img src="./docs/주요_기능/포토스팟_콜렉션/2.gif" width=70%>
       <li>콜렉션에 있는 포토스팟 리스트를 확인하고 해당 포토스팟을 클릭하면 해당 좌표로 이동</li>
       <img src="./docs/주요_기능/포토스팟_콜렉션/3.gif" width=70%>
-      <li>마음에 드는 콜렉션에 나의 반응 표현할 수 있는 좋아요 기능</li>
+      <li>마음에 드는 콜렉션에 나의 반응을 표현할 수 있는 좋아요 기능</li>
       <img src="./docs/주요_기능/포토스팟_콜렉션/4.gif" width=70%>
       <li>포토스팟에 등록된 사진을 모아보고 비슷한 사진을 추천하는 기능</li>
       <img src="./docs/주요_기능/포토스팟_콜렉션/5.gif" width=70%>
@@ -219,7 +219,7 @@
 ## 👨‍⚖️ 기술적 의사결정
 
 <details>
-  <summary><b>[동시성 처리] BullQueue</b></summary>
+  <summary><b>[동시성 처리] Bull Queue</b></summary>
   <div markdown="1">
     <ul>
       <li>도입배경</li>
@@ -338,7 +338,7 @@
     <ul>
       <li>도입배경</li>
         <ul>
-          <li>사진을 많이 저장되면 스토리지 공간을 확장해야 한다. </br>그렇기 때문에 스토리지 공간이 필요한 만큼 동적으로 할당하여 효율적으로 사진을 관리할 수 있는 클라우드 기반의 객체 스토리지 서비스가 필요했다.</li>
+          <li>사진을 많이 저장하면 스토리지 공간을 확장해야 한다. </br>그렇기 때문에 스토리지 공간이 필요한 만큼 동적으로 할당하여 효율적으로 사진을 관리할 수 있는 클라우드 기반의 객체 스토리지 서비스가 필요했다.</li>
         </ul>
       <li>기술비교</li>
         <table width="70%">
@@ -675,7 +675,7 @@
       <li>수치 비교</li>
         <ul>
           <li><b>[기존]</b></br>유저수에 비례해 증가하던 기존 메모리 사용구조</li>
-          <img src="./docs/트러블슈팅/유저블락전략/1.png" width=70%>
+          <img src="./docs/트러블슈팅/유저블락전략/1.png" width=30%>
           <li><b>[변경]</b></br>최대 100개 수준을 넘지 않는 메모리 사용구조</li>
         </ul>
     </ul>
@@ -701,9 +701,9 @@
           <li>업로드 속도 ⇒ 약 297ms에서 134ms으로 54.21% 개선</li>
             <ul>
               <li>리사이징 전</li>
-              <img src="./docs/트러블슈팅/이미지리사이징/1.png" width=70%>
+              <img src="./docs/트러블슈팅/이미지리사이징/1.png" width=30%>
               <li>리사이징 후</li>
-              <img src="./docs/트러블슈팅/이미지리사이징/2.png" width=70%>
+              <img src="./docs/트러블슈팅/이미지리사이징/2.png" width=30%>
             </ul>
           <li>사진 SIZE ⇒ 160,324를 72,626으로 54.7% 감소</li>
             <ul>
@@ -767,9 +767,8 @@
 
 ## 👨‍👨‍👧‍👦 팀원 소개
 
-| | <img src='https://github.com/boleesystem.png' width=120> | <img src='https://github.com/cchoseonghun.png' width=120> | <img src='https://github.com/muja-code.png' width=120> | <img src='https://github.com/tstunas.png' width=120> |
-| :-: | :-: | :-: | :-: | :-: |
-| 이름 | 이보형 | 조성훈 | 박무현 | 박진 |
-| 역할 | 리더 | 부리더 | 팀원 | 팀원 |
-| 사이트 | [<img src='./docs/github_logo.png' width=20>GitHub](https://github.com/boleesystem), [블로그](https://boleesystem.tistory.com) | [<img src='./docs/github_logo.png' width=20>GitHub](https://github.com/cchoseonghun), [블로그](https://4sii.tistory.com) | [<img src='./docs/github_logo.png' width=20>GitHub](https://github.com/muja-code), [블로그](https://muja-coder.tistory.com) | [<img src='./docs/github_logo.png' width=20>GitHub](https://github.com/tstunas), [블로그](https://velog.io/@tstunas3) |
-| 이메일 | boleesystem@gmail.com | cchoseonghun@gmail.com | pla2697@gmail.com | zoc6521@naver.com |
+| <img src='https://github.com/boleesystem.png' width=120> | <img src='https://github.com/cchoseonghun.png' width=120> | <img src='https://github.com/muja-code.png' width=120> | <img src='https://github.com/tstunas.png' width=120> |
+| :-: | :-: | :-: | :-: |
+| 이보형 | 조성훈 | 박무현 | 박진 |
+| [<img src='./docs/github_logo.png' width=20>GitHub](https://github.com/boleesystem), [블로그](https://boleesystem.tistory.com) | [<img src='./docs/github_logo.png' width=20>GitHub](https://github.com/cchoseonghun), [블로그](https://4sii.tistory.com) | [<img src='./docs/github_logo.png' width=20>GitHub](https://github.com/muja-code), [블로그](https://muja-coder.tistory.com) | [<img src='./docs/github_logo.png' width=20>GitHub](https://github.com/tstunas), [블로그](https://velog.io/@tstunas3) |
+| boleesystem@gmail.com | cchoseonghun@gmail.com | pla2697@gmail.com | zoc6521@naver.com |
