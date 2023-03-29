@@ -26,6 +26,7 @@
 ## 📌 목차 
 
 - [서비스 아키텍처](#%EF%B8%8F-서비스-아키텍처)
+- [프로젝트 구조](#-프로젝트-구조)
 - [설계](#-설계)
 - [주요 기능](#-주요-기능)
 - [기술적 의사결정](#%EF%B8%8F-기술적-의사결정)
@@ -76,6 +77,70 @@
   <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white"/>
 </div>
 
+<br>
+<br>
+
+## 🗂 프로젝트 구조
+
+<details>
+  <summary>Back-End (Nest.js)</summary>
+  
+```html
+📦src
+ ┣ 📂admin                  # 어드민 API
+ ┣ 📂auth                   # 사용자 API
+ ┣ 📂chat                   # 채팅 API
+ ┣ 📂collections            # 콜렉션 API
+ ┣ 📂common
+ ┃ ┣ 📂aws                  # AWS S3 세팅 관련
+ ┃ ┣ 📂config               # cache, typeorm 등의 세팅 관련
+ ┃ ┣ 📂logging              # winston을 통한 로깅 관련
+ ┃ ┗ 📂multer               # 이미지 업로드용 multer
+ ┣ 📂googleVision           # Google vision API
+ ┣ 📂guide                  # 서비스 이용안내 API
+ ┣ 📂mailer                 # 메일 시스템 관련
+ ┣ 📂meetups                # 같이찍어요 API
+ ┣ 📂photospot              # 포토스팟 API
+ ┣ 📂social                 # 소셜 로그인 관련
+ ┣ 📜app.controller.ts
+ ┣ 📜app.module.ts
+ ┣ 📜app.service.ts
+ ┗ 📜main.ts
+```
+</details>
+
+<details>
+  <summary>Front-End (Create React App)</summary>
+
+```html
+📦src
+ ┣ 📂environments           # 관리자페이지에서의 컴포넌트 재활용을 위한 파일 관련
+ ┣ 📂pages
+ ┃ ┣ 📜AdminPage.js
+ ┃ ┗ 📜UserPage.js
+ ┣ 📂routes
+ ┃ ┣ 📂Photospot            # 포토스팟 관련
+ ┃ ┣ 📂admin                # 관리자페이지 관련
+ ┃ ┣ 📂auth                 # 사용자페이지 관련
+ ┃ ┣ 📂chat                 # 채팅 관련
+ ┃ ┣ 📂collections          # 콜렉션 관련
+ ┃ ┣ 📂components           # header, footer, nav 등 공통 컴포넌트 관련
+ ┃ ┣ 📂guide                # 서비스 이용안내 관련
+ ┃ ┣ 📂hoc                  # 고차 컴포넌트(HOC, Higher Order Component)로 사용자의 로그인 여부를 체크하는 컴포넌트 관련
+ ┃ ┣ 📂main                 # 메인페이지 관련
+ ┃ ┣ 📂meetups              # 같이찍어요 관련
+ ┃ ┣ 📂oauth                # OAuth 로그인 관련
+ ┃ ┣ 📂photo                # 사진 모아보기 관련
+ ┃ ┣ 📜Main.js
+ ┃ ┗ 📜NotFound.js
+ ┣ 📂store                  # Redux slice 관련
+ ┣ 📂utils
+ ┃ ┣ 📜api-axios.js         # 편한 Axios 사용 관련 세팅
+ ┃ ┗ 📜controlCookie.js     # 쿠키 관리
+ ┣ 📜App.js
+ ┣ 📜index.js
+```
+</details>
 
 <br>
 <br>
@@ -111,7 +176,7 @@
   <summary>포토스팟 콜렉션</summary>
   <div markdown="1">
     <ul>
-      <img src="./docs/meetup1.gif" width=50%>
+      <img src="./docs/meetup1.gif" width=70%>
       <li>Kakao Map API를 이용해 원하는 좌표에 포토스팟 저장 기능</li>
       <li>포토스팟 저장 시 최대 5장의 사진 저장 기능</li>
       <li>좋아요 기능</li>
@@ -123,7 +188,7 @@
   <summary>사진 모아보기</summary>
   <div markdown="1">
     <ul>
-      <img src="./docs/meetup1.gif" width=50%>
+      <img src="./docs/meetup1.gif" width=70%>
       <li>클릭한 사진과 비슷한 사진을 보여주는 추천 시스템</li>
       <li>추천 시스템을 위해 업로드 하는 사진에 대해 자동 라벨링 기능 구현</li>
       <li>Google Vision API 사용</li>
@@ -135,7 +200,7 @@
   <summary>함께 찍어요 & 채팅</summary>
   <div markdown="1">
     <ul>
-      <img src="./docs/meetup1.gif" width=50%>
+      <img src="./docs/meetup1.gif" width=70%>
       <li>출사 모임 모집 기능</li>
       <li>주최자가 모집 마감 시 채팅으로 넘어가 참여자들 끼리 채팅 할 수 있는 기능 구현</li>
     </ul>
@@ -229,23 +294,22 @@
   </div>
 </details>
 
-
-
 <br>
 <br>
 
 ## 🎥 시연 영상
 
-<img src="./docs/service_architecture.png" width=100%>
+> 아래 이미지를 클릭하면 시연 영상을 시청할 수 있습니다.
 
+[![찰칵 시연영상](https://img.youtube.com/vi/GzMTNbJj6YU/hqdefault.jpg)](https://youtu.be/GzMTNbJj6YU)
 <br>
 <br>
 
 ## 🌏 지원하는 브라우저
 
-| <img src='./docs/chrome.png' width=60> |
-| :-: |
-|latest|
+| <img src='./docs/chrome.png' width=60> | <img src='./docs/edge.png' width=60> | <img src='./docs/safari.png' width=60> |
+| :-: | :-: | :-: |
+|latest|latest|latest|
 
 <br>
 <br>
@@ -256,5 +320,5 @@
 | :-: | :-: | :-: | :-: |
 | 이보형 | 조성훈 | 박무현 | 박진 |
 | 리더 | 부리더 | 팀원 | 팀원 |
-| [깃허브](https://github.com/boleesystem), [블로그](https://boleesystem.tistory.com) | [깃허브](https://github.com/cchoseonghun), [블로그](https://4sii.tistory.com) | [깃허브](https://github.com/muja-code), [블로그](https://muja-coder.tistory.com) | [깃허브](https://github.com/tstunas), [블로그](https://velog.io/@tstunas3) |
+| [GitHub](https://github.com/boleesystem), [블로그](https://boleesystem.tistory.com) | [GitHub](https://github.com/cchoseonghun), [블로그](https://4sii.tistory.com) | [GitHub](https://github.com/muja-code), [블로그](https://muja-coder.tistory.com) | [GitHub](https://github.com/tstunas), [블로그](https://velog.io/@tstunas3) |
 | boleesystem@gmail.com | cchoseonghun@gmail.com | pla2697@gmail.com | zoc6521@naver.com |
