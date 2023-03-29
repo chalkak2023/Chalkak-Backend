@@ -1,4 +1,4 @@
-[<img src="./docs/banner.jpg" width=100%>](https://www.chalkak.site)
+[<img src="./docs/찰칵배너.jpg" width=100%>](https://www.chalkak.site)
 
 <br>
 
@@ -651,10 +651,20 @@
         <ul>
           <li>매 API 요청마다 DB 조회를 하지 않기 위해 CacheManager로 DB에서 가져온 블락 여부에 대한 데이터를 5분 간 Cache (Redis)에 저장한다. </br>이를 통해 DB 조회 횟수를 줄여 리소스를 효율적으로 활용하고, 성능을 개선할 수 있었다.</li>
         </ul>
-      <li>수치 비교 (100회 통계, 유저수 67명)</li>
+      <li>결과</li>
         <ul>
-          <li>1회당 블락 조회에 드는 시간: 25.54ms ⇒ 1.7 ms (93.34% 개선)</li>
-          <li>외부 디비와의 통신에 드는 시간 + 디비와 레디스의 차이</li>
+          <li>외부 DB와의 통신에 따른 시간 소요와 DB 및 Redis와의 속도 차이로 인한 개선</li>
+            <ul>
+              <li>1회당 블락 유저 조회 소요 평균 시간</li>
+                <ul>
+                  <li>25.54ms ⇒ 1.7 ms (93.34% 단축)</li>
+                  <img src="./docs/트러블슈팅/유저블락전략/유저권한의검증문제/1.png" width=30%>
+                </ul>
+            </ul>
+          <li><b>[기존]</b></br>DB에서 UserEntity의 isBlock 값을 가져와서 검증</li>
+          <img src="./docs/트러블슈팅/유저블락전략/유저권한의검증문제/2.png" width=100%>
+          <li><b>[변경]</b></br>Cache (Redis)에 저장해 둔 isBlock 값을 가져와서 검증</li>
+          <img src="./docs/트러블슈팅/유저블락전략/유저권한의검증문제/3.png" width=100%>
         </ul>
     </ul>
   </div>
@@ -675,7 +685,7 @@
       <li>수치 비교</li>
         <ul>
           <li><b>[기존]</b></br>유저수에 비례해 증가하던 기존 메모리 사용구조</li>
-          <img src="./docs/트러블슈팅/유저블락전략/1.png" width=30%>
+          <img src="./docs/트러블슈팅/유저블락전략/Redis부하문제/1.png" width=30%>
           <li><b>[변경]</b></br>최대 100개 수준을 넘지 않는 메모리 사용구조</li>
         </ul>
     </ul>
@@ -758,7 +768,7 @@
 
 ## 🌏 지원하는 브라우저
 
-| <img src='./docs/chrome.png' width=60> | <img src='./docs/edge.png' width=60> | <img src='./docs/safari.png' width=60> |
+| <img src='./docs/지원브라우저/chrome.png' width=60> | <img src='./docs/지원브라우저/edge.png' width=60> | <img src='./docs/지원브라우저/safari.png' width=60> |
 | :-: | :-: | :-: |
 | Chrome | Edge | Safari |
 
