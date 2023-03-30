@@ -1,4 +1,4 @@
-# 📸 사진 공유 플랫폼, 찰칵!
+# 📸 사진촬영장소 공유 웹사이트, 찰칵!
 
 [<img src="./docs/찰칵배너.jpg" width=100%>](https://www.chalkak.site)
 
@@ -14,16 +14,13 @@
 출사 모임을 직접 만들거나 참여하여 우리의 사진과 삶을 함께 나눕니다.
 
 <br>
+<br>
 
-## 장소와 사진을 공유할 수 있습니다!
+## 🌄 &nbsp;촬영장소와 사진을 공유할 수 있습니다!
 <details>
   <summary>나만의 콜렉션을 만들어 포토스팟을 공유하세요.</summary>
   <img src="./docs/주요기능/콜렉션/1.gif" width=100%>
 </details>
-
-<br>
-
-## 사진이 마음에 드나요?
 <details>
   <summary>마음에 든 콜렉션에 하트를 눌러 좋아요를 표현하세요.</summary>
   <img src="./docs/주요기능/콜렉션/2.gif" width=100%>
@@ -32,7 +29,7 @@
 
 <br>
 
-## 사진 추천 기능을 이용해보세요!
+## 🏞 &nbsp;사진 추천 기능을 이용해보세요!
 <details>
   <summary>사진 라벨링 기술을 통해 비슷한 사진을 추천해줍니다.</summary>
   <img src="./docs/주요기능/콜렉션/3.gif" width=100%>
@@ -40,15 +37,11 @@
 
 <br>
 
-## 저랑 같이 사진 찍으러 갈래요?
+## 🎇 &nbsp;저랑 같이 사진 찍으러 갈래요?
 <details>
   <summary>모임을 만들어 같이 사진 찍으러 갈 동료를 구할 수 있습니다.</summary>
   <img src="./docs/주요기능/같이찍어요/1.gif" width=100%>
 </details>
-
-<br>
-
-## 모임 참여자들과 어떻게 소통할까요?
 <details>
   <summary>주최자가 모집 마감 버튼을 누르면 채팅 메뉴에서 참여자들끼리 대화할 수 있습니다.</summary>
   <img src="./docs/주요기능/같이찍어요/2.gif" width=100%>
@@ -56,11 +49,11 @@
 </details>
 
 <br>
+<br>
 
-## 자, 이제 준비 됐나요? 찰칵을 직접 경험해보세요!
+## 👀 &nbsp;자, 이제 준비 됐나요? 찰칵을 직접 경험해보세요!
 
 [📷 찰칵 사이트로 이동하기](https://www.chalkak.site)   
-[<img src='./docs/github_logo.png' width=20> Front-End 깃허브로 이동하기](https://github.com/chalkak2023/Chalkak-frontend)
 
 <br>
 <br>
@@ -83,7 +76,7 @@
 
 > 아래 이미지를 클릭하면 시연 영상을 시청할 수 있습니다.
 
-[![찰칵 시연영상](./docs/시연영상썸네일.jpg)](https://youtu.be/GzMTNbJj6YU)
+[![찰칵 시연영상](./docs/시연영상썸네일.jpg)](https://youtu.be/tZ_j9On3WuA)
 
 <br>
 <br>
@@ -519,10 +512,12 @@
         <ul>
           <li>Passport를 사용한 AuthGuard를 통과한 이후 DB를 조회해 유저의 블락 여부를 확인하는 과정에서 DB 조회 횟수가 늘어나면서 성능 저하와 리소스 낭비 발생</li>
         </ul>
+      </br>
       <li>해결과정</li>
         <ul>
           <li>매 API 요청마다 DB 조회를 하지 않기 위해 CacheManager로 DB에서 가져온 블락 여부에 대한 데이터를 5분 간 Cache (Redis)에 저장한다. </br>이를 통해 DB 조회 횟수를 줄여 리소스를 효율적으로 활용하고, 성능을 개선할 수 있었다.</li>
         </ul>
+      </br>
       <li>결과</li>
         <ul>
           <li>외부 DB와의 통신에 따른 시간 소요와 DB 및 Redis와의 속도 차이로 인한 개선</li>
@@ -533,12 +528,15 @@
                   <img src="./docs/트러블슈팅/유저블락전략/유저권한의검증문제/1.png" width=30%>
                 </ul>
             </ul>
+          </br>
           <li><b>[기존]</b></br>DB에서 UserEntity의 isBlock 값을 가져와서 검증</li>
           <img src="./docs/트러블슈팅/유저블락전략/유저권한의검증문제/2.png" width=100%>
+          </br>
           <li><b>[변경]</b></br>Cache (Redis)에 저장해 둔 isBlock 값을 가져와서 검증</li>
           <img src="./docs/트러블슈팅/유저블락전략/유저권한의검증문제/3.png" width=100%>
         </ul>
     </ul>
+    </br>
   </div>
 </details>
 
@@ -550,20 +548,25 @@
         <ul>
           <li>API를 요청한 모든 유저의 블락 여부를 Redis에 캐싱하다 보니 Redis의 부하가 심해짐</li>
         </ul>
+      </br>
       <li>해결과정</li>
         <ul>
           <li>블락된 유저의 정보를 Cache에 저장하고, 액세스 토큰의 만료 시간을 1시간으로 지정했다. </br>이를 통해 최근 1시간 동안 블락된 유저 숫자만큼만 Cache에 올라가게 되어, Cache 성능이 개선되었다. </br>또한, 액세스 토큰이 만료되면 로그아웃 처리를 하고, 로그인하지 못하도록 막아 보안성을 높였다.</li>
         </ul>
+      </br>
       <li>수치 비교</li>
         <ul>
           <li><b>[기존]</b></br>유저수에 비례해 증가하던 기존 메모리 사용구조</li>
           <img src="./docs/트러블슈팅/유저블락전략/Redis부하문제/1.png" width=30%>
+          </br>
           <li><b>[변경]</b></br>최대 100개 수준을 넘지 않는 메모리 사용구조</li>
         </ul>
     </ul>
   </div>
 </details>
- 
+
+</br>
+
 ### 이미지 리사이징
 
 <details>
@@ -574,23 +577,28 @@
         <ul>
           <li>이미지의 크기가 커질수록 이미지 업로드 및 웹 페이지 로딩 속도가 느려짐</li>
         </ul>
+      <br>
       <li>해결과정</li>
         <ul>
           <li>sharp를 이용해 큰 사이즈의 사진을 찰칵 웹 페이지에 적합한 크기로 리사이징해 사이즈를 대폭 줄였다.</li>
         </ul>
+      <br>
       <li>결과</li>
         <ul>
           <li>업로드 속도 ⇒ 약 297ms에서 134ms으로 54.21% 개선</li>
             <ul>
               <li>리사이징 전</li>
               <img src="./docs/트러블슈팅/이미지리사이징/1.png" width=30%>
+              <br>
               <li>리사이징 후</li>
               <img src="./docs/트러블슈팅/이미지리사이징/2.png" width=30%>
             </ul>
+          <br>
           <li>사진 SIZE ⇒ 160,324를 72,626으로 54.7% 감소</li>
             <ul>
               <li>리사이징 전</li>
               <img src="./docs/트러블슈팅/이미지리사이징/3.png" width=100%>
+              <br>
               <li>리사이징 후</li>
               <img src="./docs/트러블슈팅/이미지리사이징/4.png" width=100%>
             </ul>
@@ -598,6 +606,8 @@
     </ul>
   </div>
 </details>
+
+</br>
 
 ### 즉각적인 Bull Queue 작업결과 응답
 
@@ -609,15 +619,18 @@
         <ul>
           <li>모임 참여 신청 기능에서 Bull Queue로 구현한 후 아파치 Jmeter로 테스트를 했는데, 대기열에 Job을 넣은 이후 그 결과를 기다리지 않고 모든 요청에 대해 바로 성공 값을 반환하는 이슈가 발생 </br>(성공/실패 여부와 상관없이 항상 성공 결과 리턴)</li>
         </ul>
+      <br>
       <li>해결과정</li>
         <ul>
           <li>작업이 완료될 때까지 잠시 기다린 후 응답을 반환하기 위해 메서드 간에 Event-Emitter를 사용했다.</li>
         </ul>
+      <br>
       <li>결과</li>
         <ul>
           <li><b>[해결 전] Bull Queue만 사용</b></br>15, 16번 유저만 참여에 성공</br>참여에 실패한 14, 17, 18번 유저도 201 성공 결과를 반환 받고 있음</li>
           <img src="./docs/트러블슈팅/bullqueue/1.png" width=70%>
           <img src="./docs/트러블슈팅/bullqueue/2.png" width=70%>
+          <br>
           <li><b>[해결 후] Event-Emitter를 통해 특정 이벤트를 기다리게 함</b></br>14, 15번 유저만 참여에 성공</br>참여에 실패한 16, 17, 18번 유저는 403 실패 결과를 반환 받음 (정원 초과)</li>
           <img src="./docs/트러블슈팅/bullqueue/3.gif" width=70%>
           <img src="./docs/트러블슈팅/bullqueue/4.gif" width=70%>
