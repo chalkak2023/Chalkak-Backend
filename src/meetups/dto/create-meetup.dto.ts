@@ -18,7 +18,7 @@ export class CreateMeetupDTO {
   
   @IsNotEmpty({ message: '장소는 빈 문자열이 아니어야 합니다.' })
   @IsString({ message: '장소는 문자열이어야 합니다.' })
-  @MaxLength(8, { message: '장소는 8글자 이내여야합니다.' })
+  @MaxLength(20, { message: '장소는 20글자 이내여야합니다.' })
   readonly place: string;
 
   @Type(() => Date)
