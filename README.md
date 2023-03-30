@@ -7,7 +7,10 @@
   <summary>꿀캠</summary>
   <img src="./docs/임시/2.gif" width=90%>
 </details>
-
+<details>
+  <summary>ezgif</summary>
+  <img src="./docs/임시/3.gif" width=90%>
+</details>
 
 
 [<img src="./docs/찰칵배너.jpg" width=100%>](https://www.chalkak.site)
@@ -28,7 +31,6 @@
 <br>
 
 [📷 찰칵 사이트로 이동하기](https://www.chalkak.site)   
-[<img src='./docs/github_logo.png' width=20> Back-End 깃허브로 이동하기](https://github.com/chalkak2023/Chalkak-Backend)   
 [<img src='./docs/github_logo.png' width=20> Front-End 깃허브로 이동하기](https://github.com/chalkak2023/Chalkak-frontend)
 
 <br>
