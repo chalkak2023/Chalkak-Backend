@@ -1,26 +1,8 @@
-## (임시) gif 화질 비교용
-<details>
-  <summary>기존</summary>
-  <img src="./docs/임시/1.gif" width=90%>
-</details>
-<details>
-  <summary>꿀캠</summary>
-  <img src="./docs/임시/2.gif" width=90%>
-</details>
-<details>
-  <summary>ezgif</summary>
-  <img src="./docs/임시/3.gif" width=90%>
-</details>
-<details>
-  <summary>꿀캠+ezgif</summary>
-  <img src="./docs/임시/4.gif" width=90%>
-</details>
+# 📸 사진 공유 플랫폼, 찰칵!
 
 [<img src="./docs/찰칵배너.jpg" width=100%>](https://www.chalkak.site)
 
 <br>
-
-## 📸 사진 공유 플랫폼, 찰칵!
 
 여기저기 흩어져 있는 출사 관련 정보 및 커뮤니티를 한 곳에서!   
 `찰칵(Chalkak)`은 출사 관련 정보를 공유하는 플랫폼이자 커뮤니티 입니다.   
@@ -33,6 +15,50 @@
 
 <br>
 
+## 장소와 사진을 공유할 수 있습니다!
+<details>
+  <summary>나만의 콜렉션을 만들어 포토스팟을 공유하세요.</summary>
+  <img src="./docs/주요기능/콜렉션/1.gif" width=100%>
+</details>
+
+<br>
+
+## 사진이 마음에 드나요?
+<details>
+  <summary>마음에 든 콜렉션에 하트를 눌러 좋아요를 표현하세요.</summary>
+  <img src="./docs/주요기능/콜렉션/2.gif" width=100%>
+  <span>* 추후 좋아요한 콜렉션 목록 기능이 추가될 예정입니다.</span>
+</details>
+
+<br>
+
+## 사진 추천 기능을 이용해보세요!
+<details>
+  <summary>사진 라벨링 기술을 통해 비슷한 사진을 추천해줍니다.</summary>
+  <img src="./docs/주요기능/콜렉션/3.gif" width=100%>
+</details>
+
+<br>
+
+## 저랑 같이 사진 찍으러 갈래요?
+<details>
+  <summary>모임을 만들어 같이 사진 찍으러 갈 동료를 구할 수 있습니다.</summary>
+  <img src="./docs/주요기능/같이찍어요/1.gif" width=100%>
+</details>
+
+<br>
+
+## 모임 참여자들과 어떻게 소통할까요?
+<details>
+  <summary>주최자가 모집 마감 버튼을 누르면 채팅 메뉴에서 참여자들끼리 대화할 수 있습니다.</summary>
+  <img src="./docs/주요기능/같이찍어요/2.gif" width=100%>
+  <img src="./docs/주요기능/같이찍어요/3.gif" width=100%>
+</details>
+
+<br>
+
+## 자, 이제 준비 됐나요? 찰칵을 직접 경험해보세요!
+
 [📷 찰칵 사이트로 이동하기](https://www.chalkak.site)   
 [<img src='./docs/github_logo.png' width=20> Front-End 깃허브로 이동하기](https://github.com/chalkak2023/Chalkak-frontend)
 
@@ -42,7 +68,6 @@
 ## 📌 목차 
 
 - [시연 영상](#-시연-영상)
-- [주요 기능](#-주요-기능)
 - [기술적 의사결정](#%EF%B8%8F-기술적-의사결정)
 - [트러블슈팅](#%EF%B8%8F%EF%B8%8F-트러블슈팅)
 - [서비스 아키텍처](#%EF%B8%8F-서비스-아키텍처)
@@ -58,53 +83,7 @@
 
 > 아래 이미지를 클릭하면 시연 영상을 시청할 수 있습니다.
 
-[![찰칵 시연영상](https://img.youtube.com/vi/GzMTNbJj6YU/hqdefault.jpg)](https://youtu.be/GzMTNbJj6YU)
-
-<br>
-<br>
-
-## 🚀 주요 기능
-
-<details>
-  <summary><b>포토스팟 콜렉션</b></summary>
-  <div markdown="1">
-    <ul>
-      <li>카카오 맵을 이용해 원하는 좌표 내 포토스팟 저장 기능</li>
-      <li>포토스팟 저장 시 최대 5장의 사진 저장 기능</li>
-      <img src="./docs/주요_기능/포토스팟_콜렉션/1.gif" width=70%>
-      <img src="./docs/주요_기능/포토스팟_콜렉션/2.gif" width=70%>
-      <li>콜렉션에 있는 포토스팟 리스트를 확인하고 해당 포토스팟을 클릭하면 해당 좌표로 이동</li>
-      <img src="./docs/주요_기능/포토스팟_콜렉션/3.gif" width=70%>
-      <li>마음에 드는 콜렉션에 나의 반응을 표현할 수 있는 좋아요 기능</li>
-      <img src="./docs/주요_기능/포토스팟_콜렉션/4.gif" width=70%>
-      <li>포토스팟에 등록된 사진을 모아보고 비슷한 사진을 추천하는 기능</li>
-      <img src="./docs/주요_기능/포토스팟_콜렉션/5.gif" width=70%>
-    </ul>
-  </div>
-</details>
- 
-<details>
-  <summary><b>같이 찍어요 & 채팅</b></summary>
-  <div markdown="1">
-    <ul>
-      <li>같이 사진을 찍으러 가는 인원을 모을 수 있는 모임 기능</li>
-      <img src="./docs/주요_기능/같이찍어요/1.gif" width=70%>
-      <li>모임이 모집 마감되면 모임에 참여한 인원끼리 실시간 채팅 기능</li>
-      <img src="./docs/주요_기능/같이찍어요/2.gif" width=70%>
-      <img src="./docs/주요_기능/같이찍어요/3.gif" width=70%>
-    </ul>
-  </div>
-</details>
-
-<details>
-  <summary><b>로그인</b></summary>
-  <div markdown="1">
-    <ul>
-      <li>회원가입을 통한 이메일 로그인 및 네이버와 카카오 계정을 이용한 소셜 로그인 기능</li>
-      <img src="./docs/주요_기능/로그인/1.gif" width=70%>
-    </ul>
-  </div>
-</details>
+[![찰칵 시연영상](./docs/시연영상썸네일.jpg)](https://youtu.be/GzMTNbJj6YU)
 
 <br>
 <br>
@@ -674,6 +653,7 @@
   <img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=flat-square&logo=Amazon EC2&logoColor=white"/>
   <img src="https://img.shields.io/badge/Amazon RDS-527FFF?style=flat-square&logo=Amazon RDS&logoColor=white"/>
   <img src="https://img.shields.io/badge/Amazon S3-569A31?style=flat-square&logo=Amazon S3&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Amazon CloudFront-E0234E?style=flat-square&logo=Amazon CloudFront&logoColor=white"/>
   <!-- GitHub Actions -->
   <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat-square&logo=GitHub Actions&logoColor=white"/>
 </div>
@@ -724,7 +704,7 @@
 </details>
 
 <details>
-  <summary><b>Front-End (Create React App)</b></summary>
+  <summary><b>Front-End (React)</b></summary>
 
 ```html
 📦src
