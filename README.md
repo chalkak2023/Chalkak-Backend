@@ -11,7 +11,10 @@
   <summary>ezgif</summary>
   <img src="./docs/임시/3.gif" width=90%>
 </details>
-
+<details>
+  <summary>꿀캠+ezgif</summary>
+  <img src="./docs/임시/4.gif" width=90%>
+</details>
 
 [<img src="./docs/찰칵배너.jpg" width=100%>](https://www.chalkak.site)
 
