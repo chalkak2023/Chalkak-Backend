@@ -1,3 +1,15 @@
+## (임시) gif 화질 비교용
+<details>
+  <summary>기존</summary>
+  <img src="./docs/임시/1.gif" width=90%>
+</details>
+<details>
+  <summary>꿀캠</summary>
+  <img src="./docs/임시/2.gif" width=90%>
+</details>
+
+
+
 [<img src="./docs/찰칵배너.jpg" width=100%>](https://www.chalkak.site)
 
 <br>
@@ -24,148 +36,24 @@
 
 ## 📌 목차 
 
-- [서비스 아키텍처](#%EF%B8%8F-서비스-아키텍처)
-- [프로젝트 구조](#-프로젝트-구조)
-- [설계](#-설계)
+- [시연 영상](#-시연-영상)
 - [주요 기능](#-주요-기능)
 - [기술적 의사결정](#%EF%B8%8F-기술적-의사결정)
 - [트러블슈팅](#%EF%B8%8F%EF%B8%8F-트러블슈팅)
-- [시연 영상](#-시연-영상)
+- [서비스 아키텍처](#%EF%B8%8F-서비스-아키텍처)
+- [프로젝트 구조](#-프로젝트-구조)
+- [설계](#-설계)
 - [지원하는 브라우저](#-지원하는-브라우저)
 - [팀원 소개](#-팀원-소개)
 
 <br>
 <br>
 
-## ⚙️ 서비스 아키텍처
+## 🎥 시연 영상
 
-<img src="./docs/service_architecture.png" width=100%>
-<div>
-  <!-- Nest.js -->
-  <img src="https://img.shields.io/badge/Nest.js-E0234E?style=flat-square&logo=NestJs&logoColor=white"/>
-  <!-- Node.js -->
-  <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=Node.js&logoColor=white"/>
-  <!-- TypeScript -->
-  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=white"/>
-</div>
+> 아래 이미지를 클릭하면 시연 영상을 시청할 수 있습니다.
 
-<div>
-  <!-- React -->
-  <img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=React&logoColor=black"/>
-  <!-- Redux -->
-  <img src="https://img.shields.io/badge/Redux-764ABC?style=flat-square&logo=Redux&logoColor=black"/>
-</div>
-
-<div>
-  <!-- AWS -->
-  <img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=flat-square&logo=Amazon EC2&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Amazon RDS-527FFF?style=flat-square&logo=Amazon RDS&logoColor=white"/>
-  <img src="https://img.shields.io/badge/Amazon S3-569A31?style=flat-square&logo=Amazon S3&logoColor=white"/>
-  <!-- GitHub Actions -->
-  <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat-square&logo=GitHub Actions&logoColor=white"/>
-</div>
-
-<div>
-  <!-- PM2 -->
-  <img src="https://img.shields.io/badge/PM2-2B037A?style=flat-square&logo=PM2&logoColor=white"/>
-  <!-- MySQL -->
-  <img src="https://img.shields.io/badge/Mysql-4479A1?style=flat-square&logo=Mysql&logoColor=white"/>
-  <!-- Redis -->
-  <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=Redis&logoColor=white"/>
-  <!-- GitHub -->
-  <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=GitHub&logoColor=white"/>
-  <!-- Docker -->
-  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white"/>
-</div>
-
-<br>
-<br>
-
-## 🗂 프로젝트 구조
-
-<details>
-  <summary><b>Back-End (Nest.js)</b></summary>
-  
-```html
-📦src
- ┣ 📂admin                  # 관리자 API
- ┣ 📂auth                   # 사용자 API
- ┣ 📂chat                   # 채팅 API
- ┣ 📂collections            # 콜렉션 API
- ┣ 📂common
- ┃ ┣ 📂aws                  # AWS S3 세팅 관련
- ┃ ┣ 📂config               # cache, typeorm 등의 세팅 관련
- ┃ ┣ 📂logging              # winston을 통한 로깅 관련
- ┃ ┗ 📂multer               # 이미지 업로드용 multer
- ┣ 📂googleVision           # Google vision API
- ┣ 📂guide                  # 서비스 이용안내 API
- ┣ 📂mailer                 # 메일 시스템 관련
- ┣ 📂meetups                # 같이찍어요 API
- ┣ 📂photospot              # 포토스팟 API
- ┣ 📂social                 # 소셜 로그인 관련
- ┣ 📜app.controller.ts
- ┣ 📜app.module.ts
- ┣ 📜app.service.ts
- ┗ 📜main.ts
-```
-</details>
-
-<details>
-  <summary><b>Front-End (Create React App)</b></summary>
-
-```html
-📦src
- ┣ 📂environments           # 관리자 페이지에서의 컴포넌트 재활용을 위한 파일 관련
- ┣ 📂pages
- ┃ ┣ 📜AdminPage.js
- ┃ ┗ 📜UserPage.js
- ┣ 📂routes
- ┃ ┣ 📂Photospot            # 포토스팟 관련
- ┃ ┣ 📂admin                # 관리자 관련
- ┃ ┣ 📂auth                 # 사용자 관련
- ┃ ┣ 📂chat                 # 채팅 관련
- ┃ ┣ 📂collections          # 콜렉션 관련
- ┃ ┣ 📂components           # header, footer, nav 등 공통 컴포넌트 관련
- ┃ ┣ 📂guide                # 서비스 이용안내 관련
- ┃ ┣ 📂hoc                  # 고차 컴포넌트(HOC, Higher Order Component)로 사용자의 로그인 여부를 체크하는 컴포넌트 관련
- ┃ ┣ 📂main                 # 메인페이지 관련
- ┃ ┣ 📂meetups              # 같이찍어요 관련
- ┃ ┣ 📂oauth                # OAuth 로그인 관련
- ┃ ┣ 📂photo                # 사진 모아보기 관련
- ┃ ┣ 📜Main.js
- ┃ ┗ 📜NotFound.js
- ┣ 📂store                  # Redux slice 관련
- ┣ 📂utils
- ┃ ┣ 📜api-axios.js         # Axios 요청 관련 세팅 모듈화
- ┃ ┗ 📜controlCookie.js     # 쿠키 관리
- ┣ 📜App.js
- ┣ 📜index.js
-```
-</details>
-
-<br>
-<br>
-
-## 🛠 설계
-
-<details>
-  <summary><b>ERD</b></summary>
-  <div markdown="1">
-    <ul>
-      <div><img src="./docs/설계/erd.png" width=100%></div>
-    </ul>
-  </div>
-</details>
-
-<details>
-  <summary><b>API</b></summary>
-  <div markdown="1">
-    <ul><li>이미지로 올리기엔 너무 긴 관계로 링크로 대체하였습니다.</li></ul>
-    <ul>
-      <a href="https://chalkak.notion.site/abed2bb362604af591ec713d8683f24f?v=14b01be7858842b396b16fa5e7d871cd" target="_blank" style="font-size: 25px;">[Notion 링크] API 보러가기</a>
-    </ul>
-  </div>
-</details>
+[![찰칵 시연영상](https://img.youtube.com/vi/GzMTNbJj6YU/hqdefault.jpg)](https://youtu.be/GzMTNbJj6YU)
 
 <br>
 <br>
@@ -757,11 +645,135 @@
 <br>
 <br>
 
-## 🎥 시연 영상
+## ⚙️ 서비스 아키텍처
 
-> 아래 이미지를 클릭하면 시연 영상을 시청할 수 있습니다.
+<img src="./docs/service_architecture.png" width=100%>
+<div>
+  <!-- Nest.js -->
+  <img src="https://img.shields.io/badge/Nest.js-E0234E?style=flat-square&logo=NestJs&logoColor=white"/>
+  <!-- Node.js -->
+  <img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=Node.js&logoColor=white"/>
+  <!-- TypeScript -->
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=white"/>
+</div>
 
-[![찰칵 시연영상](https://img.youtube.com/vi/GzMTNbJj6YU/hqdefault.jpg)](https://youtu.be/GzMTNbJj6YU)
+<div>
+  <!-- React -->
+  <img src="https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=React&logoColor=black"/>
+  <!-- Redux -->
+  <img src="https://img.shields.io/badge/Redux-764ABC?style=flat-square&logo=Redux&logoColor=black"/>
+</div>
+
+<div>
+  <!-- AWS -->
+  <img src="https://img.shields.io/badge/Amazon EC2-FF9900?style=flat-square&logo=Amazon EC2&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Amazon RDS-527FFF?style=flat-square&logo=Amazon RDS&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Amazon S3-569A31?style=flat-square&logo=Amazon S3&logoColor=white"/>
+  <!-- GitHub Actions -->
+  <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=flat-square&logo=GitHub Actions&logoColor=white"/>
+</div>
+
+<div>
+  <!-- PM2 -->
+  <img src="https://img.shields.io/badge/PM2-2B037A?style=flat-square&logo=PM2&logoColor=white"/>
+  <!-- MySQL -->
+  <img src="https://img.shields.io/badge/Mysql-4479A1?style=flat-square&logo=Mysql&logoColor=white"/>
+  <!-- Redis -->
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=Redis&logoColor=white"/>
+  <!-- GitHub -->
+  <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=GitHub&logoColor=white"/>
+  <!-- Docker -->
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=Docker&logoColor=white"/>
+</div>
+
+<br>
+<br>
+
+## 🗂 프로젝트 구조
+
+<details>
+  <summary><b>Back-End (Nest.js)</b></summary>
+  
+```html
+📦src
+ ┣ 📂admin                  # 관리자 API
+ ┣ 📂auth                   # 사용자 API
+ ┣ 📂chat                   # 채팅 API
+ ┣ 📂collections            # 콜렉션 API
+ ┣ 📂common
+ ┃ ┣ 📂aws                  # AWS S3 세팅 관련
+ ┃ ┣ 📂config               # cache, typeorm 등의 세팅 관련
+ ┃ ┣ 📂logging              # winston을 통한 로깅 관련
+ ┃ ┗ 📂multer               # 이미지 업로드용 multer
+ ┣ 📂googleVision           # Google vision API
+ ┣ 📂guide                  # 서비스 이용안내 API
+ ┣ 📂mailer                 # 메일 시스템 관련
+ ┣ 📂meetups                # 같이찍어요 API
+ ┣ 📂photospot              # 포토스팟 API
+ ┣ 📂social                 # 소셜 로그인 관련
+ ┣ 📜app.controller.ts
+ ┣ 📜app.module.ts
+ ┣ 📜app.service.ts
+ ┗ 📜main.ts
+```
+</details>
+
+<details>
+  <summary><b>Front-End (Create React App)</b></summary>
+
+```html
+📦src
+ ┣ 📂environments           # 관리자 페이지에서의 컴포넌트 재활용을 위한 파일 관련
+ ┣ 📂pages
+ ┃ ┣ 📜AdminPage.js
+ ┃ ┗ 📜UserPage.js
+ ┣ 📂routes
+ ┃ ┣ 📂Photospot            # 포토스팟 관련
+ ┃ ┣ 📂admin                # 관리자 관련
+ ┃ ┣ 📂auth                 # 사용자 관련
+ ┃ ┣ 📂chat                 # 채팅 관련
+ ┃ ┣ 📂collections          # 콜렉션 관련
+ ┃ ┣ 📂components           # header, footer, nav 등 공통 컴포넌트 관련
+ ┃ ┣ 📂guide                # 서비스 이용안내 관련
+ ┃ ┣ 📂hoc                  # 고차 컴포넌트(HOC, Higher Order Component)로 사용자의 로그인 여부를 체크하는 컴포넌트 관련
+ ┃ ┣ 📂main                 # 메인페이지 관련
+ ┃ ┣ 📂meetups              # 같이찍어요 관련
+ ┃ ┣ 📂oauth                # OAuth 로그인 관련
+ ┃ ┣ 📂photo                # 사진 모아보기 관련
+ ┃ ┣ 📜Main.js
+ ┃ ┗ 📜NotFound.js
+ ┣ 📂store                  # Redux slice 관련
+ ┣ 📂utils
+ ┃ ┣ 📜api-axios.js         # Axios 요청 관련 세팅 모듈화
+ ┃ ┗ 📜controlCookie.js     # 쿠키 관리
+ ┣ 📜App.js
+ ┣ 📜index.js
+```
+</details>
+
+<br>
+<br>
+
+## 🛠 설계
+
+<details>
+  <summary><b>ERD</b></summary>
+  <div markdown="1">
+    <ul>
+      <div><img src="./docs/설계/erd.png" width=100%></div>
+    </ul>
+  </div>
+</details>
+
+<details>
+  <summary><b>API</b></summary>
+  <div markdown="1">
+    <ul><li>이미지로 올리기엔 너무 긴 관계로 링크로 대체하였습니다.</li></ul>
+    <ul>
+      <a href="https://chalkak.notion.site/abed2bb362604af591ec713d8683f24f?v=14b01be7858842b396b16fa5e7d871cd" target="_blank" style="font-size: 25px;">[Notion 링크] API 보러가기</a>
+    </ul>
+  </div>
+</details>
 
 <br>
 <br>
