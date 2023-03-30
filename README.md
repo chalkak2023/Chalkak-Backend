@@ -586,9 +586,10 @@
       <li>수치 비교</li>
         <ul>
           <li><b>[기존]</b></br>유저수에 비례해 증가하던 기존 메모리 사용구조</li>
-          <img src="./docs/트러블슈팅/유저블락전략/Redis부하문제/1.png" width=30%>
+          <img src="./docs/트러블슈팅/유저블락전략/Redis부하문제/1.png" width=70%>
           </br>
           <li><b>[변경]</b></br>최대 100개 수준을 넘지 않는 메모리 사용구조</li>
+          <img src="./docs/트러블슈팅/유저블락전략/Redis부하문제/2.png" width=70%>
         </ul>
     </ul>
   </div>
