@@ -661,11 +661,11 @@
         <ul>
           <li><b>[해결 전] Bull Queue만 사용</b></br>15, 16번 유저만 참여에 성공</br>참여에 실패한 14, 17, 18번 유저도 201 성공 결과를 반환 받고 있음</li>
           <img src="./docs/트러블슈팅/bullqueue/1.png" width=70%>
-          <img src="./docs/트러블슈팅/bullqueue/2.png" width=70%>
+          <img src="./docs/트러블슈팅/bullqueue/2.png" width=100%>
           <br>
           <li><b>[해결 후] Event-Emitter를 통해 특정 이벤트를 기다리게 함</b></br>14, 15번 유저만 참여에 성공</br>참여에 실패한 16, 17, 18번 유저는 403 실패 결과를 반환 받음 (정원 초과)</li>
-          <img src="./docs/트러블슈팅/bullqueue/3.gif" width=70%>
-          <img src="./docs/트러블슈팅/bullqueue/4.gif" width=70%>
+          <img src="./docs/트러블슈팅/bullqueue/3.gif" width=100%>
+          <img src="./docs/트러블슈팅/bullqueue/4.gif" width=100%>
         </ul>
     </ul>
   </div>
