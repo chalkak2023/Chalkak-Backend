@@ -18,11 +18,11 @@
 
 ## 🌄 &nbsp;촬영장소와 사진을 공유할 수 있습니다!
 <details>
-  <summary>나만의 콜렉션을 만들어 포토스팟을 공유하세요.</summary>
+  <summary>나만의 <code>콜렉션</code>을 만들어 <code>포토스팟</code>을 공유하세요.</summary>
   <img src="./docs/주요기능/콜렉션/1.gif" width=100%>
 </details>
 <details>
-  <summary>마음에 든 콜렉션에 하트를 눌러 좋아요를 표현하세요.</summary>
+  <summary>마음에 든 콜렉션에 하트를 눌러 <code>좋아요</code>를 표현하세요.</summary>
   <img src="./docs/주요기능/콜렉션/2.gif" width=100%>
   <span>* 추후 좋아요한 콜렉션 목록 기능이 추가될 예정입니다.</span>
 </details>
@@ -31,19 +31,19 @@
 
 ## 🏞 &nbsp;사진 추천 기능을 이용해보세요!
 <details>
-  <summary>사진 라벨링 기술을 통해 비슷한 사진을 추천해줍니다.</summary>
+  <summary>사진 <code>라벨링</code> 기술을 통해 비슷한 사진을 추천해줍니다.</summary>
   <img src="./docs/주요기능/콜렉션/3.gif" width=100%>
 </details>
 
 <br>
 
-## 🎇 &nbsp;저랑 같이 사진 찍으러 갈래요?
+## 🌃 &nbsp;저랑 같이 사진 찍으러 갈래요?
 <details>
-  <summary>모임을 만들어 같이 사진 찍으러 갈 동료를 구할 수 있습니다.</summary>
+  <summary><code>모임</code>을 만들어 같이 사진 찍으러 갈 동료를 구할 수 있습니다.</summary>
   <img src="./docs/주요기능/같이찍어요/1.gif" width=100%>
 </details>
 <details>
-  <summary>주최자가 모집 마감 버튼을 누르면 채팅 메뉴에서 참여자들끼리 대화할 수 있습니다.</summary>
+  <summary>주최자가 모집 마감 버튼을 누르면 <code>채팅</code> 메뉴에서 참여자들끼리 대화할 수 있습니다.</summary>
   <img src="./docs/주요기능/같이찍어요/2.gif" width=100%>
   <img src="./docs/주요기능/같이찍어요/3.gif" width=100%>
 </details>
@@ -51,7 +51,7 @@
 <br>
 <br>
 
-## 👀 &nbsp;자, 이제 준비 됐나요? 찰칵을 직접 경험해보세요!
+## 👀 &nbsp;자, 이제 준비 됐나요? `찰칵`을 직접 경험해보세요!
 
 [📷 찰칵 사이트로 이동하기](https://www.chalkak.site)   
 
@@ -86,11 +86,13 @@
 <details>
   <summary><b>[동시성 처리] Bull Queue</b></summary>
   <div markdown="1">
+    </br>
     <ul>
       <li>도입배경</li>
         <ul>
           <li>모임 참여 기능에서 동시 요청으로 인해 정해진 신청 인원을 초과하는 상황을 고려하여 동시성 제어가 필요했다.</li>
         </ul>
+      </br>
       <li>기술비교</li>
         <table width="70%">
           <thead>
@@ -152,6 +154,7 @@
             </tr>
           </tbody>
         </table>
+        </br>
         <ul>
           <li>Bull Queue</li>
             <ul>
@@ -165,6 +168,7 @@
                   <li>다른 메시지 큐와 비교했을 때 기능이 제한적이며, 대규모 분산 시스템에서 사용성이 제한적이다.</li>
                 </ul>
             </ul>
+          </br>
           <li>RabbitMQ</li>
             <ul>
               <li>장점</li>
@@ -176,6 +180,7 @@
                   <li>Broker 자체의 성능이 중요한 경우에는 다른 시스템과 비교해 처리량이 낮을 수 있다.</li>
                 </ul>
             </ul>
+          </br>
           <li>Kafka</li>
             <ul>
               <li>장점</li>
@@ -189,22 +194,26 @@
                 </ul>
             </ul>
         </ul>
+      </br>
       <li>최종결정</li>
         <ul>
           <li>Redis 기반의 빠른 처리 속도와 쉬운 사용성으로 작은 규모의 메시지 큐에 적합한 Bull Queue를 선택하여 동시성 제어를 위한 작업 대기열 방식으로 적용하기로 결정하였다.</li>
         </ul>
     </ul>
+    </br>
   </div>
 </details>
 
 <details>
   <summary><b>[이미지 스토리지] AWS S3</b></summary>
   <div markdown="1">
+    </br>
     <ul>
       <li>도입배경</li>
         <ul>
           <li>사진을 많이 저장하면 스토리지 공간을 확장해야 한다. </br>그렇기 때문에 스토리지 공간이 필요한 만큼 동적으로 할당하여 효율적으로 사진을 관리할 수 있는 클라우드 기반의 객체 스토리지 서비스가 필요했다.</li>
         </ul>
+      </br>
       <li>기술비교</li>
         <table width="70%">
           <thead>
@@ -248,6 +257,7 @@
             </tr>
           </tbody>
         </table>
+        </br>
         <ul>
           <li>AWS S3</li>
             <ul>
@@ -263,6 +273,7 @@
                   <li>트래픽이 너무 많을 경우 비용이 높을 수 있다.</li>
                 </ul>
             </ul>
+          </br>
           <li>Google Cloud Storage</li>
             <ul>
               <li>장점</li>
@@ -277,6 +288,7 @@
                   <li>AWS S3와 비교해서 객체 타입 지원 범위가 제한적이다.</li>
                 </ul>
             </ul>
+          </br>
           <li>Microsoft Azure Blob Storage</li>
             <ul>
               <li>장점</li>
@@ -291,22 +303,26 @@
                 </ul>
             </ul>
         </ul>
+      </br>
       <li>최종결정</li>
         <ul>
           <li>저렴한 비용과 AWS에서 RDS, EC2등 AWS서비스를 같이 사용하기 때문에 비용 관리가 용이하고, 접근하기 쉬운 API와 SDK를 제공한다. </br>그리고 자세하고 이해하기 쉽게 정리가 잘 되어있는 문서를 제공하기 때문에 결정하였다.</li>
         </ul>
     </ul>
+    </br>
   </div>
 </details>
  
 <details>
   <summary><b>[DB 모델링] STI (Single Table Inheritance)</b></summary>
   <div markdown="1">
+  </br>
     <ul>
       <li>도입배경</li>
         <ul>
           <li>이메일 및 소셜 로그인 회원의 DB에 저장되는 엔터티의 일부 칼럼이 다르므로, 싱글 및 멀티 테이블 상속 전략이 필요하다.</li>
         </ul>
+      </br>
       <li>기술비교</li>
         <table width="70%">
           <thead>
@@ -344,6 +360,7 @@
             </tr>
           </tbody>
         </table>
+        </br>
         <ul>
           <li>Single Table Inheritance</li>
             <ul>
@@ -360,6 +377,7 @@
                   <li>상황에 따라 조회 성능이 오히려 느려질 수 있다.</li>
                 </ul>
             </ul>
+          </br>
           <li>Multi Table Inheritance </li>
             <ul>
               <li>장점</li>
@@ -377,22 +395,26 @@
                 </ul>
             </ul>
         </ul>
+      </br>
       <li>최종결정</li>
         <ul>
           <li>Multi Table Inheritance를 사용하면 조인이 복잡해지고 조회 성능이 느려진다. </br>유저는 여러 관계의 중심이 된다는 점에서 유저를 가리키는 외래키가 복합키가 되어 복잡성이 증가한다.</br>따라서 싱글 테이블 전략을 선택해서 조인을 단순화시켜 조회 성능을 올리고 연관성과 복잡성을 줄이는 것으로 결정했다.</li>
         </ul>
     </ul>
+    </br>
   </div>
 </details>
 
 <details>
   <summary><b>[CI/CD] GitHub Actions</b></summary>
   <div markdown="1">
+    </br>
     <ul>
       <li>도입배경</li>
         <ul>
           <li>직접 테스트 코드를 실행하고 수동으로 배포를 하는 번거로움이 있다. </br>이 과정을 자동화하여 개발 외에 소요되는 시간을 단축하고자 도입했다.</li>
         </ul>
+      </br>
       <li>기술비교</li>
         <table width="70%">
           <tr>
@@ -444,6 +466,7 @@
             <td>Ruby</td>
           </tr>
         </table>
+        </br>
         <ul>
           <li>GitHub Actions</li>
             <ul>
@@ -460,6 +483,7 @@
                   <li>상대적으로 새로운 기술이기 때문에 자료가 부족하고 커뮤니티의 참여가 적다.</li>
                 </ul>
             </ul>
+          </br>
           <li>Jenkins</li>
             <ul>
               <li>장점</li>
@@ -475,6 +499,7 @@
                   <li>많은 자원을 소비하고 느릴 수 있다.</li>
                 </ul>
             </ul>
+          </br>
           <li>Travis CI</li>
             <ul>
               <li>장점</li>
@@ -489,11 +514,13 @@
                 </ul>
             </ul>
         </ul>
+      </br>
       <li>최종결정</li>
         <ul>
           <li>무료로 이용할 수 있으면서 GitHub와의 연동이 매우 원활하고 접근성이 좋은 GitHub Action을 이용해 CI/CD를 도입할 수 있도록 결정했다.</li>
         </ul>
     </ul>
+  </br>
   </div>
 </details>
 
@@ -507,6 +534,7 @@
 <details>
   <summary><b>유저 권한의 검증 문제</b></summary>
   <div markdown="1">
+    </br>
     <ul>
       <li>발생 문제</li>
         <ul>
@@ -543,6 +571,7 @@
 <details>
   <summary><b>Redis 부하 문제</b></summary>
   <div markdown="1">
+    </br>
     <ul>
       <li>발생 문제</li>
         <ul>
@@ -572,6 +601,7 @@
 <details>
   <summary><b>고화질 이미지의 처리 문제</b></summary>
   <div markdown="1">
+    </br>
     <ul>
       <li>발생 문제</li>
         <ul>
@@ -614,6 +644,7 @@
 <details>
   <summary><b>요청 결과가 잘못되는 문제</b></summary>
   <div markdown="1">
+    </br>
     <ul>
       <li>발생 문제</li>
         <ul>
