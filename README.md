@@ -107,7 +107,7 @@
             <tr>
               <td>간단 설명</td>
               <td>Node.js 기반 메시지 큐</td>
-              <td>AMQP 프로토콜을 기반으로 하는 오픈 소스 메시지 브로커</td>
+              <td>AMQP 기반으로 하는 오픈 소스 메시지 브로커</td>
               <td>분산 스트리밍 플랫폼</td>
             </tr>
             <tr>
@@ -125,7 +125,7 @@
             <tr>
               <td>안정성</td>
               <td>안정성 이슈 (Redis 및 처리량 관련)</td>
-              <td>안정적 (AMQP 프로토콜 사용)</td>
+              <td>안정적 (AMQP 사용)</td>
               <td>높은 안정성</td>
             </tr>
             <tr>
@@ -167,7 +167,7 @@
             <ul>
               <li>장점</li>
                 <ul>
-                  <li>AMQP 프로토콜(Advanced Message Queuing Protocol)을 기반으로 하여 안정성이 보장되며 다양한 기능을 제공한다. 다양한 언어에 대해 지원하고, 대규모 분산 시스템에서도 안정적으로 동작한다.</li>
+                  <li>AMQP(Advanced Message Queuing Protocol)을 기반으로 하여 안정성이 보장되며 다양한 기능을 제공한다. 다양한 언어에 대해 지원하고, 대규모 분산 시스템에서도 안정적으로 동작한다.</li>
                 </ul>
               <li>단점</li>
                 <ul>
