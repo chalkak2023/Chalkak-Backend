@@ -24,7 +24,6 @@
 <details>
   <summary>마음에 든 콜렉션에 하트를 눌러 <code>좋아요</code>를 표현하세요.</summary>
   <img src="./docs/주요기능/콜렉션/2.gif" width=100%>
-  <span>* 추후 좋아요한 콜렉션 목록 기능이 추가될 예정입니다.</span>
 </details>
 
 <br>
