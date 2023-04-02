@@ -1,8 +1,9 @@
 import { ConfigService } from '@nestjs/config';
 import { PhotoKeyword } from './entities/photokeyword.entity';
-import { Injectable, NotFoundException, BadRequestException, NotAcceptableException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException, BadRequestException, NotAcceptableException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
+import { Logger } from 'winston';
 import * as _ from 'lodash';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
@@ -19,6 +20,7 @@ export class PhotospotService {
     @InjectRepository(Collection) private collectionRepository: Repository<Collection>,
     @InjectRepository(Photo) private photoRepository: Repository<Photo>,
     @InjectRepository(PhotoKeyword) private photoKeywordRepository: Repository<PhotoKeyword>,
+    @Inject('winston') private readonly logger: Logger,
     private readonly configService: ConfigService,
     private readonly s3Service: S3Service,
     private readonly dataSource: DataSource,
@@ -161,27 +163,31 @@ export class PhotospotService {
   }
 
   async createImageKeyword(image: string, photoId: number): Promise<void> {
-    const photoKeywords = await this.googleVisionService.imageLabeling(image);
-    const keyword = [];
-    for (const photoKeyword of photoKeywords) {
-      if (_.isUndefined(photoKeyword)) {
-        continue;
+    try {
+      const photoKeywords = await this.googleVisionService.imageLabeling(image);
+      const keyword = [];
+      for (const photoKeyword of photoKeywords) {
+        if (_.isUndefined(photoKeyword)) {
+          continue;
+        }
+  
+        const preKeyword = await this.photoKeywordRepository.findOne({ where: { keyword: photoKeyword } });
+        if (_.isNil(preKeyword)) {
+          const insertKeyword = await this.photoKeywordRepository.save({ keyword: photoKeyword });
+          keyword.push(insertKeyword);
+        } else {
+          keyword.push(preKeyword);
+        }
       }
-
-      const preKeyword = await this.photoKeywordRepository.findOne({ where: { keyword: photoKeyword } });
-      if (_.isNil(preKeyword)) {
-        const insertKeyword = await this.photoKeywordRepository.save({ keyword: photoKeyword });
-        keyword.push(insertKeyword);
-      } else {
-        keyword.push(preKeyword);
+      const photo = await this.photoRepository.findOne({ where: { id: photoId } });
+      if (_.isNil(photo)) {
+        return;
       }
+      photo.photoKeywords = keyword;
+      await this.photoRepository.save(photo);
+    } catch (err) {
+      this.logger.error(`[createImageKeyword] [POST /api/collections/:collectionId/photospots] ${err}`);
     }
-    const photo = await this.photoRepository.findOne({ where: { id: photoId } });
-    if (_.isNil(photo)) {
-      return;
-    }
-    photo.photoKeywords = keyword;
-    await this.photoRepository.save(photo);
   }
 
   async getRecommendPhoto(id: number): Promise<Photo[]> {
@@ -214,19 +220,23 @@ export class PhotospotService {
   }
 
   async isSafePhoto(photospotId: number): Promise<void> {
-    const photospot = await this.getPhotospot(photospotId);
-    const photoCount = photospot.photos.length;
-
-    photospot.photos.forEach(async (photo) => {
-      const isSafe = await this.googleVisionService.imageSafeGuard(photo.image);
-      if (!isSafe) {
-        if (photoCount === 1) {
-          this.photospotRepository.softRemove(photospot);
-          this.photoRepository.delete(photo.id);
-        } else {
-          this.photoRepository.delete(photo.id);
+    try {
+      const photospot = await this.getPhotospot(photospotId);
+      const photoCount = photospot.photos.length;
+  
+      photospot.photos.forEach(async (photo) => {
+        const isSafe = await this.googleVisionService.imageSafeGuard(photo.image);
+        if (!isSafe) {
+          if (photoCount === 1) {
+            this.photospotRepository.softRemove(photospot);
+            this.photoRepository.delete(photo.id);
+          } else {
+            this.photoRepository.delete(photo.id);
+          }
         }
-      }
-    });
+      });
+    } catch (err) {
+      this.logger.error(`[isSafePhoto] [POST /api/collections/:collectionId/photospots] ${err}`);
+    }
   }
 }
