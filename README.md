@@ -1,3 +1,8 @@
+<img src="./docs/최고의 프로젝트상_A1찰칵(가로).jpg" width=100%>
+
+<br>
+<br>
+
 # 📸 사진촬영장소 공유 웹사이트, 찰칵!
 
 [<img src="./docs/찰칵배너.jpg" width=100%>](https://www.chalkak.site)
