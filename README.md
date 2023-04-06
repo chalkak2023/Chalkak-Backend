@@ -1,4 +1,4 @@
-<img src="./docs/최고의 프로젝트상_A1찰칵(가로).jpg" width=100%>
+<img src="./docs/최고의_프로젝트상_A1찰칵(가로).jpg" width=100%>
 
 <br>
 <br>
