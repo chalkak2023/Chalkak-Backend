@@ -1,0 +1,112 @@
+name: CI/CD Docker
+
+on:
+  pull_request:
+    branches: [dev]
+    types: [closed]
+  
+env:
+  DOCKER_IMAGE: ghcr.io/chalkak2023/chalkak
+  VERSION: ${{ github.sha }}
+  NAME: chalkak
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.event.pull_request.merged == true
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up docker buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Cache docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ env.VERSION }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-11
+      - name: Login to ghcr
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+      - name: Build and push
+        id: docker_build
+        uses: docker/build-push-action@v4
+        with:
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}:latest
+  # 배포 Job
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: [self-hosted, label-chalkak] # AWS ./configure에서 사용할 label명
+    steps:
+      - name: Login to ghcr
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GHCR_TOKEN }}
+      # 임시로 충돌 안 나게 포트 변경!
+      - name: Docker run
+        run: |
+          docker pull ${{ env.DOCKER_IMAGE }}:latest
+          docker stop redis || true
+          docker rm -f redis || true
+          docker stop ${{ env.NAME }} || true
+          docker rm -f ${{ env.NAME }} || true
+          docker network create app-network || true
+          docker run -d --name redis --network app-network --restart always redis:latest
+          docker run -d -p 8080:8080 --name chalkak --network app-network --restart always \
+            -e DATABASE_HOST=${{ secrets.DATABASE_HOST }} \
+            -e DATABASE_PORT=${{ secrets.DATABASE_PORT }} \
+            -e DATABASE_USERNAME=${{ secrets.DATABASE_USERNAME }} \
+            -e DATABASE_PASSWORD="${{ secrets.DATABASE_PASSWORD }}" \
+            -e DATABASE_NAME=${{ secrets.DATABASE_NAME }} \
+            -e DATABASE_SYNC=${{ secrets.DATABASE_SYNC }} \
+            -e JWT_ACCESS_TOKEN_SECRET=${{ secrets.JWT_ACCESS_TOKEN_SECRET }} \
+            -e JWT_ACCESS_TOKEN_EXPIRES_IN=${{ secrets.JWT_ACCESS_TOKEN_EXPIRES_IN }} \
+            -e JWT_REFRESH_TOKEN_SECRET=${{ secrets.JWT_REFRESH_TOKEN_SECRET }} \
+            -e JWT_REFRESH_TOKEN_EXPIRES_IN=${{ secrets.JWT_REFRESH_TOKEN_EXPIRES_IN }} \
+            -e JWT_ADMIN_ACCESS_TOKEN_SECRET=${{ secrets.JWT_ADMIN_ACCESS_TOKEN_SECRET }} \
+            -e JWT_ADMIN_ACCESS_TOKEN_EXPIRES_IN=${{ secrets.JWT_ADMIN_ACCESS_TOKEN_EXPIRES_IN }} \
+            -e JWT_ADMIN_REFRESH_TOKEN_SECRET=${{ secrets.JWT_ADMIN_REFRESH_TOKEN_SECRET }} \
+            -e JWT_ADMIN_REFRESH_TOKEN_EXPIRES_IN=${{ secrets.JWT_ADMIN_REFRESH_TOKEN_EXPIRES_IN }} \
+            -e MAILER_HOST=${{ secrets.MAILER_HOST }} \
+            -e MAILER_PORT=${{ secrets.MAILER_PORT }} \
+            -e MAILER_USER=${{ secrets.MAILER_USER }} \
+            -e MAILER_PASS=${{ secrets.MAILER_PASS }} \
+            -e MAILER_SECURE=${{ secrets.MAILER_SECURE }} \
+            -e AWS_BUCKET_REGION=${{ secrets.AWS_BUCKET_REGION }} \
+            -e AWS_BUCKET_NAME=${{ secrets.AWS_BUCKET_NAME }} \
+            -e AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }} \
+            -e AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }} \
+            -e OAUTH2_NAVER_CLIENT_ID=${{ secrets.OAUTH2_NAVER_CLIENT_ID }} \
+            -e OAUTH2_NAVER_CLIENT_SECRET=${{ secrets.OAUTH2_NAVER_CLIENT_SECRET }} \
+            -e OAUTH2_NAVER_REDIRECT_URI=${{ secrets.OAUTH2_NAVER_REDIRECT_URI }} \
+            -e OAUTH2_KAKAO_CLIENT_ID=${{ secrets.OAUTH2_KAKAO_CLIENT_ID }} \
+            -e OAUTH2_KAKAO_CLIENT_SECRET=${{ secrets.OAUTH2_KAKAO_CLIENT_SECRET }} \
+            -e OAUTH2_KAKAOR_REDIRECT_URI=${{ secrets.OAUTH2_KAKAOR_REDIRECT_URI }} \
+            -e CACHE_STORE_NAME=${{ secrets.CACHE_STORE_NAME }} \
+            -e CACHE_HOST=${{ secrets.CACHE_HOST }} \
+            -e CACHE_PORT=${{ secrets.CACHE_PORT }} \
+            -e CACHE_TTL=${{ secrets.CACHE_TTL }} \
+            -e CACHE_REDIS_USERNAME=${{ secrets.CACHE_REDIS_USERNAME }} \
+            -e CACHE_REDIS_PASSWORD=${{ secrets.CACHE_REDIS_PASSWORD }} \
+            -e GOOGLE_VISION_API_SECRET_KEY="$(echo -e "${{ secrets.GOOGLE_VISION_API_SECRET_KEY }}")" \
+            -e GOOGLE_VISION_API_CLIENT_EMAIL=${{ secrets.GOOGLE_VISION_API_CLIENT_EMAIL }} \
+            -e MEETUPS_PAGE_LIMIT=${{ secrets.MEETUPS_PAGE_LIMIT }} \
+            -e COLLECTIONS_PAGE_LIMIT=${{ secrets.COLLECTIONS_PAGE_LIMIT }} \
+            -e PHOTOS_PAGE_LIMIT=${{ secrets.PHOTOS_PAGE_LIMIT }} \
+            -e PAGE_TAKE_ADMIN_ADMIN_LIST=${{ secrets.PAGE_TAKE_ADMIN_ADMIN_LIST }} \
+            -e PAGE_TAKE_ADMIN_USER_LIST=${{ secrets.PAGE_TAKE_ADMIN_USER_LIST }} \
+            -e PAGE_TAKE_ADMIN_COLLECTION_LIST=${{ secrets.PAGE_TAKE_ADMIN_COLLECTION_LIST }} \
+            -e PAGE_TAKE_ADMIN_MEETUP_LIST=${{ secrets.PAGE_TAKE_ADMIN_MEETUP_LIST }} \
+            -e PAGE_TAKE_ADMIN_FAQ_LIST=${{ secrets.PAGE_TAKE_ADMIN_FAQ_LIST }} \
+            ${{ env.DOCKER_IMAGE }}:latest
+          docker images | grep -v latest | awk '{print $3}' | xargs docker rmi || true

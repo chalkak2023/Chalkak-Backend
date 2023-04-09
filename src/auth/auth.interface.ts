@@ -1,0 +1,1 @@
+export type verifyTokenType = 'signup' | 'changePassword' | 'resetPassword'

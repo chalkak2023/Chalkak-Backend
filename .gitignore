@@ -35,3 +35,7 @@ lerna-debug.log*
 !.vscode/extensions.json
 
 .env
+.env.test
+.env.docker
+
+visionApiKey.json

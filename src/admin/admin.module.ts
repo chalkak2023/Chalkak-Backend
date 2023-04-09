@@ -1,13 +1,23 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AdminController } from './admin.controller';
-import { AdminService } from './admin.service';
-import { Admin } from './entities/admin.entity';
-import { Faq } from './entities/faq.entity';
+import { PassportModule } from '@nestjs/passport';
+import { Admin } from 'src/admin/entities/admin.entity';
+import { AdminController } from 'src/admin/admin.controller';
+import { AdminService } from 'src/admin/admin.service';
+import { Faq } from 'src/admin/entities/faq.entity';
+import { LocalAdminStrategy } from 'src/admin/strategies/local.admin.strategy';
+import { JwtAdminStrategy } from 'src/admin/strategies/jwt.admin.strategy';
+import { RefreshTokenAdminStrategy } from 'src/admin/strategies/refresh.token.admin.strategy';
+import { User } from 'src/auth/entities/user.entity';
+import { Collection } from 'src/collections/entities/collection.entity';
+import { Photospot } from 'src/photospot/entities/photospot.entity';
+import { Meetup } from 'src/meetups/entities/meetup.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Admin, Faq])],
+  imports: [TypeOrmModule.forFeature([Admin, Faq, User, Collection, Photospot, Meetup]), JwtModule, PassportModule],
+  providers: [AdminService, LocalAdminStrategy, JwtAdminStrategy, RefreshTokenAdminStrategy],
   controllers: [AdminController],
-  providers: [AdminService]
+  exports: [AdminService],
 })
 export class AdminModule {}
