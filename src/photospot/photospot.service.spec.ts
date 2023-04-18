@@ -1,4 +1,3 @@
-import { BadRequestException, NotAcceptableException, NotFoundException, Module } from '@nestjs/common';
 import { ModuleMocker, MockFunctionMetadata } from 'jest-mock';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { DataSource, QueryRunner, Repository } from 'typeorm';
@@ -16,6 +15,7 @@ import { ConfigService } from '@nestjs/config';
 import { CreatePhotospotDto } from './dto/create-photospot.dto';
 import { ModifyPhotospotDto } from './dto/modify-photospot.dto';
 import { CollectionLike } from 'src/collections/entities/collection.like.entity';
+import { Logger } from 'winston';
 
 const moduleMocker = new ModuleMocker(global);
 const collectionId = 1;
@@ -96,6 +96,7 @@ describe('PhotospotService', () => {
   let mockGoogleService: jest.Mocked<GoogleVisionService>;
   let mockConfigService: jest.Mocked<ConfigService>;
   let mockDataSource: jest.Mocked<DataSource>;
+  let mockLogger: jest.Mocked<Logger>;
   const PHOTOSPOT_REPOSITORY_TOKEN = getRepositoryToken(Photospot);
   const COLLECTION_REPOSITORY_TOKEN = getRepositoryToken(Collection);
   const PHOTO_REPOSITORY_TOKEN = getRepositoryToken(Photo);
@@ -133,6 +134,11 @@ describe('PhotospotService', () => {
             save: jest.fn(),
             findOne: jest.fn(),
           };
+        }
+        if (token === 'winston') {
+          return {
+            error: jest.fn(),
+          }
         }
         if (typeof token === 'function') {
           const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
