@@ -143,8 +143,8 @@ export class PhotospotService {
       throw new NotAcceptableException('해당 포토스팟에 접근 할 수 없습니다');
     }
 
-    this.photospotRepository.softRemove(photospot);
-    this.photoRepository.delete({ photospotId: photospot.id });
+    await this.photospotRepository.softRemove(photospot);
+    await this.photoRepository.delete({ photospotId: photospot.id });
   }
 
   async getRandomPhoto(): Promise<Photo[]> {
@@ -228,10 +228,10 @@ export class PhotospotService {
         const isSafe = await this.googleVisionService.imageSafeGuard(photo.image);
         if (!isSafe) {
           if (photoCount === 1) {
-            this.photospotRepository.softRemove(photospot);
-            this.photoRepository.delete(photo.id);
+            await this.photospotRepository.softRemove(photospot);
+            await this.photoRepository.delete(photo.id);
           } else {
-            this.photoRepository.delete(photo.id);
+            await this.photoRepository.delete(photo.id);
           }
         }
       });
