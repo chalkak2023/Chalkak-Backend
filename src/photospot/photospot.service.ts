@@ -167,14 +167,15 @@ export class PhotospotService {
   async createImageKeyword(image: string, photoId: number): Promise<void> {
     try {
       const photoKeywords = await this.googleVisionService.imageLabeling(image);
+      const keywordEntities = await this.photoKeywordRepository.find({select : {keyword: true, id: true}});      
       const keyword = [];
       for (const photoKeyword of photoKeywords) {
         if (_.isUndefined(photoKeyword)) {
           continue;
         }
-
-        const preKeyword = await this.photoKeywordRepository.findOne({ where: { keyword: photoKeyword } });
-        if (_.isNil(preKeyword)) {
+        
+        const preKeyword = keywordEntities.find((keywordEntitie) => keywordEntitie.keyword === photoKeyword);
+        if (_.isUndefined(preKeyword)) {
           const insertKeyword = await this.photoKeywordRepository.save({ keyword: photoKeyword });
           keyword.push(insertKeyword);
         } else {
@@ -185,6 +186,7 @@ export class PhotospotService {
       if (_.isNil(photo)) {
         return;
       }
+      
       photo.photoKeywords = keyword;
       await this.photoRepository.save(photo);
     } catch (err) {
