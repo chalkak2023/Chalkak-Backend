@@ -2,10 +2,11 @@ import { ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
-import { winstonLogger } from './common/logging/winston.util';
+import { WinstonModule } from 'nest-winston';
+import { winstonConfig } from './common/logging/winston.config';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {logger: winstonLogger});
+  const app = await NestFactory.create(AppModule, {logger: WinstonModule.createLogger(winstonConfig)});
   app.enableCors({
     // origin: 'http://localhost:3000',
     origin: true,

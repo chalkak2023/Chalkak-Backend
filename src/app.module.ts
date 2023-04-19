@@ -15,6 +15,8 @@ import { CacheConfigService } from './common/config/cache.config.service';
 import { GuideModule } from './guide/guide.module';
 import { ChatModule } from './chat/chat.module';
 import { BullModule } from '@nestjs/bull';
+import { WinstonModule } from 'nest-winston';
+import { winstonConfig } from './common/logging/winston.config';
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { BullModule } from '@nestjs/bull';
         }
       })
     }),
+    WinstonModule.forRoot(winstonConfig),
     AuthModule,
     CollectionsModule,
     MeetupsModule,
