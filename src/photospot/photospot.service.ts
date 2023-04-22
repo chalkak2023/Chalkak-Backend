@@ -143,8 +143,10 @@ export class PhotospotService {
       throw new NotAcceptableException('해당 포토스팟에 접근 할 수 없습니다');
     }
 
-    this.photospotRepository.softRemove(photospot);
-    this.photoRepository.delete({ photospotId: photospot.id });
+    await Promise.all([
+      this.photospotRepository.softRemove(photospot),
+      this.photoRepository.delete({ photospotId: photospot.id }),
+    ]);
   }
 
   async getRandomPhoto(): Promise<Photo[]> {
@@ -165,14 +167,15 @@ export class PhotospotService {
   async createImageKeyword(image: string, photoId: number): Promise<void> {
     try {
       const photoKeywords = await this.googleVisionService.imageLabeling(image);
+      const keywordEntities = await this.photoKeywordRepository.find({select : {keyword: true, id: true}});      
       const keyword = [];
       for (const photoKeyword of photoKeywords) {
         if (_.isUndefined(photoKeyword)) {
           continue;
         }
-  
-        const preKeyword = await this.photoKeywordRepository.findOne({ where: { keyword: photoKeyword } });
-        if (_.isNil(preKeyword)) {
+        
+        const preKeyword = keywordEntities.find((keywordEntitie) => keywordEntitie.keyword === photoKeyword);
+        if (_.isUndefined(preKeyword)) {
           const insertKeyword = await this.photoKeywordRepository.save({ keyword: photoKeyword });
           keyword.push(insertKeyword);
         } else {
@@ -183,6 +186,7 @@ export class PhotospotService {
       if (_.isNil(photo)) {
         return;
       }
+      
       photo.photoKeywords = keyword;
       await this.photoRepository.save(photo);
     } catch (err) {
@@ -223,15 +227,14 @@ export class PhotospotService {
     try {
       const photospot = await this.getPhotospot(photospotId);
       const photoCount = photospot.photos.length;
-  
+
       photospot.photos.forEach(async (photo) => {
         const isSafe = await this.googleVisionService.imageSafeGuard(photo.image);
         if (!isSafe) {
           if (photoCount === 1) {
-            this.photospotRepository.softRemove(photospot);
-            this.photoRepository.delete(photo.id);
+            await Promise.all([this.photospotRepository.softRemove(photospot), this.photoRepository.delete(photo.id)]);
           } else {
-            this.photoRepository.delete(photo.id);
+            await this.photoRepository.delete(photo.id);
           }
         }
       });

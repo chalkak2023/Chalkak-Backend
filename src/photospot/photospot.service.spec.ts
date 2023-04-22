@@ -84,7 +84,7 @@ const mockPhoto = {
   user: new User(),
   photospot: new Photospot(),
   photoKeywords: [new PhotoKeyword()],
-}
+};
 
 describe('PhotospotService', () => {
   let service: PhotospotService;
@@ -133,12 +133,13 @@ describe('PhotospotService', () => {
           return {
             save: jest.fn(),
             findOne: jest.fn(),
+            find: jest.fn(),
           };
         }
         if (token === 'winston') {
           return {
             error: jest.fn(),
-          }
+          };
         }
         if (typeof token === 'function') {
           const mockMetadata = moduleMocker.getMetadata(token) as MockFunctionMetadata<any, any>;
@@ -328,12 +329,14 @@ describe('PhotospotService', () => {
   describe('service createImageKeyword', () => {
     it('createImageKeyword 성공', async () => {
       const photoKeywords = ['test1', 'test2', 'test3'];
-      const preKeyword = { id: 1, keyword: 'test1', photos: [mockPhoto] };
+      const keywordEntities = [
+        { id: 1, keyword: 'test1', photos: [mockPhoto] },
+        { id: 1, keyword: 'test2', photos: [mockPhoto] },
+      ];
       const insertKeyword = { id: 2, keyword: 'test4', photos: [mockPhoto] };
 
       jest.spyOn(mockGoogleService, 'imageLabeling').mockResolvedValue(photoKeywords);
-      jest.spyOn(mockPhotoKeywordRepositor, 'findOne').mockResolvedValue(preKeyword);
-      jest.spyOn(mockPhotoKeywordRepositor, 'findOne').mockResolvedValueOnce(null);
+      jest.spyOn(mockPhotoKeywordRepositor, 'find').mockResolvedValue(keywordEntities);
       jest.spyOn(mockPhotoKeywordRepositor, 'save').mockResolvedValue(insertKeyword);
       jest.spyOn(mockPhotoRepository, 'findOne').mockResolvedValue(mockPhoto);
 
@@ -342,7 +345,7 @@ describe('PhotospotService', () => {
       expect(mockGoogleService.imageLabeling).toHaveBeenCalledTimes(1);
       expect(mockGoogleService.imageLabeling).toHaveBeenCalledWith(imagePath);
       expect(await mockGoogleService.imageLabeling(imagePath)).toEqual(photoKeywords);
-      expect(mockPhotoKeywordRepositor.findOne).toHaveBeenCalledTimes(3);
+      expect(mockPhotoKeywordRepositor.find).toHaveBeenCalledTimes(1);
       expect(mockPhotoKeywordRepositor.save).toHaveBeenCalledTimes(1);
       expect(mockPhotoRepository.findOne).toHaveBeenCalledTimes(1);
       expect(mockPhotoRepository.save).toHaveBeenCalledTimes(1);
@@ -366,9 +369,9 @@ describe('PhotospotService', () => {
       const recommendPhoto = await service.getRecommendPhoto(photoId);
       expect(mockPhotoRepository.findOne).toHaveBeenCalledTimes(1);
       expect(mockPhotoRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
-      expect(recommendPhoto).toEqual([mockPhoto])
-    })
-  })
+      expect(recommendPhoto).toEqual([mockPhoto]);
+    });
+  });
 
   describe('service getAllPhoto', () => {
     it('getAllPhoto 성공', async () => {
@@ -387,22 +390,22 @@ describe('PhotospotService', () => {
       expect(mockConfigService.get).toHaveBeenCalledTimes(1);
       expect(mockPhotoRepository.createQueryBuilder).toHaveBeenCalledTimes(1);
       expect(returnPhoto).toEqual([mockPhoto]);
-    })
-  })
+    });
+  });
 
   describe('service isSafePhoto', () => {
     it('isSafePhoto 사진 문제없음 성공', async () => {
-      const isSafe = true
+      const isSafe = true;
 
       service.getPhotospot = jest.fn(async () => mockPhotospots[0]);
       jest.spyOn(mockGoogleService, 'imageSafeGuard').mockResolvedValue(isSafe);
 
       await service.isSafePhoto(photospotId);
-      expect(service.getPhotospot).toHaveBeenCalledTimes(1)
-      expect(service.getPhotospot).toHaveBeenCalledWith(photospotId)
+      expect(service.getPhotospot).toHaveBeenCalledTimes(1);
+      expect(service.getPhotospot).toHaveBeenCalledWith(photospotId);
       expect(mockGoogleService.imageSafeGuard).toHaveBeenCalled();
       expect(mockPhotospotRepository.softRemove).not.toHaveBeenCalled();
       expect(mockPhotoRepository.delete).not.toHaveBeenCalled();
-    })
-  })
+    });
+  });
 });
